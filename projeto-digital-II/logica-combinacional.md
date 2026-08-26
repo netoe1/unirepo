@@ -63,4 +63,9 @@ Usar o for para conectar cada bit dos sinais criados, para uma porta lógica.
 # Tipo baseado em array:
 - É usado para descrever memória;
 - Sempre ao admitir valores literais, usar aspas duplas. Se é um único bit, não tem problema.
+
+# Tipo de dados: numeric_std
+- Realizar operações de forma mais minunciosa
+- A vantagem é que dá para manipular os bits de forma individualizada
   
+# Operações Espaciais (ver depois)
