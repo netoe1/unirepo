@@ -20,3 +20,7 @@
 - Método de Instância: métodos que você pode usar apenas se instanciar ou criar o objeto;
 
 - Método de Classe: Não precisa criar a classe.
+
+# Herança e sub herança:
+é um = quando um objeto filho herda de um pai;
+tem um = o carro têm um; (agregação ou composição);
