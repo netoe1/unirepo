@@ -1,8 +1,6 @@
 public class OffRoad extends Vehicle {
     private float groundClearance;
 
-
-
     public OffRoad(float _groundClearance,int _passengers, float _fuel_cap,float _mpg){
         super(_passengers,_fuel_cap,_mpg);
         this.groundClearance = _groundClearance;
