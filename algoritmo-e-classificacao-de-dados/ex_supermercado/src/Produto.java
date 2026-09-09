@@ -10,7 +10,6 @@ public class Produto {
         this.quantidadeEstoque = quantidadeEstoque;
     }
 
-
     // Getters
     
     public Descricao getDescricao(){return this.descricao;}
