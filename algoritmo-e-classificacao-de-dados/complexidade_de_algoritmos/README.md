@@ -49,3 +49,6 @@ Se a variável n for pequeno, inserção é meçhor que intercalação, mas have
 # Piso (Floor)
 Arredondamento de um número para baixo;
 Ex: Floor(3.5) = 3; Floor(3.1) = 3;
+
+# Função exponencial:
+f(n) = b^n
