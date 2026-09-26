@@ -46,7 +46,10 @@ begin
             out_mux4 <= input_shifter(0);
 
         elsif (controle_mux = "10") then
-            
+            out_mux1 <= '0';
+            out_mux2 <= '0';
+            out_mux3 <= out_reg1;
+            out_mux4 <= out_reg2;
         else
           
         end if;
