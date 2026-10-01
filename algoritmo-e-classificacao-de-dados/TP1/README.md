@@ -239,7 +239,7 @@ Breve descrição dos algoritmos de ordenação utilizados, incluindo suas princ
 
 ### **9.3 Metodologia**
 
-Descrição suficientemente detalhada para permitir a compreensão de como o experimento foi realizado, incluindo:
+Descrição suficientemente detalhada para permitir a compreensão de como o experimento foi realizado, incluindo: 
 
 * hardware e software utilizados;  
 * algoritmos avaliados;  
