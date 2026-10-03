@@ -241,6 +241,68 @@ Breve descrição dos algoritmos de ordenação utilizados, incluindo suas princ
 
 Descrição suficientemente detalhada para permitir a compreensão de como o experimento foi realizado, incluindo: 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 * hardware e software utilizados;  
 * algoritmos avaliados;  
 * características dos vetores de entrada;  
