@@ -1,16 +1,57 @@
-// Se atentar aos algortimos de tempo linear e procurar o maior elemento antes.
 
 public class Ordenadores {
+    
+    // Tipos não lineares:
+    Ordenadores(TipoAlgoritmo tipoAlgoritmo){
 
-    public static <T extends Comparable<T>> void bubblesort(T[] a, int n) {
-        // ...
+        long inicio=0;
+        long fim=0;
+        long tempo=0;
+
+
+        inicio = System.nanoTime();
+        try{
+            switch (tipoAlgoritmo) {
+            case BUBBLE:
+            
+                break;
+
+            case INSERTION:
+                
+                break;
+
+            case SELECTION:
+                
+                break;
+
+            case MERGE:
+                
+                break;
+
+            case HEAP:
+                
+                break;
+
+            case QUICK:
+                
+                break;
+        
+            default:
+                 
+                break;
+        }
+        }
+        catch(Exception e){
+            throw e;
+        }
+        
+
+        fim = System.nanoTime();
+        tempo = fim - inicio;
+
     }
 
-    public static <T extends Comparable<T>> void insertionsort(T[] a, int n) {
-        // ...
-    }
+    Ordenadores(){
 
-    public static <T extends Comparable<T>> void selectionsort(T[] a, int n) {
-        // ...
     }
 }
