@@ -1,68 +1,89 @@
-public class MergeSort{
+import java.util.List;
+import java.util.Vector;
+
+public class MergeSort <T extends Comparable<T>> extends Ordenador<T> {
+
+    public MergeSort(){
+        super();
+    }
+
+    @Override 
+    public void sort(Vector<T> vetor_com_dados){
     
-    public static <T extends Comparable<T>> void mergesort(T[] a, int n) {
-        if (a == null || n <= 1) {
-            return;
+        this.tempoInicial = System.nanoTime();
+        this.vetor.clear();
+        if (vetor_com_dados != null) {
+            this.vetor.addAll(vetor_com_dados);
         }
-
-        @SuppressWarnings("unchecked")
-        T[] aux = (T[]) new Comparable[n];
-
-        for (int currSize = 1; currSize < n; currSize *= 2) {
-            
-            for (int leftStart = 0; leftStart < n - 1; leftStart += 2 * currSize) {
-                
-                // Calcula o fim do subvetor da esquerda (mid) e o fim do subvetor da direita (hi)
-                // Math.min previne o acesso a índices fora dos limites do vetor original
-                int mid = Math.min(leftStart + currSize - 1, n - 1);
-                int hi = Math.min(leftStart + 2 * currSize - 1, n - 1);
-
-                // Intercala os subvetores a[leftStart...mid] e a[mid+1...hi]
-                merge(a, aux, leftStart, mid, hi);
-            }
+        if (this.vetor.size() > 1) {
+            executarMergeSort(0, this.vetor.size() - 1);
         }
+        this.tempoFinal = System.nanoTime();
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
+    }
+    
+
+    @Override 
+    public long getTempoTotal(){
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
+        return this.tempoTotal;
     }
 
-    private static <T extends Comparable<T>> void merge(T[] a, T[] aux, int lo, int mid, int hi) {
-        // Copia os elementos da fatia atual para o vetor auxiliar
-        for (int k = lo; k <= hi; k++) {
-            aux[k] = a[k];
-        }
+    private void intercalar(int inicio, int meio, int fim) {
+        // Cria cópias temporárias das duas sublistas usando a estrutura Vector
+        Vector<T> esquerda = new Vector<>(this.vetor.subList(inicio, meio + 1));
+        Vector<T> direita = new Vector<>(this.vetor.subList(meio + 1, fim + 1));
 
-        int i = lo;
-        int j = mid + 1;
+        int i = 0; // Índice para a sublista esquerda
+        int j = 0; // Índice para a sublista direita
+        int k = inicio; // Índice para o vetor principal original
 
-        // Intercala de volta para o vetor original 'a'
-        for (int k = lo; k <= hi; k++) {
-            if (i > mid) {
-                // Elementos da metade esquerda já foram todos consumidos
-                a[k] = aux[j++];
-            } else if (j > hi) {
-                // Elementos da metade direita já foram todos consumidos
-                a[k] = aux[i++];
-            } else if (aux[j].compareTo(aux[i]) < 0) {
-                // O elemento da direita é menor
-                a[k] = aux[j++];
+        // Compara os elementos das duas metades e reinsere no vetor principal ordenadamente
+        while (i < esquerda.size() && j < direita.size()) {
+            if (esquerda.get(i).compareTo(direita.get(j)) <= 0) {
+                this.vetor.set(k, esquerda.get(i));
+                i++;
             } else {
-                // O elemento da esquerda é menor ou igual
-                a[k] = aux[i++];
+                this.vetor.set(k, direita.get(j));
+                j++;
             }
+            k++;
+        }
+
+        // Copia os elementos restantes da sublista esquerda, se houver
+        while (i < esquerda.size()) {
+            this.vetor.set(k, esquerda.get(i));
+            i++;
+            k++;
+        }
+
+        // Copia os elementos restantes da sublista direita, se houver
+        while (j < direita.size()) {
+            this.vetor.set(k, direita.get(j));
+            j++;
+            k++;
         }
     }
 
-    public static void main(String args[]){
-        Integer a[] = {3,4,3,7,2,6,9,0,9,0,9,0,9,0,9,0,9,7,5,2,3,4,6,7,8,9,8,6,54,3,2,3,5,6,7};
+    private void executarMergeSort(int inicio, int fim) {
+        if (inicio < fim) {
+            int meio = inicio + (fim - inicio) / 2;
 
-        System.out.println("Antes:");
-        for(int i = 0; i < a.length;i++){
-            System.out.println(String.format("[%d]",a[i]));
+            // Divide recursivamente a metade esquerda e a direita
+            executarMergeSort(inicio, meio);
+            executarMergeSort(meio + 1, fim);
+
+            // Une as duas metades ordenadas
+            intercalar(inicio, meio, fim);
         }
-        MergeSort.mergesort(a,a.length);
+    }
 
-        System.out.println("Depois:");
-        for(int i = 0; i < a.length;i++){
-            System.out.println(String.format("[%d]",a[i]));
-        }
-
+    public static void main(String[] args){
+        Vector<Integer> v = new Vector<>(List.of(4, 2, 2, 4, 0, 6, 7));
+        MergeSort<Integer> mergesort = new MergeSort<Integer>();
+        System.out.println(v.toString());   
+        mergesort.sort(v);
+        System.out.println(mergesort.toString());
+        System.out.println((long) mergesort.getTempoTotal());
     }
 }
