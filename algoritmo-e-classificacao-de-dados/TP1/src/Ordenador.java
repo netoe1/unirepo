@@ -6,17 +6,16 @@ public abstract class Ordenador<T extends Comparable<T>>
     protected long tempoInicial;
     protected long tempoFinal;
     protected long vezes_executado;
-    protected Vector<T> vetor;
+    protected  Vector<T> vetor;
 
     Ordenador(){
         this.tempoFinal = this.tempoInicial = this.tempoTotal = 0;
         this.vetor = new Vector<>();
-        this.vetor.clear();
+        this.clear();
     }   
 
-    public abstract void sort(Vector<T> vetor_com_dados);
+    public abstract void sort();
 
-    
     public long getTempoTotal(){
         this.tempoTotal = this.tempoFinal - this.tempoInicial;
         return this.tempoTotal;
@@ -40,6 +39,19 @@ public abstract class Ordenador<T extends Comparable<T>>
         aux.append("]");
         
         return aux.toString();
+    }
+    
+    public void setVetor(Vector<T> v){
+        this.vetor = v;
+    }
+
+    public void clear(){
+        this.vetor.clear();
+    }
+
+    public void print(){
+        String aux = this.getClass().getName() + ":";
+        System.out.println(aux + this.toString());
     }
 }
 

@@ -1,4 +1,4 @@
-import java.util.List;
+import java.util.Arrays;
 import java.util.Vector;
 
 public class BubbleSort <T extends Comparable<T>> extends Ordenador<T> {
@@ -8,12 +8,11 @@ public class BubbleSort <T extends Comparable<T>> extends Ordenador<T> {
     }
 
     @Override 
-    public void sort(Vector<T> vetor_com_dados){
+    public void sort(){
     
         this.tempoInicial = System.nanoTime();
-        this.vetor.clear();
-        if (vetor_com_dados != null) {
-            this.vetor.addAll(vetor_com_dados);
+        if (this.vetor == null) {
+            throw new Error("Vetor Vazio!   ");
         }
         if (this.vetor.size() > 1) {
             executarBubbleSort();
@@ -51,13 +50,11 @@ public class BubbleSort <T extends Comparable<T>> extends Ordenador<T> {
         }
     }
 
-    public static void main(String[] args){
-        Vector<Integer> v = new Vector<>(List.of(8, 3, 6, 2, 4, 3, 5, 1, 7, 9));
-        BubbleSort<Integer> bubblesort = new BubbleSort<>();
-        
-        System.out.println("Vetor original: " + v.toString());   
-        bubblesort.sort(v);
-        System.out.println("Vetor ordenado: " + bubblesort.toString());
-        System.out.println("Tempo total (ns): " + (long) bubblesort.getTempoTotal());
+    public static void main(String args[]){
+        BubbleSort<Integer> bubble = new BubbleSort<>();
+        bubble.setVetor(new Vector<>(Arrays.asList(4,2,3,1,5,6,2,3,4,5,2,3,3,4,7,8)));
+        bubble.print();
+        bubble.sort();
+        bubble.print();
     }
 }
