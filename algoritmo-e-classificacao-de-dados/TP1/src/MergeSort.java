@@ -1,4 +1,4 @@
-import java.util.List;
+import java.util.Arrays;
 import java.util.Vector;
 
 public class MergeSort <T extends Comparable<T>> extends Ordenador<T> {
@@ -8,25 +8,17 @@ public class MergeSort <T extends Comparable<T>> extends Ordenador<T> {
     }
 
     @Override 
-    public void sort(Vector<T> vetor_com_dados){
+    public void sort(){
     
         this.tempoInicial = System.nanoTime();
-        this.vetor.clear();
-        if (vetor_com_dados != null) {
-            this.vetor.addAll(vetor_com_dados);
+        if (this.vetor == null) {
+            throw new Error("Vetor Vazio!");
         }
         if (this.vetor.size() > 1) {
             executarMergeSort(0, this.vetor.size() - 1);
         }
         this.tempoFinal = System.nanoTime();
         this.tempoTotal = this.tempoFinal - this.tempoInicial;
-    }
-    
-
-    @Override 
-    public long getTempoTotal(){
-        this.tempoTotal = this.tempoFinal - this.tempoInicial;
-        return this.tempoTotal;
     }
 
     private void intercalar(int inicio, int meio, int fim) {
@@ -78,12 +70,12 @@ public class MergeSort <T extends Comparable<T>> extends Ordenador<T> {
         }
     }
 
-    public static void main(String[] args){
-        Vector<Integer> v = new Vector<>(List.of(4, 2, 2, 4, 0, 6, 7));
-        MergeSort<Integer> mergesort = new MergeSort<Integer>();
-        System.out.println(v.toString());   
-        mergesort.sort(v);
-        System.out.println(mergesort.toString());
-        System.out.println((long) mergesort.getTempoTotal());
+    public static void main(String args[]){
+        MergeSort<Integer> merge = new MergeSort<>();
+        merge.setVetor(new Vector<>(Arrays.asList(4,2,3,1,5,6,4,7,8)));
+        merge.print();
+        merge.sort();
+        merge.print();
     }
+    
 }
