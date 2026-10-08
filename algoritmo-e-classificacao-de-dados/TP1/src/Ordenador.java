@@ -15,7 +15,12 @@ public abstract class Ordenador<T extends Comparable<T>>
     }   
 
     public abstract void sort(Vector<T> vetor_com_dados);
-    public abstract long getTempoTotal();
+
+    
+    public long getTempoTotal(){
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
+        return this.tempoTotal;
+    }
 
     @Override
     public String toString() {

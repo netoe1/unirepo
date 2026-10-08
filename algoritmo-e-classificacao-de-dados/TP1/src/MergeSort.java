@@ -21,13 +21,6 @@ public class MergeSort <T extends Comparable<T>> extends Ordenador<T> {
         this.tempoFinal = System.nanoTime();
         this.tempoTotal = this.tempoFinal - this.tempoInicial;
     }
-    
-
-    @Override 
-    public long getTempoTotal(){
-        this.tempoTotal = this.tempoFinal - this.tempoInicial;
-        return this.tempoTotal;
-    }
 
     private void intercalar(int inicio, int meio, int fim) {
         // Cria cópias temporárias das duas sublistas usando a estrutura Vector
