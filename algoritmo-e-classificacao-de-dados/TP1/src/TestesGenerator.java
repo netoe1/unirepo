@@ -3,6 +3,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -12,7 +13,11 @@ public class TestesGenerator {
         1000, 10000, 100000, 1000000
     };
 
-    private final int repeticoes = 10;
+    private int repeticoes = 10;
+
+    public TestesGenerator(int repeticoes) {
+        this.repeticoes = repeticoes;
+    }
 
     public void rodarTeste(Path arquivoCsv) throws IOException {
 
@@ -26,6 +31,10 @@ public class TestesGenerator {
                 for (String caso : Arrays.asList(
                     "CRESCENTE", "DECRESCENTE", "ALEATORIO", "REPETIDOS"
                 )) {
+
+                    if (n == 1000000 && !caso.equals("ALEATORIO")) {
+                        continue; // Mantém a otimização padrão para 1M se desejado, ou remova se precisar de todos
+                    }
 
                     Vector<Integer> original = gerarVetor(n, caso);
 
@@ -49,22 +58,27 @@ public class TestesGenerator {
                         executar(new ShellSort<>(), original,
                             "ShellSort", n, caso, repeticao, csv);
 
-                            executar(new SelectionSort<>(), original,
+                        executar(new SelectionSort<>(), original,
                             "SelectionSort", n, caso, repeticao, csv);
 
-                            executar(new RadixSort<>(), original,
-                            "RadixSort", n, caso, repeticao, csv);
+                        executar(new HeapSort<>(), original,
+                            "HeapSort", n, caso, repeticao, csv);
 
-                            executar(new CountingSort<>(), original,
-                            "CountingSort", n, caso, repeticao, csv);
+                        executar(new CountingSort(), original,
+                            "CountingSort", n, caso, repeticao, csv);        
 
-                            executar(new BucketSort<>(), original,
+                        //executar(new RadixSort(), original,
+                        //    "RadixSort", n, caso, repeticao, csv);
+
+                        executar(new BucketSort(), original,
                             "BucketSort", n, caso, repeticao, csv);
 
                     }
                 }
             }
         }
+
+        System.out.println("Testes finalizados com sucesso! Arquivo gerado: " + arquivoCsv.getFileName());
     }
 
     private void executar(
@@ -119,5 +133,31 @@ public class TestesGenerator {
         }
 
         return new Vector<>(Arrays.asList(dados));
+    }
+
+    public static void main(String args[]) {
+        String nomeArquivo = "resultados_tp1.csv";
+        int reps = 10;
+
+        if (args.length > 0) {
+            nomeArquivo = args[0];
+        }
+        if (args.length > 1) {
+            try {
+                reps = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                System.out.println("Número de repetições inválido. Usando o padrão: 10");
+            }
+        }
+
+        TestesGenerator gerador = new TestesGenerator(reps);
+        Path caminho = Paths.get(nomeArquivo);
+
+        try {
+            System.out.println("Iniciando experimentos...");
+            gerador.rodarTeste(caminho);
+        } catch (IOException e) {
+            System.err.println("Erro ao escrever o arquivo CSV: " + e.getMessage());
+        }
     }
 }
