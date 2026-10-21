@@ -67,8 +67,8 @@ public class TestesGenerator {
                         executar(new CountingSort(), original,
                             "CountingSort", n, caso, repeticao, csv);        
 
-                        //executar(new RadixSort(), original,
-                        //    "RadixSort", n, caso, repeticao, csv);
+                        executar(new RadixSort(), original,
+                           "RadixSort", n, caso, repeticao, csv);
 
                         executar(new BucketSort(), original,
                             "BucketSort", n, caso, repeticao, csv);
