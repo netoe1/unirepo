@@ -1,3 +1,67 @@
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+/**
+ * Logger simples para o TP1, inspirado no estilo visual de logs do Node.js.
+ * Suporta níveis, contexto, cores ANSI e uma barra de progresso.
+ */
+public final class Logs {
+
+    private static final DateTimeFormatter HORARIO = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final int LARGURA_NIVEL = 7;
+    private static final int LARGURA_BARRA = 24;
+
+    private static final String RESET = "\u001B[0m";
+    private static final String CINZA = "\u001B[90m";
+    private static final String AZUL = "\u001B[34m";
+    private static final String CIANO = "\u001B[36m";
+    private static final String VERDE = "\u001B[32m";
+    private static final String AMARELO = "\u001B[33m";
+    private static final String VERMELHO = "\u001B[31m";
+    private static final String MAGENTA = "\u001B[35m";
+    private static final String NEGRITO = "\u001B[1m";
+
+    private static volatile boolean debugAtivado;
+    private static volatile boolean coresAtivadas = detectarSuporteACores();
+
+    private Logs() {
+        // Classe utilitaria: nao deve ser instanciada.
+    }
+
+    /** Ativa ou desativa mensagens de nivel DEBUG. */
+    public static void setDebug(boolean ativado) {
+        debugAtivado = ativado;
+    }
+
+    /** Permite forcar a exibicao ou a remocao das cores ANSI. */
+    public static void setCores(boolean ativadas) {
+        coresAtivadas = ativadas;
+    }
+
+    public static boolean isDebugAtivado() {
+        return debugAtivado;
+    }
+
+    public static void info(String contexto, String mensagem) {
+        escrever("INFO", contexto, mensagem, CIANO);
+    }
+
+    public static void success(String contexto, String mensagem) {
+        escrever("SUCCESS", contexto, mensagem, VERDE);
+    }
+
+    public static void debug(String contexto, String mensagem) {
+        if (debugAtivado) {
+            escrever("DEBUG", contexto, mensagem, MAGENTA);
+        }
+    }
+
+    public static void warn(String contexto, String mensagem) {
+        escrever("WARN", contexto, mensagem, AMARELO);
+    }
+
+    public static void error(String contexto, String mensagem) {
         escrever("ERROR", contexto, mensagem, VERMELHO);
     }
 
