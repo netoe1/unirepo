@@ -1,124 +1,150 @@
-# TestesGenerator — Experimentos de ordenação (TP1)
+# TestesGenerator — Execução dos experimentos do TP1
 
-A classe `TestesGenerator.java` automatiza os experimentos de desempenho dos algoritmos de ordenação do Trabalho Prático 1 (TP1), da disciplina Algoritmos e Classificação de Dados (ACD).
+## Objetivo
 
-Ela percorre os valores de `EnumAlgoritmos`, cria uma instância do algoritmo correspondente, prepara os dados de entrada, realiza aquecimentos, mede o tempo de ordenação e registra os resultados em um arquivo CSV.
+A classe `TestesGenerator` automatiza os experimentos de desempenho dos algoritmos de ordenação do TP1. Ela prepara os vetores de entrada, executa os algoritmos selecionados, mede o tempo de `sort()` com `System.nanoTime()` e registra cada medição em CSV.
 
-> **Importante:** esta classe mede desempenho. Ela **não verifica automaticamente a corretude do resultado**, ou seja, não compara o vetor final com uma versão ordenada esperada. Os testes pequenos de corretude devem ser feitos separadamente ou adicionados ao gerador.
+## CSVs separados por algoritmo e tamanho
 
-## Algoritmos contemplados
+Os resultados são organizados em **um arquivo CSV para cada combinação de algoritmo e tamanho do vetor**. O argumento posicional de arquivo define o prefixo e a pasta de saída, não um único CSV.
 
-O código possui mapeamento para estes dez algoritmos:
+Por exemplo, executando com o prefixo `resultados_tp1.csv`, são criados arquivos como:
 
-- Bubble Sort (`BUBBLE`)
-- Insertion Sort (`INSERCTION` ou `INSERTION`)
-- Selection Sort (`SELECTION`)
-- Shell Sort (`SHELL`)
-- Heap Sort (`HEAP`)
-- Merge Sort (`MERGE`)
-- Quick Sort (`QUICK`)
-- Bucket Sort (`BUCKET`)
-- Counting Sort (`COUNTING`)
-- Radix Sort (`RADIX`)
+```text
+resultados_tp1_MergeSort_n1000.csv
+resultados_tp1_MergeSort_n10000.csv
+resultados_tp1_RadixSort_n1000.csv
+resultados_tp1_RadixSort_n1000000.csv
+```
 
-Para que todos sejam executados com sucesso, os valores de `EnumAlgoritmos` devem corresponder a esses nomes e as classes correspondentes devem compilar e cumprir a interface usada pelo projeto: construtor sem argumentos, herança de `Ordenador<Integer>`, `setVetor(...)` e `sort()`.
+Cada arquivo contém os casos e as repetições correspondentes àquele algoritmo e tamanho. O cabeçalho é:
 
-A classe **tenta executar todos os algoritmos listados no enum**, mas isso não significa que toda combinação de algoritmo, tamanho e caso será medida. Algumas combinações são ignoradas conforme os limites descritos abaixo. Se uma implementação der erro, o status é registrado no CSV.
+```csv
+algoritmo,n,caso,repeticao,t_ns
+```
 
-## Configuração padrão
+- `algoritmo`: nome do algoritmo executado;
+- `n`: quantidade de elementos do vetor;
+- `caso`: configuração dos dados de entrada;
+- `repeticao`: índice da repetição dentro da execução atual;
+- `t_ns`: tempo de ordenação em nanossegundos.
 
-### Tamanhos dos vetores
+### Acumulação dos resultados
 
-O código usa estes tamanhos:
+Se o CSV já existir, novas medições são **acrescentadas ao final do arquivo**. O conteúdo existente não é apagado e o cabeçalho não é repetido. Se o arquivo não existir ou estiver vazio, ele é criado com o cabeçalho.
 
-- 1.000 elementos
-- 10.000 elementos
-- 100.000 elementos
-- 1.000.000 de elementos
+Ao executar o programa novamente com o mesmo prefixo, algoritmo e tamanho, as medições novas são acumuladas nos arquivos correspondentes. Como o número da repetição volta a 1 em cada execução do programa, podem aparecer índices de repetição repetidos quando os resultados são acumulados de várias sessões.
 
-### Casos de entrada
+## Algoritmos disponíveis
 
-Para tamanhos de até 100.000 elementos, são considerados quatro casos:
+- `MergeSort`
+- `BubbleSort`
+- `InsertionSort`
+- `QuickSort`
+- `ShellSort`
+- `SelectionSort`
+- `HeapSort`
+- `CountingSort`
+- `RadixSort`
+- `BucketSort`
 
-- **CRESCENTE:** valores em ordem crescente.
-- **DECRESCENTE:** valores em ordem decrescente.
-- **ALEATORIO:** permutação dos valores, embaralhada com uma semente fixa para tornar a entrada reproduzível.
-- **REPETIDOS:** todos os valores são iguais a `7`.
+Por padrão, todos são executados. É possível selecionar um algoritmo individualmente usando `--algoritmo`.
 
-Para o vetor de 1.000.000 de elementos, somente o caso `ALEATORIO` é executado, a fim de reduzir o custo total dos experimentos.
+## Compilar e executar
 
-### Aquecimentos e repetições
-
-Antes de medir cada configuração, o programa executa **2 aquecimentos**. Os tempos dessas execuções não são registrados como medições oficiais.
-
-Depois, são feitas **10 repetições medidas** por padrão. Cada repetição recebe uma cópia independente do vetor original, para que a ordenação anterior não altere a próxima entrada.
-
-### Combinações ignoradas
-
-Para reduzir o risco de execuções excessivamente demoradas:
-
-- Bubble Sort, Insertion Sort e Selection Sort são ignorados para tamanhos maiores que 1.000 elementos.
-- Quick Sort é ignorado em casos crescentes, decrescentes e repetidos quando o tamanho ultrapassa 1.000 elementos. Isso considera que a implementação do projeto usa o último elemento como pivô, o que pode gerar recursão muito profunda em entradas desse tipo.
-- Para o tamanho de 1.000.000, somente o caso aleatório é gerado para todos os algoritmos.
-
-Esses casos não medidos aparecem no CSV com o status `IGNORADO_LIMITE_DE_TEMPO`. Essa decisão é uma proteção prática do experimento; não substitui a análise teórica nem significa que esses algoritmos não façam parte do TP1.
-
-## Como executar
-
-Execute os comandos no terminal, dentro da pasta `TP1/src`:
+Execute os comandos dentro da pasta `TP1/src`, onde estão as classes Java do projeto:
 
 ```bash
 javac *.java
-java TestesGenerator
 ```
 
-Por padrão, o programa cria `resultados_tp1.csv` no diretório de execução.
-
-Também é possível informar o nome/caminho do CSV e o número de repetições:
+Executar todos os algoritmos, usando 10 repetições por configuração:
 
 ```bash
 java TestesGenerator resultados_tp1.csv 10
 ```
 
-Por exemplo, para fazer 30 repetições:
+Executar somente Radix Sort:
 
 ```bash
-java TestesGenerator resultados_tp1_30_repeticoes.csv 30
+java TestesGenerator resultados_tp1.csv 10 --algoritmo RadixSort
 ```
 
-O segundo argumento precisa ser um número inteiro maior que zero.
+Executar somente Counting Sort, ativando os logs:
 
-> **Atenção:** o arquivo CSV informado é criado ou sobrescrito quando o programa inicia. Use um nome diferente para preservar resultados anteriores.
+```bash
+java TestesGenerator resultados_tp1.csv 10 --algoritmo CountingSort --debug
+```
 
-## Formato do CSV
+Também são aceitos nomes curtos, como `radix`, `counting`, `merge`, `bubble`, `insertion`, `quick`, `shell`, `selection`, `heap` e `bucket`.
 
-O arquivo usa uma linha por medição ou situação não medida, com estas colunas:
+Ver todas as opções:
 
-| Coluna | Significado |
-|---|---|
-| `algoritmo` | Nome do valor de `EnumAlgoritmos`. |
-| `tamanho` | Quantidade de elementos no vetor. |
-| `caso` | Configuração dos dados (`CRESCENTE`, `DECRESCENTE`, `ALEATORIO` ou `REPETIDOS`). |
-| `repeticao` | Número da repetição medida; `0` é usado para aquecimento com erro ou configuração ignorada. |
-| `tempo_ns` | Tempo de execução da ordenação em nanossegundos. Fica vazio quando não há medição válida. |
-| `status` | `OK`, motivo de erro ou `IGNORADO_LIMITE_DE_TEMPO`. |
+```bash
+java TestesGenerator --help
+```
 
-A cópia do vetor e a criação do objeto ordenador são feitas **fora do intervalo cronometrado**. O intervalo medido envolve a chamada `sort()`.
+### Argumentos
 
-Os erros durante o aquecimento e durante a medição são registrados no CSV. Quando uma configuração falha durante uma medição, o código interrompe as repetições restantes daquela configuração e continua o experimento.
+```text
+java TestesGenerator [prefixo.csv] [repeticoes] [opções]
+```
 
-## Como interpretar os resultados
+- `prefixo.csv`: prefixo e pasta para os arquivos de saída. Se omitido, usa `resultados_tp1.csv` no diretório atual.
+- `repeticoes`: número de medições por combinação. Se omitido ou inválido, usa 10.
+- `--algoritmo <nome>`: executa somente o algoritmo informado ou `todos`.
+- `--debug`: mostra o progresso detalhado.
+- `--help`: exibe a ajuda.
 
-- Considere para os cálculos de média e dispersão apenas as linhas com `status` igual a `OK` e um valor válido em `tempo_ns`.
-- Não trate as linhas `IGNORADO_LIMITE_DE_TEMPO` como tempos iguais a zero: elas representam configurações não medidas.
-- Investigue as linhas com `ERRO` antes de usar seus dados para comparação.
-- Compare os algoritmos somente sob configurações de entrada equivalentes.
-- O CSV preserva tempos individuais; estatísticas como média, mediana, mínimo, máximo e desvio-padrão podem ser calculadas posteriormente.
+Para gravar em uma pasta específica, informe um caminho como `resultados/resultado.csv`. A pasta é criada automaticamente quando necessário.
 
-## Limitações conhecidas
+## Tamanhos e configurações de entrada
 
-1. A classe não contém uma asserção de corretude que confirme se o vetor terminou ordenado.
-2. A entrada aleatória é determinística e gerada como uma permutação sem duplicatas, enquanto o caso `REPETIDOS` contém apenas o valor `7`. Portanto, a configuração de dados deve ser descrita no relatório.
-3. As combinações ignoradas reduzem a abrangência das comparações e precisam ser mencionadas na metodologia do relatório.
-4. Todos os resultados dependem da implementação concreta dos algoritmos, da JVM, do hardware e da carga do sistema durante as medições.
+Os tamanhos definidos atualmente são:
 
+- 1.000 elementos;
+- 10.000 elementos;
+- 100.000 elementos;
+- 1.000.000 de elementos.
+
+Os casos gerados são:
+
+- `CRESCENTE`;
+- `DECRESCENTE`;
+- `ALEATORIO`;
+- `REPETIDOS`.
+
+Para `n = 1.000.000`, a configuração atual executa somente `ALEATORIO`. Essa regra está implementada para reduzir a duração dos experimentos; portanto, não haverá linhas dos outros casos nos CSVs desse tamanho.
+
+## Debug, progresso e estimativa de tempo
+
+Com `--debug`, o programa mostra:
+
+- qual algoritmo, tamanho, caso e repetição estão começando;
+- qual CSV recebe a medição;
+- o tempo de ordenação daquela execução;
+- o número de medições concluídas e o percentual de progresso;
+- o tempo decorrido e uma estimativa aproximada do tempo restante (ETA).
+
+A estimativa é recalculada com base na duração observada até então e pode variar bastante quando a execução passa para vetores maiores ou algoritmos mais lentos.
+
+## Como a medição é feita
+
+A cópia do vetor original é preparada antes do início do cronômetro. O tempo registrado envolve somente a chamada a `ordenador.sort()`:
+
+```java
+long inicio = System.nanoTime();
+ordenador.sort();
+long fim = System.nanoTime();
+long tempo = fim - inicio;
+```
+
+Para cada combinação experimental, os algoritmos recebem cópias do mesmo vetor original gerado para aquele tamanho e caso. O tempo de geração do vetor, a cópia e a gravação do CSV não fazem parte de `t_ns`.
+
+## Observações para a análise do TP1
+
+1. Preserve os CSVs: eles contêm as medições individuais necessárias para calcular estatísticas e construir gráficos.
+2. Registre no relatório as configurações que não foram executadas, inclusive a restrição para vetores de um milhão de elementos.
+3. Counting Sort, Radix Sort e Bucket Sort dependem de características da entrada. Documente o domínio e o intervalo de valores utilizado ao comparar seus resultados.
+4. Os tempos acumulados podem conter o mesmo número de `repeticao` em sessões distintas. Para análises que precisem distinguir sessões de execução, mantenha um controle externo das rodadas ou execute com um prefixo novo.
+5. Antes da coleta definitiva, faça uma rodada piloto para confirmar que todas as implementações compilam, ordenam corretamente e terminam em tempo aceitável.
