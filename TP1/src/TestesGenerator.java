@@ -41,6 +41,7 @@ public class TestesGenerator {
     public TestesGenerator(int repeticoes, boolean debug, List<String> algoritmosSelecionados) {
         this.repeticoes = repeticoes > 0 ? repeticoes : 10;
         this.debug = debug;
+        Logs.setDebug(debug);
         this.algoritmosSelecionados = new ArrayList<>(algoritmosSelecionados);
     }
 
@@ -84,14 +85,15 @@ public class TestesGenerator {
         }
 
         long duracaoTotalMs = (System.nanoTime() - inicioExperimento) / 1_000_000L;
-        System.out.println("Testes finalizados com sucesso!");
-        System.out.println("CSV(s) atualizados na pasta: " + obterPastaSaida(arquivoBase).toAbsolutePath());
-        System.out.println("Padrão dos arquivos: " + obterPrefixo(arquivoBase)
+        Logs.divider("TestesGenerator", "Resumo do experimento");
+        Logs.success("TestesGenerator", "Experimentos finalizados com sucesso.");
+        Logs.info("TestesGenerator", "Pasta de saída: " + obterPastaSaida(arquivoBase).toAbsolutePath());
+        Logs.info("TestesGenerator", "Padrão dos arquivos: " + obterPrefixo(arquivoBase)
             + "_<Algoritmo>_n<Tamanho>.csv");
-        System.out.println("Algoritmos executados: " + String.join(", ", algoritmosSelecionados));
-        System.out.println("Medições registradas: " + execucoesConcluidas
+        Logs.info("TestesGenerator", "Algoritmos executados: " + String.join(", ", algoritmosSelecionados));
+        Logs.info("TestesGenerator", "Medições registradas: " + execucoesConcluidas
             + "/" + totalExecucoes + " (" + String.format(Locale.ROOT, "%.1f", calcularProgresso()) + "%).");
-        System.out.println("Tempo total: " + formatarDuracao(duracaoTotalMs) + ".");
+        Logs.info("TestesGenerator", "Tempo total: " + formatarDuracao(duracaoTotalMs));
     }
 
     private Path criarCaminhoCsv(Path arquivoBase, String algoritmo, int n) {
@@ -204,12 +206,10 @@ public class TestesGenerator {
         String decorrido = formatarDuracao((System.nanoTime() - inicioExperimento) / 1_000_000L);
         String restante = estimarTempoRestante();
 
-        System.out.println(String.format(Locale.ROOT,
-            "[DEBUG] Iniciando %s | n=%d | caso=%s | repetição=%d/%d | "
-                + "progresso=%.1f%% (%d/%d) | decorrido=%s | ETA≈%s | CSV=%s",
+        Logs.debug("TestesGenerator", String.format(Locale.ROOT,
+            "Iniciando %s  n=%d  caso=%s  repetição=%d/%d  progresso=%.1f%%  decorrido=%s  restante~%s  CSV=%s",
             algoritmo, n, caso, repeticao, repeticoes,
-            progresso, execucoesConcluidas, totalExecucoes, decorrido, restante,
-            caminhoCsv.getFileName()));
+            progresso, decorrido, restante, caminhoCsv.getFileName()));
     }
 
     private void logTesteConcluido(
@@ -223,12 +223,11 @@ public class TestesGenerator {
         String decorrido = formatarDuracao((System.nanoTime() - inicioExperimento) / 1_000_000L);
         String restante = estimarTempoRestante();
 
-        System.out.println(String.format(Locale.ROOT,
-            "[DEBUG] Concluído %s | n=%d | caso=%s | repetição=%d/%d | "
-                + "sort=%d ns | progresso=%.1f%% (%d/%d) | decorrido=%s | ETA≈%s | CSV=%s",
+        Logs.debug("TestesGenerator", String.format(Locale.ROOT,
+            "Concluído %s  n=%d  caso=%s  repetição=%d/%d  sort=%d ns  progresso=%.1f%%  decorrido=%s  restante~%s  CSV=%s",
             algoritmo, n, caso, repeticao, repeticoes, tempoNs,
-            progresso, execucoesConcluidas, totalExecucoes, decorrido, restante,
-            caminhoCsv.getFileName()));
+            progresso, decorrido, restante, caminhoCsv.getFileName()));
+        Logs.progress("TestesGenerator", execucoesConcluidas, totalExecucoes, decorrido, restante);
     }
 
     private long calcularTotalExecucoes() {
@@ -281,9 +280,7 @@ public class TestesGenerator {
     }
 
     private void logDebug(String mensagem) {
-        if (debug) {
-            System.out.println("[DEBUG] " + mensagem);
-        }
+        Logs.debug("TestesGenerator", mensagem);
     }
 
     private Vector<Integer> gerarVetor(int n, String caso) {
@@ -375,7 +372,7 @@ public class TestesGenerator {
             } else if ("--algoritmo".equalsIgnoreCase(arg) || "--algorithm".equalsIgnoreCase(arg)
                 || "-a".equalsIgnoreCase(arg)) {
                 if (i + 1 >= args.length) {
-                    System.err.println("Erro: informe um nome após " + arg + ".");
+                    Logs.error("TestesGenerator", "Informe um nome após " + arg + ".");
                     imprimirAjuda();
                     return;
                 }
@@ -399,14 +396,14 @@ public class TestesGenerator {
                     throw new NumberFormatException("O número de repetições deve ser positivo.");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Número de repetições inválido. Usando o padrão: 10");
+                Logs.warn("TestesGenerator", "Número de repetições inválido. Usando o padrão: 10.");
                 reps = 10;
             }
         }
 
         List<String> selecionados = resolverAlgoritmos(algoritmoArg);
         if (selecionados == null) {
-            System.err.println("Algoritmo desconhecido: " + algoritmoArg);
+            Logs.error("TestesGenerator", "Algoritmo desconhecido: " + algoritmoArg);
             imprimirAjuda();
             return;
         }
@@ -415,10 +412,11 @@ public class TestesGenerator {
         Path caminho = Paths.get(nomeArquivo);
 
         try {
-            System.out.println("Iniciando experimentos..." + (debug ? " (DEBUG ativado)" : ""));
+            Logs.divider("TestesGenerator", "Experimentos do TP1");
+            Logs.info("TestesGenerator", "Iniciando experimentos" + (debug ? " com DEBUG ativado." : "."));
             gerador.rodarTeste(caminho);
         } catch (IOException e) {
-            System.err.println("Erro ao escrever os arquivos CSV: " + e.getMessage());
+            Logs.error("TestesGenerator", "Erro ao escrever os arquivos CSV: " + e.getMessage());
         }
     }
 }
