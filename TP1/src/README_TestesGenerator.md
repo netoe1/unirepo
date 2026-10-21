@@ -148,3 +148,26 @@ Para cada combinação experimental, os algoritmos recebem cópias do mesmo veto
 3. Counting Sort, Radix Sort e Bucket Sort dependem de características da entrada. Documente o domínio e o intervalo de valores utilizado ao comparar seus resultados.
 4. Os tempos acumulados podem conter o mesmo número de `repeticao` em sessões distintas. Para análises que precisem distinguir sessões de execução, mantenha um controle externo das rodadas ou execute com um prefixo novo.
 5. Antes da coleta definitiva, faça uma rodada piloto para confirmar que todas as implementações compilam, ordenam corretamente e terminam em tempo aceitável.
+
+## Logs formatados
+
+A classe `Logs.java` centraliza a saída do terminal em um estilo inspirado nos logs de aplicações Node.js: horário, nível, contexto e mensagem, com cores ANSI quando suportadas pelo terminal. Ela oferece os níveis `INFO`, `DEBUG`, `SUCCESS`, `WARN`, `ERROR` e `PROGRESS`.
+
+Mantenha `Logs.java` na mesma pasta das classes do TP1 e compile normalmente:
+
+```bash
+javac *.java
+```
+
+Com `--debug`, o `TestesGenerator` mostra cada medição e uma barra de progresso com percentual, quantidade concluída, tempo decorrido e estimativa restante. Sem `--debug`, os detalhes de cada medição e a barra são ocultados; as mensagens de início, resumo e erro continuam disponíveis.
+
+Exemplo ilustrativo de saída:
+
+```text
+[20:15:08] INFO    [TestesGenerator] Iniciando experimentos com DEBUG ativado.
+[20:15:08] DEBUG   [TestesGenerator] Iniciando RadixSort  n=1000  caso=ALEATORIO  repetição=1/10
+[20:15:08] PROGRESS [TestesGenerator] [########................]  33.0%  33/100
+[20:15:08] SUCCESS [TestesGenerator] Experimentos finalizados com sucesso.
+```
+
+Os horários e tempos acima são apenas exemplos. Se necessário, as cores podem ser desligadas programaticamente com `Logs.setCores(false)`, ou ativadas com `Logs.setCores(true)`.
