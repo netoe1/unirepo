@@ -1,173 +1,145 @@
-# TestesGenerator — Execução dos experimentos do TP1
+# TesteGenerator — CLI do TP1 de ACD
 
-## Objetivo
+`TesteGenerator.java` oferece uma interface de linha de comando (CLI), sem perguntas interativas. Todos os parâmetros são informados como argumentos, então o programa pode ser executado diretamente pelo shell, por scripts `.sh`, cron ou outros automatizadores.
 
-A classe `TestesGenerator` automatiza os experimentos de desempenho dos algoritmos de ordenação do TP1. Ela prepara os vetores de entrada, executa os algoritmos selecionados, mede o tempo de `sort()` com `System.nanoTime()` e registra cada medição em CSV.
+## Requisitos
 
-## CSVs separados por algoritmo e tamanho
+- JDK instalado (`java` e `javac` disponíveis no `PATH`).
+- `TesteGenerator.java`, `Logs.java`, `Ordenador.java`, `CasosAlgoritmo.java` e as classes dos algoritmos na mesma pasta `src`.
+- O script `executar_testes.sh` deve ter permissão de execução.
 
-Os resultados são organizados em **um arquivo CSV para cada combinação de algoritmo e tamanho do vetor**. O argumento posicional de arquivo define o prefixo e a pasta de saída, não um único CSV.
+## Uso básico
 
-Por exemplo, executando com o prefixo `resultados_tp1.csv`, são criados arquivos como:
-
-```text
-resultados_tp1_MergeSort_n1000.csv
-resultados_tp1_MergeSort_n10000.csv
-resultados_tp1_RadixSort_n1000.csv
-resultados_tp1_RadixSort_n1000000.csv
+```bash
+chmod +x executar_testes.sh
+./executar_testes.sh \
+  --repeticoes 10 \
+  --caso MEDIO \
+  --algoritmo InsertionSort \
+  --disposicao ALEATORIO \
+  --n 1000 \
+  --saida resultados/tp1 \
+  --debug
 ```
 
-Cada arquivo contém os casos e as repetições correspondentes àquele algoritmo e tamanho. O cabeçalho é:
+A execução não lê nada de `stdin` e não exige confirmação do usuário. O script compila os arquivos Java e encaminha todos os argumentos para `TesteGenerator`.
+
+Se nenhum argumento for fornecido, o script exibe a ajuda em vez de entrar num modo interativo:
+
+```bash
+./executar_testes.sh --help
+```
+
+## Parâmetros obrigatórios
+
+| Parâmetro | Valores | Significado |
+|---|---|---|
+| `--repeticoes` | `1` a `1000` | Número de medições oficiais depois dos aquecimentos. |
+| `--caso` | `MELHOR`, `PIOR`, `MEDIO` | Rótulo do caso teórico que será registrado no CSV. |
+| `--algoritmo` | Nome de um dos dez algoritmos | Algoritmo executado nesta chamada. |
+| `--disposicao` | `CRESCENTE`, `DECRESCENTE`, `ALEATORIO`, `REPETIDOS` | Como o vetor de entrada será gerado. |
+| `--n` | `1` a `1000000` | Número de elementos do vetor. |
+
+Algoritmos aceitos: `BubbleSort`, `InsertionSort`, `SelectionSort`, `ShellSort`, `HeapSort`, `MergeSort`, `QuickSort`, `CountingSort`, `RadixSort` e `BucketSort`. Os nomes também aceitam abreviações sem o sufixo `Sort`, por exemplo `--algoritmo Radix`.
+
+## Parâmetros opcionais
+
+| Parâmetro | Efeito |
+|---|---|
+| `--saida PREFIXO` | Pasta/prefixo dos arquivos gerados. Padrão: `resultados_tp1`. |
+| `--debug` | Ativa logs detalhados e progresso percentual com estimativa de tempo restante. |
+| `--no-color` | Desativa as cores ANSI nos logs. |
+| `--help` ou `-h` | Exibe a ajuda e termina. |
+
+## CSV gerado
+
+O nome segue o padrão:
+
+```text
+<PREFIXO>_<Algoritmo>_n<TAMANHO>.csv
+```
+
+Por exemplo, usando `--saida resultados/tp1`, algoritmo `InsertionSort` e `n=1000`:
+
+```text
+resultados/tp1_InsertionSort_n1000.csv
+```
+
+O cabeçalho é:
 
 ```csv
-algoritmo,n,caso,repeticao,t_ns
+algoritmo,n,caso,disposicao,sessao,repeticao,t_ns
 ```
 
-- `algoritmo`: nome do algoritmo executado;
-- `n`: quantidade de elementos do vetor;
-- `caso`: configuração dos dados de entrada;
-- `repeticao`: índice da repetição dentro da execução atual;
-- `t_ns`: tempo de ordenação em nanossegundos.
+| Coluna | Interpretação |
+|---|---|
+| `algoritmo` | Algoritmo que foi executado. |
+| `n` | Número de elementos no vetor. |
+| `caso` | Rótulo experimental solicitado (`MELHOR`, `PIOR` ou `MEDIO`). |
+| `disposicao` | Disposição usada para gerar a entrada. |
+| `sessao` | Identificador único da execução do programa, para distinguir execuções acumuladas. |
+| `repeticao` | Número da medição oficial dentro daquela sessão, de 1 até o valor de `--repeticoes`. |
+| `t_ns` | Tempo da chamada `sort()`, em nanossegundos. |
 
-### Acumulação dos resultados
+Se o CSV já existir e tiver o cabeçalho esperado, as medições serão acrescentadas ao final. O conteúdo anterior é preservado. Se o cabeçalho for incompatível, a execução falha para evitar misturar formatos diferentes.
 
-Se o CSV já existir, novas medições são **acrescentadas ao final do arquivo**. O conteúdo existente não é apagado e o cabeçalho não é repetido. Se o arquivo não existir ou estiver vazio, ele é criado com o cabeçalho.
+## Automatização com shell
 
-Ao executar o programa novamente com o mesmo prefixo, algoritmo e tamanho, as medições novas são acumuladas nos arquivos correspondentes. Como o número da repetição volta a 1 em cada execução do programa, podem aparecer índices de repetição repetidos quando os resultados são acumulados de várias sessões.
-
-## Algoritmos disponíveis
-
-- `MergeSort`
-- `BubbleSort`
-- `InsertionSort`
-- `QuickSort`
-- `ShellSort`
-- `SelectionSort`
-- `HeapSort`
-- `CountingSort`
-- `RadixSort`
-- `BucketSort`
-
-Por padrão, todos são executados. É possível selecionar um algoritmo individualmente usando `--algoritmo`.
-
-## Compilar e executar
-
-Execute os comandos dentro da pasta `TP1/src`, onde estão as classes Java do projeto:
+### Exemplo: executar um algoritmo por vez
 
 ```bash
-javac *.java
+./executar_testes.sh --repeticoes 10 --caso PIOR \
+  --algoritmo InsertionSort --disposicao DECRESCENTE --n 1000 \
+  --saida resultados/tp1 --debug
 ```
 
-Executar todos os algoritmos, usando 10 repetições por configuração:
+### Exemplo: executar várias configurações em sequência
+
+O shell pode percorrer uma lista de tamanhos e algoritmos sem interação. Compile uma vez e chame a classe Java diretamente dentro do loop para evitar recompilar a cada configuração:
 
 ```bash
-java TestesGenerator resultados_tp1.csv 10
+javac -encoding UTF-8 *.java
+
+for algoritmo in MergeSort QuickSort CountingSort RadixSort BucketSort; do
+  for n in 1000 10000 100000; do
+    java -Xms128m -Xmx1g TesteGenerator \
+      --repeticoes 10 \
+      --caso MEDIO \
+      --algoritmo "$algoritmo" \
+      --disposicao ALEATORIO \
+      --n "$n" \
+      --saida resultados/tp1 \
+      --no-color
+  done
+done
 ```
 
-Executar somente Radix Sort:
+O exemplo usa algoritmos adequados, em geral, para vetores maiores. Ao criar loops mais abrangentes, respeite os limites específicos descritos abaixo e confira o código de cada implementação. O `set -e` pode ser usado em um script batch para interromper a execução se algum experimento falhar.
+
+## Aquecimento e medição
+
+O programa executa duas passagens de aquecimento, que não são registradas no CSV. A geração dos dados e a cópia do vetor ficam fora do intervalo cronometrado. A coluna `t_ns` mede apenas a chamada `sort()`.
+
+O progresso e o ETA são estimativas. Os tempos podem variar quando o programa troca de tamanho do vetor ou por causa de atividade externa na máquina.
+
+## Limites preventivos de execução
+
+Para reduzir riscos de execuções demoradas ou falha por recursão/memória:
+
+- `n` máximo: `1.000.000`.
+- `BubbleSort`, `InsertionSort` e `SelectionSort`: `n <= 10.000`.
+- `QuickSort`: `n <= 100.000`; com disposição crescente ou decrescente, `n <= 1.000`, porque certas estratégias de pivô podem degenerar para `O(n²)` e aprofundar demais a recursão.
+- Para algoritmos quadráticos, configurações com `n >= 5.000` aceitam no máximo 10 repetições.
+- O script usa por padrão `-Xms128m -Xmx1g`; é possível ajustar a heap:
 
 ```bash
-java TestesGenerator resultados_tp1.csv 10 --algoritmo RadixSort
+JAVA_OPTS='-Xms64m -Xmx512m' ./executar_testes.sh \
+  --repeticoes 10 --caso MEDIO --algoritmo RadixSort \
+  --disposicao ALEATORIO --n 100000 --saida resultados/tp1
 ```
 
-Executar somente Counting Sort, ativando os logs:
+Aumentar a heap não resolve complexidade quadrática nem garante que um Quick Sort recursivo evite `StackOverflowError`.
 
-```bash
-java TestesGenerator resultados_tp1.csv 10 --algoritmo CountingSort --debug
-```
+## Importante para o relatório
 
-Também são aceitos nomes curtos, como `radix`, `counting`, `merge`, `bubble`, `insertion`, `quick`, `shell`, `selection`, `heap` e `bucket`.
-
-Ver todas as opções:
-
-```bash
-java TestesGenerator --help
-```
-
-### Argumentos
-
-```text
-java TestesGenerator [prefixo.csv] [repeticoes] [opções]
-```
-
-- `prefixo.csv`: prefixo e pasta para os arquivos de saída. Se omitido, usa `resultados_tp1.csv` no diretório atual.
-- `repeticoes`: número de medições por combinação. Se omitido ou inválido, usa 10.
-- `--algoritmo <nome>`: executa somente o algoritmo informado ou `todos`.
-- `--debug`: mostra o progresso detalhado.
-- `--help`: exibe a ajuda.
-
-Para gravar em uma pasta específica, informe um caminho como `resultados/resultado.csv`. A pasta é criada automaticamente quando necessário.
-
-## Tamanhos e configurações de entrada
-
-Os tamanhos definidos atualmente são:
-
-- 1.000 elementos;
-- 10.000 elementos;
-- 100.000 elementos;
-- 1.000.000 de elementos.
-
-Os casos gerados são:
-
-- `CRESCENTE`;
-- `DECRESCENTE`;
-- `ALEATORIO`;
-- `REPETIDOS`.
-
-Para `n = 1.000.000`, a configuração atual executa somente `ALEATORIO`. Essa regra está implementada para reduzir a duração dos experimentos; portanto, não haverá linhas dos outros casos nos CSVs desse tamanho.
-
-## Debug, progresso e estimativa de tempo
-
-Com `--debug`, o programa mostra:
-
-- qual algoritmo, tamanho, caso e repetição estão começando;
-- qual CSV recebe a medição;
-- o tempo de ordenação daquela execução;
-- o número de medições concluídas e o percentual de progresso;
-- o tempo decorrido e uma estimativa aproximada do tempo restante (ETA).
-
-A estimativa é recalculada com base na duração observada até então e pode variar bastante quando a execução passa para vetores maiores ou algoritmos mais lentos.
-
-## Como a medição é feita
-
-A cópia do vetor original é preparada antes do início do cronômetro. O tempo registrado envolve somente a chamada a `ordenador.sort()`:
-
-```java
-long inicio = System.nanoTime();
-ordenador.sort();
-long fim = System.nanoTime();
-long tempo = fim - inicio;
-```
-
-Para cada combinação experimental, os algoritmos recebem cópias do mesmo vetor original gerado para aquele tamanho e caso. O tempo de geração do vetor, a cópia e a gravação do CSV não fazem parte de `t_ns`.
-
-## Observações para a análise do TP1
-
-1. Preserve os CSVs: eles contêm as medições individuais necessárias para calcular estatísticas e construir gráficos.
-2. Registre no relatório as configurações que não foram executadas, inclusive a restrição para vetores de um milhão de elementos.
-3. Counting Sort, Radix Sort e Bucket Sort dependem de características da entrada. Documente o domínio e o intervalo de valores utilizado ao comparar seus resultados.
-4. Os tempos acumulados podem conter o mesmo número de `repeticao` em sessões distintas. Para análises que precisem distinguir sessões de execução, mantenha um controle externo das rodadas ou execute com um prefixo novo.
-5. Antes da coleta definitiva, faça uma rodada piloto para confirmar que todas as implementações compilam, ordenam corretamente e terminam em tempo aceitável.
-
-## Logs formatados
-
-A classe `Logs.java` centraliza a saída do terminal em um estilo inspirado nos logs de aplicações Node.js: horário, nível, contexto e mensagem, com cores ANSI quando suportadas pelo terminal. Ela oferece os níveis `INFO`, `DEBUG`, `SUCCESS`, `WARN`, `ERROR` e `PROGRESS`.
-
-Mantenha `Logs.java` na mesma pasta das classes do TP1 e compile normalmente:
-
-```bash
-javac *.java
-```
-
-Com `--debug`, o `TestesGenerator` mostra cada medição e uma barra de progresso com percentual, quantidade concluída, tempo decorrido e estimativa restante. Sem `--debug`, os detalhes de cada medição e a barra são ocultados; as mensagens de início, resumo e erro continuam disponíveis.
-
-Exemplo ilustrativo de saída:
-
-```text
-[20:15:08] INFO    [TestesGenerator] Iniciando experimentos com DEBUG ativado.
-[20:15:08] DEBUG   [TestesGenerator] Iniciando RadixSort  n=1000  caso=ALEATORIO  repetição=1/10
-[20:15:08] PROGRESS [TestesGenerator] [########................]  33.0%  33/100
-[20:15:08] SUCCESS [TestesGenerator] Experimentos finalizados com sucesso.
-```
-
-Os horários e tempos acima são apenas exemplos. Se necessário, as cores podem ser desligadas programaticamente com `Logs.setCores(false)`, ou ativadas com `Logs.setCores(true)`.
+`caso` e `disposicao` são registrados separadamente. Escolher `--caso MELHOR` não transforma a entrada em melhor caso automaticamente: a relação entre o rótulo e a disposição depende do algoritmo e da implementação. Registre e justifique essa correspondência na metodologia do TP1.
