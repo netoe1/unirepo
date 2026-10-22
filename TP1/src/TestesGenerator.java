@@ -1,4 +1,3 @@
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,11 +6,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
-import java.util.stream.Stream;
 
 public class TestesGenerator {
 
@@ -19,8 +16,6 @@ public class TestesGenerator {
     private final String[] casos = {
         "CRESCENTE", "DECRESCENTE", "ALEATORIO", "REPETIDOS"
     };
-
-    private static final String CABECALHO_CSV = "algoritmo,n,caso,repeticao,t_ns";
 
     private static final List<String> TODOS_ALGORITMOS = Arrays.asList(
         "MergeSort", "BubbleSort", "InsertionSort", "QuickSort", "ShellSort",
@@ -191,7 +186,7 @@ public class TestesGenerator {
                 StandardOpenOption.WRITE,
                 StandardOpenOption.APPEND)) {
             if (escreverCabecalho) {
-                csv.write(CABECALHO_CSV);
+                csv.write("algoritmo,n,caso,repeticao,t_ns");
                 csv.newLine();
             }
 
@@ -346,147 +341,23 @@ public class TestesGenerator {
         return valor.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
     }
 
-
-    /**
-     * Junta os CSVs gerados pelo TestesGenerator em um unico arquivo.
-     * Considera apenas arquivos que seguem o padrao <prefixo>_<Algoritmo>_n<Tamanho>.csv.
-     * O arquivo consolidado e recriado em cada execucao; os CSVs individuais sao preservados.
-     */
-    public static void mesclarCSVs(Path arquivoBase, Path arquivoSaidaSolicitado) throws IOException {
-        Path pasta = arquivoBase.toAbsolutePath().getParent();
-        if (pasta == null) {
-            pasta = Paths.get(".").toAbsolutePath();
-        }
-
-        String prefixo = obterPrefixoEstatico(arquivoBase);
-        Path arquivoSaida;
-        if (arquivoSaidaSolicitado == null) {
-            arquivoSaida = pasta.resolve(prefixo + "_consolidado.csv");
-        } else if (arquivoSaidaSolicitado.isAbsolute()) {
-            arquivoSaida = arquivoSaidaSolicitado.normalize();
-        } else if (arquivoSaidaSolicitado.getParent() == null) {
-            arquivoSaida = pasta.resolve(arquivoSaidaSolicitado).normalize();
-        } else {
-            arquivoSaida = arquivoSaidaSolicitado.toAbsolutePath().normalize();
-        }
-
-        Path saidaNormalizada = arquivoSaida.toAbsolutePath().normalize();
-        List<Path> fontes = new ArrayList<>();
-        try (Stream<Path> arquivos = Files.list(pasta)) {
-            arquivos.filter(Files::isRegularFile)
-                .filter(caminho -> ehCSVDeResultado(caminho.getFileName().toString(), prefixo))
-                .sorted(Comparator.comparing(caminho -> caminho.getFileName().toString()))
-                .forEach(fontes::add);
-        }
-
-        if (fontes.isEmpty()) {
-            Logs.warn("TestesGenerator", "Nenhum CSV individual encontrado para o prefixo '" + prefixo + "' na pasta " + pasta + ".");
-            Logs.info("TestesGenerator", "Esperado um padrão como " + prefixo + "_RadixSort_n1000.csv");
-            return;
-        }
-
-        for (Path fonte : fontes) {
-            if (fonte.toAbsolutePath().normalize().equals(saidaNormalizada)) {
-                throw new IOException("O arquivo de saída não pode ser um dos CSVs de origem: " + saidaNormalizada);
-            }
-        }
-
-        Path parentSaida = saidaNormalizada.getParent();
-        if (parentSaida != null) {
-            Files.createDirectories(parentSaida);
-        }
-
-        long linhasCopiadas = 0;
-        try (BufferedWriter saida = Files.newBufferedWriter(
-                saidaNormalizada,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.WRITE)) {
-            saida.write(CABECALHO_CSV);
-            saida.newLine();
-
-            for (Path fonte : fontes) {
-                try (BufferedReader leitor = Files.newBufferedReader(fonte)) {
-                    String linha;
-                    while ((linha = leitor.readLine()) != null) {
-                        String linhaTrim = linha.trim();
-                        if (linhaTrim.isEmpty() || CABECALHO_CSV.equalsIgnoreCase(linhaTrim)) {
-                            continue;
-                        }
-                        saida.write(linha);
-                        saida.newLine();
-                        linhasCopiadas++;
-                    }
-                }
-                Logs.debug("TestesGenerator", "Mesclado: " + fonte.getFileName());
-            }
-        }
-
-        Logs.divider("TestesGenerator", "Consolidação de CSVs concluída");
-        Logs.success("TestesGenerator", "Arquivos individuais encontrados: " + fontes.size());
-        Logs.success("TestesGenerator", "Registros consolidados: " + linhasCopiadas);
-        Logs.info("TestesGenerator", "Arquivo consolidado: " + saidaNormalizada);
-        Logs.info("TestesGenerator", "Os CSVs individuais foram preservados.");
-    }
-
-    private static boolean ehCSVDeResultado(String nomeArquivo, String prefixo) {
-        String inicioEsperado = prefixo + "_";
-        if (!nomeArquivo.startsWith(inicioEsperado) || !nomeArquivo.toLowerCase(Locale.ROOT).endsWith(".csv")) {
-            return false;
-        }
-
-        String semExtensao = nomeArquivo.substring(0, nomeArquivo.length() - 4);
-        int indiceN = semExtensao.lastIndexOf("_n");
-        if (indiceN <= inicioEsperado.length() - 1) {
-            return false;
-        }
-
-        String tamanho = semExtensao.substring(indiceN + 2);
-        if (tamanho.isEmpty()) {
-            return false;
-        }
-        for (int i = 0; i < tamanho.length(); i++) {
-            if (!Character.isDigit(tamanho.charAt(i))) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static String obterPrefixoEstatico(Path arquivoBase) {
-        Path nomePath = arquivoBase.getFileName();
-        String nome = nomePath == null ? "resultados_tp1" : nomePath.toString();
-        if (nome.toLowerCase(Locale.ROOT).endsWith(".csv")) {
-            nome = nome.substring(0, nome.length() - 4);
-        }
-        return nome.trim().isEmpty() ? "resultados_tp1" : nome;
-    }
-
     private static void imprimirAjuda() {
         System.out.println("Uso: java TestesGenerator [prefixo.csv] [repeticoes] [opções]");
-        System.out.println("\nExecução dos experimentos:");
-        System.out.println("  java TestesGenerator resultados_tp1.csv 10 --algoritmo RadixSort --debug");
-        System.out.println("\nConsolidação dos CSVs já existentes (não executa algoritmos):");
-        System.out.println("  java TestesGenerator resultados_tp1.csv --merge");
-        System.out.println("  java TestesGenerator resultados_tp1.csv --merge --merge-output conjunto.csv");
-        System.out.println("\nOpções:");
+        System.out.println("Opções:");
         System.out.println("  --debug                  Ativa logs, progresso e estimativa de tempo");
         System.out.println("  --algoritmo <nome>       Executa um algoritmo ou 'todos' (padrão: todos)");
         System.out.println("  --algoritmo=<nome>       Forma alternativa para selecionar o algoritmo");
-        System.out.println("  --merge, --merge-csvs    Junta os CSVs individuais em um único CSV consolidado");
-        System.out.println("  --merge-output <arquivo> Define o nome do CSV consolidado (opcional)");
         System.out.println("  --help                   Mostra esta ajuda");
-        System.out.println("\nAlgoritmos: " + String.join(", ", TODOS_ALGORITMOS));
-        System.out.println("Os CSVs individuais seguem o padrão <prefixo>_<Algoritmo>_n<Tamanho>.csv");
+        System.out.println("Algoritmos: " + String.join(", ", TODOS_ALGORITMOS));
+        System.out.println("Os CSVs serão separados por algoritmo e tamanho, ex.: resultados_tp1_RadixSort_n1000.csv");
+        System.out.println("Exemplo: java TestesGenerator resultados_tp1.csv 10 --algoritmo RadixSort --debug");
     }
 
     public static void main(String[] args) {
         String nomeArquivo = "resultados_tp1.csv";
         String algoritmoArg = "todos";
-        String mergeOutputArg = null;
         int reps = 10;
         boolean debug = false;
-        boolean merge = false;
         List<String> argumentosPosicionais = new ArrayList<>();
 
         for (int i = 0; i < args.length; i++) {
@@ -498,20 +369,6 @@ public class TestesGenerator {
                 debug = true;
             } else if (arg.startsWith("--debug=")) {
                 debug = Boolean.parseBoolean(arg.substring("--debug=".length()));
-            } else if ("--merge".equalsIgnoreCase(arg) || "--merge-csv".equalsIgnoreCase(arg)
-                || "--merge-csvs".equalsIgnoreCase(arg)) {
-                merge = true;
-            } else if ("--merge-output".equalsIgnoreCase(arg)) {
-                if (i + 1 >= args.length) {
-                    Logs.error("TestesGenerator", "Informe o nome do arquivo após --merge-output.");
-                    imprimirAjuda();
-                    return;
-                }
-                mergeOutputArg = args[++i];
-                merge = true;
-            } else if (arg.startsWith("--merge-output=")) {
-                mergeOutputArg = arg.substring("--merge-output=".length());
-                merge = true;
             } else if ("--algoritmo".equalsIgnoreCase(arg) || "--algorithm".equalsIgnoreCase(arg)
                 || "-a".equalsIgnoreCase(arg)) {
                 if (i + 1 >= args.length) {
@@ -532,18 +389,6 @@ public class TestesGenerator {
         if (!argumentosPosicionais.isEmpty()) {
             nomeArquivo = argumentosPosicionais.get(0);
         }
-
-        Path caminho = Paths.get(nomeArquivo);
-        if (merge) {
-            Logs.setDebug(debug);
-            try {
-                mesclarCSVs(caminho, mergeOutputArg == null ? null : Paths.get(mergeOutputArg));
-            } catch (IOException e) {
-                Logs.error("TestesGenerator", "Erro ao consolidar CSVs: " + e.getMessage());
-            }
-            return;
-        }
-
         if (argumentosPosicionais.size() > 1) {
             try {
                 reps = Integer.parseInt(argumentosPosicionais.get(1));
@@ -564,6 +409,8 @@ public class TestesGenerator {
         }
 
         TestesGenerator gerador = new TestesGenerator(reps, debug, selecionados);
+        Path caminho = Paths.get(nomeArquivo);
+
         try {
             Logs.divider("TestesGenerator", "Experimentos do TP1");
             Logs.info("TestesGenerator", "Iniciando experimentos" + (debug ? " com DEBUG ativado." : "."));
