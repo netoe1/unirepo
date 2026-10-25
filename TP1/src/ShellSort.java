@@ -35,7 +35,26 @@ public class ShellSort<T extends Comparable<T>> extends Ordenador<T> {
 
     public static void main(String args[]){
         ShellSort<Integer> shell = new ShellSort<>();
-        shell.setVetor(new Vector<>(Arrays.asList(4,2,3,1,5,7,8,-9,6,4,7,8)));
+        System.out.println("\nCrescente: ");
+        shell.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        shell.print();
+        shell.sort();
+        shell.print();
+
+        System.out.println("\nDecrescente: ");
+        shell.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        shell.print();
+        shell.sort();
+        shell.print();
+
+        System.out.println("\nAleatorio: ");
+        shell.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        shell.print();
+        shell.sort();
+        shell.print();
+
+        System.out.println("\nRepetido: ");
+        shell.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
         shell.print();
         shell.sort();
         shell.print();

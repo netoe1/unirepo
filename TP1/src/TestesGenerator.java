@@ -5,14 +5,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 public class TestesGenerator {
 
-    private final int[] tamanhos = {
-        1000, 10000, 100000, 1000000
-    };
-
+    private final int[] tamanhos = {1000, 10000, 100000, 1000000};
+    private final List<String> casos = Arrays.asList("CRESCENTE", "DECRESCENTE", "ALEATORIO", "REPETIDOS");
     private int repeticoes = 10;
 
     public TestesGenerator(int repeticoes) {
@@ -27,58 +26,70 @@ public class TestesGenerator {
             csv.newLine();
 
             for (int n : tamanhos) {
-
-                for (String caso : Arrays.asList(
-                    "CRESCENTE", "DECRESCENTE", "ALEATORIO", "REPETIDOS"
-                )) {
-
+                for (String caso : casos) {
                     if (n == 1000000 && !caso.equals("ALEATORIO")) {
                         continue; // Mantém a otimização padrão para 1M se desejado, ou remova se precisar de todos
                     }
 
+                    System.out.println("-> Processando: N = " + n + " | Caso = " + caso);
                     Vector<Integer> original = gerarVetor(n, caso);
 
-                    for (int repeticao = 1;
-                         repeticao <= repeticoes;
-                         repeticao++) {
-
-                        // Cada algoritmo recebe uma cópia dos mesmos dados.
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
                         executar(new MergeSort<>(), original,
                             "MergeSort", n, caso, repeticao, csv);
+                    }        
 
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
                         executar(new BubbleSort<>(), original,
                             "BubbleSort", n, caso, repeticao, csv);
+                    }
 
-                        executar(new InsertionSort<>(), original,
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new InsertionSort<>(), original, 
                             "InsertionSort", n, caso, repeticao, csv);
+                    }        
 
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
                         executar(new QuickSort<>(), original,
                             "QuickSort", n, caso, repeticao, csv);
+                    }
 
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
                         executar(new ShellSort<>(), original,
                             "ShellSort", n, caso, repeticao, csv);
+                    }        
 
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
                         executar(new SelectionSort<>(), original,
                             "SelectionSort", n, caso, repeticao, csv);
+                    }
 
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
                         executar(new HeapSort<>(), original,
                             "HeapSort", n, caso, repeticao, csv);
+                    }        
 
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
                         executar(new CountingSort(), original,
-                            "CountingSort", n, caso, repeticao, csv);        
+                            "CountingSort", n, caso, repeticao, csv);
+                    }
 
-                        //executar(new RadixSort(), original,
-                        //    "RadixSort", n, caso, repeticao, csv);
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new RadixSort(), original,
+                            "RadixSort", n, caso, repeticao, csv);
+                    }        
 
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
                         executar(new BucketSort(), original,
                             "BucketSort", n, caso, repeticao, csv);
-
                     }
                 }
             }
-        }
 
-        System.out.println("Testes finalizados com sucesso! Arquivo gerado: " + arquivoCsv.getFileName());
+            System.out.println("Testes finalizados com sucesso! Arquivo gerado: " + arquivoCsv.getFileName());
+        }
+    
+        System.out.println("Arquivo gerado com sucesso: " + arquivoCsv.toAbsolutePath());
     }
 
     private void executar(
@@ -96,17 +107,9 @@ public class TestesGenerator {
         long inicio = System.nanoTime();
         ordenador.sort();
         long fim = System.nanoTime();
-
         long tempo = fim - inicio;
 
-        csv.write(
-            algoritmo + ","
-            + n + ","
-            + caso + ","
-            + repeticao + ","
-            + tempo
-        );
-
+        csv.write(String.format("%s,%d,%s,%d,%d", algoritmo, n, caso, repeticao, tempo));
         csv.newLine();
     }
 
@@ -146,7 +149,7 @@ public class TestesGenerator {
             try {
                 reps = Integer.parseInt(args[1]);
             } catch (NumberFormatException e) {
-                System.out.println("Número de repetições inválido. Usando o padrão: 10");
+                System.out.println("Número de repetições inválidas. Usando o padrão: 10");
             }
         }
 

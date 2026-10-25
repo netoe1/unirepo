@@ -1,5 +1,4 @@
 import java.util.Random;
-import java.util.Arrays;
 
 public class CasosAlgoritmo {
 
@@ -26,9 +25,14 @@ public class CasosAlgoritmo {
         }
     }
 
-    public static void ordem_repetidas(Integer[] v, int n, int valor) {
+    public static void ordem_repetidas(Integer[] v, int n, int range) {
+        Random gerador = new Random();
         int limite = Math.min(n, v.length);
-        Arrays.fill(v, 0, limite, valor);
-    }
+    
+        int valoresUnicos = (range > 0) ? range : 5; 
 
+        for (int i = 0; i < limite; i++) {
+            v[i] = gerador.nextInt(valoresUnicos); // Gera apenas números entre 0 e (valoresUnicos - 1)
+        }
+    }
 }

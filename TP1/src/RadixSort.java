@@ -67,9 +67,26 @@ public class RadixSort extends Ordenador<Integer> {
 
     public static void main(String[] args) {
         RadixSort radix = new RadixSort();
-        radix.setVetor(new Vector<>(Arrays.asList(42, 7, 315, 89, 7, 0, -12, -315,
-                Integer.MIN_VALUE, Integer.MAX_VALUE)));
+        System.out.println("\nCrescente: ");
+        radix.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        radix.print();
+        radix.sort();
+        radix.print();
 
+        System.out.println("\nDecrescente: ");
+        radix.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        radix.print();
+        radix.sort();
+        radix.print();
+
+        System.out.println("\nAleatorio: ");
+        radix.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        radix.print();
+        radix.sort();
+        radix.print();
+
+        System.out.println("\nRepetido: ");
+        radix.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
         radix.print();
         radix.sort();
         radix.print();

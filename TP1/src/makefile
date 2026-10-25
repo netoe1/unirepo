@@ -6,6 +6,5 @@ clean:
 	rm -rf *.class
 
 run:
-	echo "Rodando Main.java"
-	java Main.java
-	
+	echo "Rodando TestesGenerator.java"
+	java TestesGenerator
