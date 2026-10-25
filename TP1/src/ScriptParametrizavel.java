@@ -372,8 +372,7 @@ public class ScriptParametrizavel {
         }
         return new Vector<>(Arrays.asList(dados));
     }
-
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    
     private static Ordenador<Integer> criarOrdenador(String algoritmo) {
         switch (algoritmo) {
             case "BubbleSort": return new BubbleSort<>();
