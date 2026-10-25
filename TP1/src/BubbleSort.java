@@ -52,7 +52,26 @@ public class BubbleSort <T extends Comparable<T>> extends Ordenador<T> {
 
     public static void main(String args[]){
         BubbleSort<Integer> bubble = new BubbleSort<>();
-        bubble.setVetor(new Vector<>(Arrays.asList(4,2,3,1,5,6,2,3,4,5,2,3,3,4,7,8)));
+        System.out.println("\nCrescente: ");
+        bubble.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        bubble.print();
+        bubble.sort();
+        bubble.print();
+
+        System.out.println("\nDecrescente: ");
+        bubble.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        bubble.print();
+        bubble.sort();
+        bubble.print();
+
+        System.out.println("\nAleatorio: ");
+        bubble.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        bubble.print();
+        bubble.sort();
+        bubble.print();
+
+        System.out.println("\nRepetido: ");
+        bubble.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
         bubble.print();
         bubble.sort();
         bubble.print();

@@ -34,7 +34,26 @@ public class SelectionSort<T extends Comparable<T>> extends Ordenador<T> {
 
     public static void main(String args[]) {
         SelectionSort<Integer> selection = new SelectionSort<>();
-        selection.setVetor(new Vector<>(Arrays.asList(4, 2, 3, 1, 5, 6, 2, 3, 4, 5, 2, 3, 3, 4, 7, 8)));
+        System.out.println("\nCrescente: ");
+        selection.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        selection.print();
+        selection.sort();
+        selection.print();
+
+        System.out.println("\nDecrescente: ");
+        selection.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        selection.print();
+        selection.sort();
+        selection.print();
+
+        System.out.println("\nAleatorio: ");
+        selection.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        selection.print();
+        selection.sort();
+        selection.print();
+
+        System.out.println("\nRepetido: ");
+        selection.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
         selection.print();
         selection.sort();
         selection.print();

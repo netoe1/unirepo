@@ -72,10 +72,28 @@ public class MergeSort <T extends Comparable<T>> extends Ordenador<T> {
 
     public static void main(String args[]){
         MergeSort<Integer> merge = new MergeSort<>();
-        merge.setVetor(new Vector<>(Arrays.asList(4,2,3,1,5,6,4,7,8)));
+        System.out.println("\nCrescente: ");
+        merge.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
         merge.print();
         merge.sort();
         merge.print();
-    }
-    
+
+        System.out.println("\nDecrescente: ");
+        merge.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        merge.print();
+        merge.sort();
+        merge.print();
+
+        System.out.println("\nAleatorio: ");
+        merge.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        merge.print();
+        merge.sort();
+        merge.print();
+
+        System.out.println("\nRepetido: ");
+        merge.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        merge.print();
+        merge.sort();
+        merge.print();
+    }  
 }
