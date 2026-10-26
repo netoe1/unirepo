@@ -23,7 +23,7 @@ import java.util.Vector;
  */
 public class Main {
 
-    private static final String CONTEXTO = "ScriptParametrizavel";
+    private static final String CONTEXTO = "Main";
     private static final int MAX_N = 1_000_000;
     private static final int MAX_REPETICOES = 1_000;
     private static final int AQUECIMENTOS = 2;
@@ -49,7 +49,6 @@ public class Main {
     private final long semente;
     private final Path caminhoCsv;
     private final String sessao;
-    private final boolean debug;
 
     private Main(
         int repeticoes,
@@ -58,8 +57,7 @@ public class Main {
         String disposicao,
         int n,
         long semente,
-        Path caminhoCsv,
-        boolean debug
+        Path caminhoCsv
     ) {
         this.repeticoes = repeticoes;
         this.caso = caso;
@@ -68,7 +66,6 @@ public class Main {
         this.n = n;
         this.semente = semente;
         this.caminhoCsv = caminhoCsv;
-        this.debug = debug;
         this.sessao = LocalDateTime.now().format(
             DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS", Locale.ROOT)
         );
@@ -124,7 +121,7 @@ public class Main {
             Logs.info(CONTEXTO, "Execucao nao interativa: nenhum dado sera lido de stdin.");
 
             Main gerador = new Main(
-                repeticoes, caso, algoritmo, disposicao, n, semente, csv, debug);
+                repeticoes, caso, algoritmo, disposicao, n, semente, csv);
             gerador.executar();
         } catch (IllegalArgumentException e) {
             Logs.error(CONTEXTO, e.getMessage());
@@ -474,7 +471,7 @@ public class Main {
     }
 
     private static void imprimirAjuda() {
-        System.out.println("Uso: java ScriptParametrizavel --repeticoes N --caso MELHOR|MEDIO|PIOR"
+        System.out.println("Uso: java Main --repeticoes N --caso MELHOR|MEDIO|PIOR"
             + " --algoritmo NOME --disposicao CRESCENTE|DECRESCENTE|ALEATORIO|REPETIDOS --n TAMANHO [opcoes]");
         System.out.println();
         System.out.println("Parametros obrigatorios:");
@@ -492,7 +489,7 @@ public class Main {
         System.out.println("  --help, -h           Mostra esta ajuda");
         System.out.println();
         System.out.println("Exemplo:");
-        System.out.println("  java ScriptParametrizavel --repeticoes 10 --caso MEDIO --algoritmo InsertionSort"
+        System.out.println("  java Main --repeticoes 10 --caso MEDIO --algoritmo InsertionSort"
             + " --disposicao ALEATORIO --n 1000 --saida resultados/tp1 --debug");
         System.out.println("CSV: <prefixo>_<Algoritmo>_n<Tamanho>.csv; novas medicoes sao acrescentadas ao arquivo.");
         System.out.println("O programa nao usa Scanner, Console nem System.in: toda configuracao vem dos argumentos CLI.");

@@ -1,19 +1,19 @@
+JAVAC := javac
+JAVA := java
+
 all:
-	echo "Compilando os arquivos .java..."
-	javac -encoding UTF-8 *.java
+	$(JAVAC) -encoding UTF-8 ./*.java
 
-run:
-	echo "Rodando Main.java"
-	java Main.java
-
-test:
-	./testes_tp1.sh corretude
+test: all
+	$(JAVA) -cp . TestesCorretude
 
 benchmark:
 	./testes_tp1.sh desempenho
 
-clean:
-	echo "Removendo bytecode..."
-	rm -f *.class
+run: all
+	$(JAVA) -cp . Main --help
 
-.PHONY: all run test benchmark clean
+clean:
+	rm -f ./*.class
+
+.PHONY: all test benchmark run clean

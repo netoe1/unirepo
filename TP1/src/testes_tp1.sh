@@ -27,8 +27,7 @@ if [[ "$MODO" == "corretude" ]]; then
     exit 0
 fi
 
-# Experimentos: 10 medicoes por configuracao, conforme o minimo recomendado no TP1.
-# Altere REPETICOES se precisar; mantenha pelo menos 10 para os resultados oficiais.
+# O enunciado pede no minimo 10 medicoes por configuracao.
 REPETICOES=10
 SEMENTE=2026
 SAIDA="resultados/tp1"
@@ -42,7 +41,7 @@ rodar() {
 
     printf '\n[TP1] %s | n=%s | disposicao=%s | caso=%s\n' \
         "$algoritmo" "$n" "$disposicao" "$caso"
-    java -Xms128m -Xmx1g -cp . TesteGenerator \
+    java -Xms128m -Xmx1g -cp . Main \
         --repeticoes "$REPETICOES" \
         --caso "$caso" \
         --algoritmo "$algoritmo" \
@@ -54,7 +53,7 @@ rodar() {
 }
 
 # Bubble e Insertion: melhor, medio e pior caso em n=1000.
-# Em n=10000, roda somente o caso crescente para evitar uma bateria quadratica muito demorada.
+# Em n=10000, mede somente a entrada crescente para limitar o custo quadratico.
 for algoritmo in BubbleSort InsertionSort; do
     rodar MELHOR "$algoritmo" CRESCENTE 1000
     rodar MEDIO  "$algoritmo" ALEATORIO 1000
@@ -62,12 +61,12 @@ for algoritmo in BubbleSort InsertionSort; do
     rodar MELHOR "$algoritmo" CRESCENTE 10000
 done
 
-# Selection faz quantidade de comparacoes quadratica em todas as disposicoes.
+# Selection tem custo quadratico nas tres disposicoes; n=1000.
 rodar MEDIO SelectionSort CRESCENTE 1000
 rodar MEDIO SelectionSort DECRESCENTE 1000
 rodar MEDIO SelectionSort ALEATORIO 1000
 
-# Quick Sort usa o ultimo elemento como pivo: entradas ordenadas sao limitadas a n=1000.
+# Quick Sort usa o ultimo elemento como pivo; entradas ordenadas limitadas a n=1000.
 rodar PIOR  QuickSort CRESCENTE 1000
 rodar PIOR  QuickSort DECRESCENTE 1000
 rodar MEDIO QuickSort ALEATORIO 1000
@@ -75,7 +74,7 @@ rodar MEDIO QuickSort ALEATORIO 10000
 rodar MEDIO QuickSort ALEATORIO 100000
 
 # Algoritmos adequados a entradas maiores: tres disposicoes ate 100000 e aleatorio em 1 milhao.
-# Para estes algoritmos, 'MEDIO' e um rotulo experimental; a disposicao real fica registrada separadamente.
+# Para esses algoritmos, MEDIO e um rótulo experimental; a disposicao real tambem fica registrada.
 for algoritmo in ShellSort MergeSort HeapSort CountingSort RadixSort BucketSort; do
     for n in 1000 10000 100000; do
         rodar MEDIO "$algoritmo" CRESCENTE "$n"
@@ -86,4 +85,4 @@ for algoritmo in ShellSort MergeSort HeapSort CountingSort RadixSort BucketSort;
 done
 
 echo
-echo "[TP1] Testes e experimentos concluidos. Os CSVs estao em resultados/."
+echo "[TP1] Testes e experimentos concluidos. Os CSVs foram gravados com prefixo $SAIDA."
