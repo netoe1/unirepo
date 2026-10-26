@@ -15,7 +15,11 @@ run: all
 
 clean:
 	rm -f ./*.class
+	
 clean_all:
 	rm -rf ./*.class ../resultados/*.csv
+
+gen_ctx:
+	gitingest . -o ctx.txt
 
 .PHONY: all test benchmark run clean
