@@ -287,9 +287,8 @@ public class Main {
                 + " | caso=" + caso + " | disposicao=" + disposicao
                 + " | repeticao=" + repeticao + "/" + repeticoes);
 
-            long inicio = System.nanoTime();
             ordenador.sort();
-            long tempoNs = System.nanoTime() - inicio;
+            long tempoNs = ordenador.getTempoTotal();
             registrarResultado(repeticao, tempoNs);
 
             long decorridoMs = (System.nanoTime() - inicioExperimento) / 1_000_000L;
