@@ -1,0 +1,2255 @@
+Directory structure:
+└── src/
+    ├── BubbleSort.java
+    ├── BucketSort.java
+    ├── CasosAlgoritmo.java
+    ├── CountingSort.java
+    ├── CSVItem.java
+    ├── EnumAlgoritmos.java
+    ├── EnumCasos.java
+    ├── HeapSort.java
+    ├── InsertionSort.java
+    ├── Logs.java
+    ├── Main.java
+    ├── makefile
+    ├── MergeSort.java
+    ├── Ordenador.java
+    ├── QuickSort.java
+    ├── RadixSort.java
+    ├── SelectionSort.java
+    ├── ShellSort.java
+    ├── testes_tp1.md
+    ├── testes_tp1.sh
+    ├── TestesCorretude.java
+    ├── TestesGenerator.java
+    ├── TestesGenerator.md
+    └── resultados/
+        └── .gitkeep
+
+================================================
+FILE: BubbleSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+
+public class BubbleSort <T extends Comparable<T>> extends Ordenador<T> {
+
+    public BubbleSort(){
+        super();
+    }
+
+    @Override 
+    public void sort(){
+    
+        this.tempoInicial = System.nanoTime();
+        if (this.vetor == null) {
+            throw new Error("Vetor Vazio!   ");
+        }
+        if (this.vetor.size() > 1) {
+            executarBubbleSort();
+        }
+        this.tempoFinal = System.nanoTime();
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
+    }
+    
+
+    @Override 
+    public long getTempoTotal(){
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
+        return this.tempoTotal;
+    }
+
+    private void executarBubbleSort() {
+        int n = this.vetor.size();
+        boolean trocou;
+
+        for(int i = 0; i < n - 1; i++){
+            trocou = false;
+
+            for(int j = 0; j < n - 1 - i; j++){
+                if(this.vetor.get(j).compareTo(this.vetor.get(j + 1)) > 0){
+                    T temp = this.vetor.get(j);
+                    this.vetor.set(j, this.vetor.get(j + 1));
+                    this.vetor.set(j + 1, temp);
+                    trocou = true;
+                }
+            }
+
+            if(!trocou){
+                break;
+            }
+        }
+    }
+
+    public static void main(String args[]){
+        BubbleSort<Integer> bubble = new BubbleSort<>();
+        System.out.println("\nCrescente: ");
+        bubble.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        bubble.print();
+        bubble.sort();
+        bubble.print();
+
+        System.out.println("\nDecrescente: ");
+        bubble.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        bubble.print();
+        bubble.sort();
+        bubble.print();
+
+        System.out.println("\nAleatorio: ");
+        bubble.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        bubble.print();
+        bubble.sort();
+        bubble.print();
+
+        System.out.println("\nRepetido: ");
+        bubble.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        bubble.print();
+        bubble.sort();
+        bubble.print();
+    }
+}
+
+
+================================================
+FILE: BucketSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+import java.util.Collections;
+
+public class BucketSort extends Ordenador<Integer> {
+
+    public BucketSort() {
+        super();
+    }
+
+    @Override
+    public void sort() {
+        if (this.vetor == null || this.vetor.size() <= 1) {
+            return;
+        }
+
+        int max = Collections.max(this.vetor);
+        int min = Collections.min(this.vetor);
+
+        if (max == min) {
+            return;
+        }
+
+        int n = this.vetor.size();
+        int numBuckets = (int) Math.sqrt(n);
+        if (numBuckets < 1) {
+            numBuckets = 1;
+        }
+
+        @SuppressWarnings("unchecked")
+        Vector<Integer>[] buckets = new Vector[numBuckets + 1];
+        for (int i = 0; i <= numBuckets; i++) {
+            buckets[i] = new Vector<>();
+        }
+
+        double range = (double) (max - min + 1);
+        for (int i = 0; i < n; i++) {
+            int val = this.vetor.get(i);
+            int bucketIndex = (int) ((val - min) / range * numBuckets);
+            if (bucketIndex > numBuckets) {
+                bucketIndex = numBuckets;
+            }
+            buckets[bucketIndex].add(val);
+        }
+
+        int index = 0;
+        for (int i = 0; i <= numBuckets; i++) {
+            if (!buckets[i].isEmpty()) {
+                Collections.sort(buckets[i]);
+                for (int val : buckets[i]) {
+                    this.vetor.set(index++, val);
+                }
+            }
+        }
+    }
+
+    public static void main(String args[]) {
+        BucketSort bucket = new BucketSort();
+        System.out.println("\nCrescente: ");
+        bucket.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        bucket.print();
+        bucket.sort();
+        bucket.print();
+
+        System.out.println("\nDecrescente: ");
+        bucket.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        bucket.print();
+        bucket.sort();
+        bucket.print();
+
+        System.out.println("\nAleatorio: ");
+        bucket.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        bucket.print();
+        bucket.sort();
+        bucket.print();
+
+        System.out.println("\nRepetido: ");
+        bucket.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        bucket.print();
+        bucket.sort();
+        bucket.print();
+    }
+}
+
+
+================================================
+FILE: CasosAlgoritmo.java
+================================================
+import java.util.Random;
+
+public class CasosAlgoritmo {
+
+    public static void ordem_crescente(Integer[] v, int n) {
+        int limite = Math.min(n, v.length);
+        for (int i = 0; i < limite; i++) {
+            v[i] = i;
+        }
+    }
+
+    public static void ordem_decrescente(Integer[] v, int n) {
+        int limite = Math.min(n, v.length);
+        for (int i = 0; i < limite; i++) {
+            v[i] = limite - i; 
+        }
+    }
+
+    public static void ordem_aleatoria(Integer[] v, int n) {
+        Random gerador = new Random();
+        int limite = Math.min(n, v.length);
+
+        for (int i = 0; i < limite; i++) {
+            v[i] = gerador.nextInt(1000); 
+        }
+    }
+
+    public static void ordem_repetidas(Integer[] v, int n, int range) {
+        Random gerador = new Random();
+        int limite = Math.min(n, v.length);
+    
+        int valoresUnicos = (range > 0) ? range : 5; 
+
+        for (int i = 0; i < limite; i++) {
+            v[i] = gerador.nextInt(valoresUnicos); // Gera apenas números entre 0 e (valoresUnicos - 1)
+        }
+    }
+}
+
+
+================================================
+FILE: CountingSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+import java.util.Collections;
+
+public class CountingSort extends Ordenador<Integer> {
+
+    public CountingSort() {
+        super();
+    }
+
+    @Override
+    public void sort() {
+        if (this.vetor == null || this.vetor.size() <= 1) {
+            return;
+        }
+
+        int max = Collections.max(this.vetor);
+        int min = Collections.min(this.vetor);
+        int range = max - min + 1;
+
+        int[] count = new int[range];
+        int n = this.vetor.size();
+
+        for (int i = 0; i < n; i++) {
+            count[this.vetor.get(i) - min]++;
+        }
+
+        int index = 0;
+        for (int i = 0; i < range; i++) {
+            while (count[i] > 0) {
+                this.vetor.set(index++, i + min);
+                count[i]--;
+            }
+        }
+    }
+
+    public static void main(String args[]) {
+        CountingSort counting = new CountingSort();
+        System.out.println("\nCrescente: ");
+        counting.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        counting.print();
+        counting.sort();
+        counting.print();
+
+        System.out.println("\nDecrescente: ");
+        counting.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        counting.print();
+        counting.sort();
+        counting.print();
+
+        System.out.println("\nAleatorio: ");
+        counting.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        counting.print();
+        counting.sort();
+        counting.print();
+
+        System.out.println("\nRepetido: ");
+        counting.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        counting.print();
+        counting.sort();
+        counting.print();
+    }
+}
+
+
+================================================
+FILE: CSVItem.java
+================================================
+public class CSVItem{
+    private String nomeAlgoritmo;
+    private int nElementos;
+    private EnumCasos caso;
+    private long tempoExecucao;
+
+    public CSVItem(String nomeAlgoritmo, int nElementos, EnumCasos caso){
+        this.nomeAlgoritmo = nomeAlgoritmo;
+        this.nElementos = nElementos;
+        this.caso = caso;
+    }
+    
+    public String getNomeAlgoritmo(){
+        return this.nomeAlgoritmo;
+    }
+
+    public void setNomeAlgoritmo(String novoNome){
+        this.nomeAlgoritmo = novoNome;
+    }
+
+    public int getNElementos(){
+        return this.nElementos;
+    }
+
+    public void setNElementos(int n){
+        this.nElementos = n;
+    }
+
+    public EnumCasos getCaso(){
+        return this.caso;
+    }
+
+    public void setCaso(EnumCasos caso){
+        this.caso = caso;
+    }
+
+    public long getTempoExecucao(){
+        return this.tempoExecucao;
+    }
+
+    public void setTempoExecucao(long n){
+        this.tempoExecucao = n;
+    }
+
+    @Override 
+    public String toString(){
+        return String.format("Algoritmo:%s\tN:%d,\tCaso:%s",this.nomeAlgoritmo,this.nElementos,this.caso.toString().toUpperCase().trim());
+    }
+    
+    public void print(){
+        System.out.println(this.toString());
+    }
+
+}
+
+
+================================================
+FILE: EnumAlgoritmos.java
+================================================
+public enum EnumAlgoritmos {
+    MERGE,
+    BUBBLE,
+    INSERCTION,
+    SELECTION,
+    SHELL,
+    QUICK,
+    HEAP,
+    COUNTING,
+    BUCKET,
+    RADIX,
+}
+
+
+
+================================================
+FILE: EnumCasos.java
+================================================
+public enum EnumCasos {
+    MELHOR,
+    MEDIO,
+    PIOR
+}
+
+
+
+================================================
+FILE: HeapSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+
+public class HeapSort<T extends Comparable<T>> extends Ordenador<T> {
+
+    public HeapSort() {
+        super();
+    }
+
+    @Override
+    public void sort() {
+        if (this.vetor == null || this.vetor.size() <= 1) {
+            return;
+        }
+
+        int n = this.vetor.size();
+
+        // Constrói o heap (reorganiza o vetor)
+        for (int i = n / 2 - 1; i >= 0; i--) {
+            heapify(n, i);
+        }
+
+        // Extrai os elementos do heap um a um
+        for (int i = n - 1; i > 0; i--) {
+            T temp = this.vetor.get(0);
+            this.vetor.set(0, this.vetor.get(i));
+            this.vetor.set(i, temp);
+
+            heapify(i, 0);
+        }
+    }
+
+    private void heapify(int n, int i) {
+        int maior = i;
+        int esquerda = 2 * i + 1;
+        int direita = 2 * i + 2;
+
+        if (esquerda < n && this.vetor.get(esquerda).compareTo(this.vetor.get(maior)) > 0) {
+            maior = esquerda;
+        }
+
+        if (direita < n && this.vetor.get(direita).compareTo(this.vetor.get(maior)) > 0) {
+            maior = direita;
+        }
+
+        if (maior != i) {
+            T troca = this.vetor.get(i);
+            this.vetor.set(i, this.vetor.get(maior));
+            this.vetor.set(maior, troca);
+
+            heapify(n, maior);
+        }
+    }
+
+    public static void main(String args[]) {
+        HeapSort<Integer> heap = new HeapSort<>();
+        System.out.println("\nCrescente: ");
+        heap.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        heap.print();
+        heap.sort();
+        heap.print();
+
+        System.out.println("\nDecrescente: ");
+        heap.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        heap.print();
+        heap.sort();
+        heap.print();
+
+        System.out.println("\nAleatorio: ");
+        heap.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        heap.print();
+        heap.sort();
+        heap.print();
+
+        System.out.println("\nRepetido: ");
+        heap.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        heap.print();
+        heap.sort();
+        heap.print();
+    }
+}
+
+
+================================================
+FILE: InsertionSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+
+public class InsertionSort<T extends Comparable<T>> extends Ordenador<T> {
+
+    public InsertionSort() {
+        super();
+    }
+
+    @Override 
+    public void sort() {
+        if (this.vetor == null) return;
+        
+        int n = this.vetor.size();
+        
+        for (int i = 1; i < n; i++) {
+            T chave = this.vetor.get(i);
+            int j = i - 1;
+
+            // Desloca os elementos maiores para a direita utilizando .get() e .set()
+            while (j >= 0 && this.vetor.get(j).compareTo(chave) > 0) {
+                this.vetor.set(j + 1, this.vetor.get(j));
+                j--;
+            }
+            
+            // Insere a chave na sua posição correta
+            this.vetor.set(j + 1, chave);
+        }
+    }
+
+    public static void main(String args[]){
+        InsertionSort<Integer> insertion = new InsertionSort<>();
+        System.out.println("\nCrescente: ");
+        insertion.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        insertion.print();
+        insertion.sort();
+        insertion.print();
+
+        System.out.println("\nDecrescente: ");
+        insertion.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        insertion.print();
+        insertion.sort();
+        insertion.print();
+
+        System.out.println("\nAleatorio: ");
+        insertion.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        insertion.print();
+        insertion.sort();
+        insertion.print();
+
+        System.out.println("\nRepetido: ");
+        insertion.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        insertion.print();
+        insertion.sort();
+        insertion.print();
+    }
+}
+
+
+================================================
+FILE: Logs.java
+================================================
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
+/**
+ * Logger simples para o TP1, inspirado no estilo visual de logs do Node.js.
+ * Suporta níveis, contexto, cores ANSI e uma barra de progresso.
+ */
+public final class Logs {
+
+    private static final DateTimeFormatter HORARIO = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final int LARGURA_NIVEL = 7;
+    private static final int LARGURA_BARRA = 24;
+
+    private static final String RESET = "\u001B[0m";
+    private static final String CINZA = "\u001B[90m";
+    private static final String AZUL = "\u001B[34m";
+    private static final String CIANO = "\u001B[36m";
+    private static final String VERDE = "\u001B[32m";
+    private static final String AMARELO = "\u001B[33m";
+    private static final String VERMELHO = "\u001B[31m";
+    private static final String MAGENTA = "\u001B[35m";
+    private static final String NEGRITO = "\u001B[1m";
+
+    private static volatile boolean debugAtivado;
+    private static volatile boolean coresAtivadas = detectarSuporteACores();
+
+    private Logs() {
+        // Classe utilitaria: nao deve ser instanciada.
+    }
+
+    /** Ativa ou desativa mensagens de nivel DEBUG. */
+    public static void setDebug(boolean ativado) {
+        debugAtivado = ativado;
+    }
+
+    /** Permite forcar a exibicao ou a remocao das cores ANSI. */
+    public static void setCores(boolean ativadas) {
+        coresAtivadas = ativadas;
+    }
+
+    public static boolean isDebugAtivado() {
+        return debugAtivado;
+    }
+
+    public static void info(String contexto, String mensagem) {
+        escrever("INFO", contexto, mensagem, CIANO);
+    }
+
+    public static void success(String contexto, String mensagem) {
+        escrever("SUCCESS", contexto, mensagem, VERDE);
+    }
+
+    public static void debug(String contexto, String mensagem) {
+        if (debugAtivado) {
+            escrever("DEBUG", contexto, mensagem, MAGENTA);
+        }
+    }
+
+    public static void warn(String contexto, String mensagem) {
+        escrever("WARN", contexto, mensagem, AMARELO);
+    }
+
+    public static void error(String contexto, String mensagem) {
+        escrever("ERROR", contexto, mensagem, VERMELHO);
+    }
+
+    /** Atalhos usando o contexto padrao "TP1". */
+    public static void info(String mensagem) {
+        info("TP1", mensagem);
+    }
+
+    public static void success(String mensagem) {
+        success("TP1", mensagem);
+    }
+
+    public static void debug(String mensagem) {
+        debug("TP1", mensagem);
+    }
+
+    public static void warn(String mensagem) {
+        warn("TP1", mensagem);
+    }
+
+    public static void error(String mensagem) {
+        error("TP1", mensagem);
+    }
+
+    /**
+     * Registra o progresso atual. A barra e a mensagem so aparecem em modo debug.
+     */
+    public static void progress(
+        String contexto,
+        long concluidas,
+        long total,
+        String decorrido,
+        String restante
+    ) {
+        if (!debugAtivado) {
+            return;
+        }
+
+        double percentual = total <= 0 ? 100.0 : Math.min(100.0, concluidas * 100.0 / total);
+        int preenchidas = (int) Math.round(LARGURA_BARRA * percentual / 100.0);
+        StringBuilder barra = new StringBuilder(LARGURA_BARRA);
+
+        for (int i = 0; i < LARGURA_BARRA; i++) {
+            barra.append(i < preenchidas ? '#' : '.');
+        }
+
+        String mensagem = String.format(
+            Locale.ROOT,
+            "%s %5.1f%%  %d/%d  decorrido %s  restante ~%s",
+            barra,
+            percentual,
+            concluidas,
+            total,
+            decorrido,
+            restante
+        );
+        escrever("PROGRESS", contexto, mensagem, AZUL);
+    }
+
+    /** Imprime uma linha divisoria para separar etapas do experimento. */
+    public static void divider(String contexto, String titulo) {
+        String nome = titulo == null ? "" : titulo.trim();
+        int largura = 56;
+        if (nome.isEmpty()) {
+            info(contexto, repetir('-', largura));
+            return;
+        }
+
+        String texto = " " + nome + " ";
+        int espacos = Math.max(2, largura - texto.length());
+        int esquerda = espacos / 2;
+        int direita = espacos - esquerda;
+        info(contexto, repetir('-', esquerda) + texto + repetir('-', direita));
+    }
+
+    private static synchronized void escrever(
+        String nivel,
+        String contexto,
+        String mensagem,
+        String cor
+    ) {
+        String horario = LocalTime.now().format(HORARIO);
+        String nomeContexto = contexto == null || contexto.trim().isEmpty() ? "TP1" : contexto.trim();
+        String texto = mensagem == null ? "" : mensagem;
+        String nivelFormatado = String.format(Locale.ROOT, "%-" + LARGURA_NIVEL + "s", nivel);
+
+        String horarioFormatado = colorir("[" + horario + "]", CINZA);
+        String nivelColorido = colorir(nivelFormatado, cor + NEGRITO);
+        String contextoColorido = colorir("[" + nomeContexto + "]", AZUL + NEGRITO);
+
+        System.out.println(horarioFormatado + " " + nivelColorido + " " + contextoColorido + " " + texto);
+    }
+
+    private static String repetir(char caractere, int quantidade) {
+        StringBuilder resultado = new StringBuilder(Math.max(0, quantidade));
+        for (int i = 0; i < quantidade; i++) {
+            resultado.append(caractere);
+        }
+        return resultado.toString();
+    }
+
+    private static String colorir(String texto, String codigo) {
+        return coresAtivadas ? codigo + texto + RESET : texto;
+    }
+
+    private static boolean detectarSuporteACores() {
+        String semCores = System.getenv("NO_COLOR");
+        String terminal = System.getenv("TERM");
+        return semCores == null && (terminal == null || !"dumb".equalsIgnoreCase(terminal));
+    }
+}
+
+
+
+================================================
+FILE: Main.java
+================================================
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.Vector;
+
+/**
+ * Executa uma configuracao experimental do TP1 via CLI, sem interacao com stdin.
+ *
+ * A entrada e configurada com --disposicao. O rotulo --caso (MELHOR, MEDIO ou
+ * PIOR) e registrado separadamente porque sua relacao com a entrada depende do
+ * algoritmo e da implementacao concreta.
+ */
+public class Main {
+
+    private static final String CONTEXTO = "Main";
+    private static final int MAX_N = 1_000_000;
+    private static final int MAX_REPETICOES = 1_000;
+    private static final int AQUECIMENTOS = 2;
+    private static final int MAX_N_QUADRATICOS = 10_000;
+    private static final String CABECALHO_CSV =
+        "algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns";
+
+    private static final String[] ALGORITMOS = {
+        "BubbleSort", "InsertionSort", "SelectionSort", "ShellSort", "HeapSort",
+        "MergeSort", "QuickSort", "CountingSort", "RadixSort", "BucketSort"
+    };
+
+    private static final String[] CASOS = {"MELHOR", "MEDIO", "PIOR"};
+    private static final String[] DISPOSICOES = {
+        "CRESCENTE", "DECRESCENTE", "ALEATORIO", "REPETIDOS"
+    };
+
+    private final int repeticoes;
+    private final String caso;
+    private final String algoritmo;
+    private final String disposicao;
+    private final int n;
+    private final long semente;
+    private final Path caminhoCsv;
+    private final String sessao;
+
+    private Main(
+        int repeticoes,
+        String caso,
+        String algoritmo,
+        String disposicao,
+        int n,
+        long semente,
+        Path caminhoCsv
+    ) {
+        this.repeticoes = repeticoes;
+        this.caso = caso;
+        this.algoritmo = algoritmo;
+        this.disposicao = disposicao;
+        this.n = n;
+        this.semente = semente;
+        this.caminhoCsv = caminhoCsv;
+        this.sessao = LocalDateTime.now().format(
+            DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS", Locale.ROOT)
+        );
+    }
+
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            imprimirAjuda();
+            return;
+        }
+
+        final Map<String, String> opcoes;
+        try {
+            opcoes = analisarArgumentos(args);
+        } catch (IllegalArgumentException e) {
+            Logs.error(CONTEXTO, e.getMessage());
+            imprimirAjuda();
+            System.exit(2);
+            return;
+        }
+
+        if (opcoes.containsKey("help")) {
+            imprimirAjuda();
+            return;
+        }
+
+        boolean debug = opcoes.containsKey("debug");
+        Logs.setDebug(debug);
+        if (opcoes.containsKey("no-color")) {
+            Logs.setCores(false);
+        }
+
+        try {
+            int repeticoes = parseInteiro(opcoes, "repeticoes", 1, MAX_REPETICOES);
+            int n = parseInteiro(opcoes, "n", 1, MAX_N);
+            long semente = parseLong(opcoes, "semente", 2026L);
+            String caso = normalizarCaso(obrigatorio(opcoes, "caso"));
+            String algoritmo = normalizarAlgoritmo(obrigatorio(opcoes, "algoritmo"));
+            String disposicao = normalizarDisposicao(obrigatorio(opcoes, "disposicao"));
+            String prefixo = opcoes.getOrDefault("saida", "resultados_tp1");
+
+            validarLimites(algoritmo, disposicao, n, repeticoes);
+            Path csv = criarCaminhoCsv(prefixo, algoritmo, n);
+            avisarSobreCaso(algoritmo, caso, disposicao);
+
+            Logs.divider(CONTEXTO, "Experimento TP1 ACD");
+            Logs.info(CONTEXTO, "Algoritmo: " + algoritmo);
+            Logs.info(CONTEXTO, "Configuracao: repeticoes=" + repeticoes
+                + ", caso=" + caso + ", disposicao=" + disposicao + ", n=" + n
+                + ", semente=" + semente + ", aquecimentos=" + AQUECIMENTOS);
+            Logs.info(CONTEXTO, "CSV: " + csv.toAbsolutePath());
+            Logs.info(CONTEXTO, "Apenas sort() sera cronometrado; geracao e copia ficam fora da medicao.");
+            Logs.info(CONTEXTO, "Execucao nao interativa: nenhum dado sera lido de stdin.");
+
+            Main gerador = new Main(
+                repeticoes, caso, algoritmo, disposicao, n, semente, csv);
+            gerador.executar();
+        } catch (IllegalArgumentException e) {
+            Logs.error(CONTEXTO, e.getMessage());
+            imprimirAjuda();
+            System.exit(2);
+        } catch (IOException e) {
+            Logs.error(CONTEXTO, "Erro de arquivo: " + e.getMessage());
+            System.exit(1);
+        } catch (RuntimeException e) {
+            Logs.error(CONTEXTO, "Erro durante a execucao: " + e.getMessage());
+            if (debug) {
+                e.printStackTrace(System.err);
+            }
+            System.exit(1);
+        }
+    }
+
+    /** Analisa pares --opcao valor e flags; nao solicita nenhuma entrada pelo stdin. */
+    private static Map<String, String> analisarArgumentos(String[] args) {
+        Map<String, String> opcoes = new HashMap<>();
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
+            if ("--help".equalsIgnoreCase(arg) || "-h".equalsIgnoreCase(arg)) {
+                opcoes.put("help", "true");
+                continue;
+            }
+            if ("--debug".equalsIgnoreCase(arg)) {
+                opcoes.put("debug", "true");
+                continue;
+            }
+            if ("--no-color".equalsIgnoreCase(arg)) {
+                opcoes.put("no-color", "true");
+                continue;
+            }
+            if (!arg.startsWith("--")) {
+                throw new IllegalArgumentException("Argumento invalido: " + arg);
+            }
+
+            String nome = arg.substring(2).toLowerCase(Locale.ROOT);
+            if (!Arrays.asList(
+                    "repeticoes", "caso", "algoritmo", "disposicao", "n", "saida", "semente"
+                ).contains(nome)) {
+                throw new IllegalArgumentException("Opcao desconhecida: " + arg);
+            }
+            if (opcoes.containsKey(nome)) {
+                throw new IllegalArgumentException("Opcao informada mais de uma vez: " + arg);
+            }
+            if (i + 1 >= args.length || args[i + 1].startsWith("--")) {
+                throw new IllegalArgumentException("Falta informar o valor de " + arg);
+            }
+            opcoes.put(nome, args[++i]);
+        }
+
+        if (!opcoes.containsKey("help")) {
+            String[] obrigatorias = {"repeticoes", "caso", "algoritmo", "disposicao", "n"};
+            for (String chave : obrigatorias) {
+                if (!opcoes.containsKey(chave)) {
+                    throw new IllegalArgumentException("Parametro obrigatorio ausente: --" + chave);
+                }
+            }
+        }
+        return opcoes;
+    }
+
+    private static String obrigatorio(Map<String, String> opcoes, String chave) {
+        String valor = opcoes.get(chave);
+        if (valor == null || valor.trim().isEmpty()) {
+            throw new IllegalArgumentException("O parametro --" + chave + " nao pode estar vazio.");
+        }
+        return valor.trim();
+    }
+
+    private static int parseInteiro(Map<String, String> opcoes, String chave, int minimo, int maximo) {
+        String texto = obrigatorio(opcoes, chave);
+        final int valor;
+        try {
+            valor = Integer.parseInt(texto);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("--" + chave + " deve ser um inteiro: " + texto);
+        }
+        if (valor < minimo || valor > maximo) {
+            throw new IllegalArgumentException("--" + chave + " deve estar entre " + minimo + " e " + maximo + ".");
+        }
+        return valor;
+    }
+
+    private static long parseLong(Map<String, String> opcoes, String chave, long padrao) {
+        if (!opcoes.containsKey(chave)) {
+            return padrao;
+        }
+        try {
+            return Long.parseLong(opcoes.get(chave));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("--" + chave + " deve ser um inteiro longo.");
+        }
+    }
+
+    private static String normalizarAlgoritmo(String valor) {
+        String informado = limparIdentificador(valor);
+        for (String algoritmo : ALGORITMOS) {
+            if (limparIdentificador(algoritmo).equals(informado)) {
+                return algoritmo;
+            }
+        }
+        String[] apelidos = {
+            "bubble", "insertion", "selection", "shell", "heap",
+            "merge", "quick", "counting", "radix", "bucket"
+        };
+        for (int i = 0; i < apelidos.length; i++) {
+            if (apelidos[i].equals(informado)) {
+                return ALGORITMOS[i];
+            }
+        }
+        throw new IllegalArgumentException("Algoritmo invalido: " + valor + ". Consulte --help.");
+    }
+
+    private static String limparIdentificador(String valor) {
+        return valor.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]", "");
+    }
+
+    private static String normalizarCaso(String valor) {
+        String caso = limparIdentificador(valor);
+        if ("medio".equals(caso) || "mediocaso".equals(caso)) return "MEDIO";
+        if ("melhor".equals(caso) || "melhorcaso".equals(caso)) return "MELHOR";
+        if ("pior".equals(caso) || "piorcaso".equals(caso)) return "PIOR";
+        throw new IllegalArgumentException("Caso invalido: " + valor + ". Use MELHOR, MEDIO ou PIOR.");
+    }
+
+    private static String normalizarDisposicao(String valor) {
+        String disposicao = limparIdentificador(valor);
+        switch (disposicao) {
+            case "crescente": return "CRESCENTE";
+            case "decrescente": return "DECRESCENTE";
+            case "aleatorio": return "ALEATORIO";
+            case "repetidos":
+            case "valoresrepetidos": return "REPETIDOS";
+            default: throw new IllegalArgumentException(
+                "Disposicao invalida: " + valor + ". Use CRESCENTE, DECRESCENTE, ALEATORIO ou REPETIDOS.");
+        }
+    }
+
+    private void executar() throws IOException {
+        prepararCsv(caminhoCsv);
+        Vector<Integer> original = gerarVetor(n, disposicao, semente);
+        Logs.success(CONTEXTO, "Vetor gerado: n=" + n + ", disposicao=" + disposicao
+            + ", minimo=" + minimo(original) + ", maximo=" + maximo(original));
+
+        Logs.divider(CONTEXTO, "Aquecimento da JVM");
+        for (int i = 1; i <= AQUECIMENTOS; i++) {
+            Ordenador<Integer> ordenador = criarOrdenador(algoritmo);
+            ordenador.setVetor(new Vector<>(original));
+            Logs.debug(CONTEXTO, "Aquecimento " + i + "/" + AQUECIMENTOS + " - " + algoritmo);
+            ordenador.sort();
+        }
+
+        Logs.divider(CONTEXTO, "Medicoes");
+        long inicioExperimento = System.nanoTime();
+        for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+            Ordenador<Integer> ordenador = criarOrdenador(algoritmo);
+            ordenador.setVetor(new Vector<>(original)); // copia fora do cronometro
+
+            Logs.debug(CONTEXTO, "Iniciando " + algoritmo + " | n=" + n
+                + " | caso=" + caso + " | disposicao=" + disposicao
+                + " | repeticao=" + repeticao + "/" + repeticoes);
+
+            long inicio = System.nanoTime();
+            ordenador.sort();
+            long tempoNs = System.nanoTime() - inicio;
+            registrarResultado(repeticao, tempoNs);
+
+            long decorridoMs = (System.nanoTime() - inicioExperimento) / 1_000_000L;
+            Logs.debug(CONTEXTO, "Concluido " + algoritmo + " | sort=" + tempoNs
+                + " ns | repeticao=" + repeticao + "/" + repeticoes);
+            Logs.progress(CONTEXTO, repeticao, repeticoes,
+                formatarDuracao(decorridoMs), estimarRestante(decorridoMs, repeticao, repeticoes));
+        }
+
+        long totalMs = (System.nanoTime() - inicioExperimento) / 1_000_000L;
+        Logs.divider(CONTEXTO, "Resumo");
+        Logs.success(CONTEXTO, "Experimento finalizado; medicoes gravadas: " + repeticoes);
+        Logs.info(CONTEXTO, "Tempo total das medicoes: " + formatarDuracao(totalMs));
+        Logs.info(CONTEXTO, "CSV: " + caminhoCsv.toAbsolutePath());
+    }
+
+    private void registrarResultado(int repeticao, long tempoNs) throws IOException {
+        try (BufferedWriter escritor = Files.newBufferedWriter(
+                caminhoCsv,
+                StandardOpenOption.CREATE,
+                StandardOpenOption.WRITE,
+                StandardOpenOption.APPEND)) {
+            escritor.write(algoritmo + "," + n + "," + caso + "," + disposicao + ","
+                + semente + "," + sessao + "," + repeticao + "," + tempoNs);
+            escritor.newLine();
+        }
+    }
+
+    private static void prepararCsv(Path caminho) throws IOException {
+        Path pasta = caminho.toAbsolutePath().getParent();
+        if (pasta != null) Files.createDirectories(pasta);
+
+        if (Files.exists(caminho) && Files.size(caminho) > 0) {
+            try (BufferedReader leitor = Files.newBufferedReader(caminho)) {
+                String existente = leitor.readLine();
+                if (!CABECALHO_CSV.equals(existente)) {
+                    throw new IOException("Cabecalho CSV incompativel. Esperado: " + CABECALHO_CSV
+                        + ". Informe outro --saida para nao misturar formatos.");
+                }
+            }
+        } else {
+            try (BufferedWriter escritor = Files.newBufferedWriter(
+                    caminho, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE)) {
+                escritor.write(CABECALHO_CSV);
+                escritor.newLine();
+            }
+        }
+    }
+
+    /** Cria sempre a mesma entrada para a combinacao n/disposicao/semente. */
+    private static Vector<Integer> gerarVetor(int n, String disposicao, long semente) {
+        Integer[] dados = new Integer[n];
+        switch (disposicao) {
+            case "CRESCENTE":
+                for (int i = 0; i < n; i++) dados[i] = i;
+                break;
+            case "DECRESCENTE":
+                for (int i = 0; i < n; i++) dados[i] = n - 1 - i;
+                break;
+            case "ALEATORIO":
+                // Permutacao de 0..n-1: evita que o teste aleatorio tenha duplicatas acidentais.
+                for (int i = 0; i < n; i++) dados[i] = i;
+                Random random = new Random(semente ^ (31L * n));
+                for (int i = n - 1; i > 0; i--) {
+                    int j = random.nextInt(i + 1);
+                    int temporario = dados[i];
+                    dados[i] = dados[j];
+                    dados[j] = temporario;
+                }
+                break;
+            case "REPETIDOS":
+                Arrays.fill(dados, 5);
+                break;
+            default:
+                throw new IllegalArgumentException("Disposicao desconhecida: " + disposicao);
+        }
+        return new Vector<>(Arrays.asList(dados));
+    }
+    
+    private static Ordenador<Integer> criarOrdenador(String algoritmo) {
+        switch (algoritmo) {
+            case "BubbleSort": return new BubbleSort<>();
+            case "InsertionSort": return new InsertionSort<>();
+            case "SelectionSort": return new SelectionSort<>();
+            case "ShellSort": return new ShellSort<>();
+            case "HeapSort": return new HeapSort<>();
+            case "MergeSort": return new MergeSort<>();
+            case "QuickSort": return new QuickSort<>();
+            case "CountingSort": return (Ordenador<Integer>) new CountingSort();
+            case "RadixSort": return (Ordenador<Integer>) new RadixSort();
+            case "BucketSort": return (Ordenador<Integer>) new BucketSort();
+            default: throw new IllegalArgumentException("Algoritmo nao reconhecido: " + algoritmo);
+        }
+    }
+
+    private static void validarLimites(String algoritmo, String disposicao, int n, int repeticoes) {
+        if (isQuadratico(algoritmo) && n > MAX_N_QUADRATICOS) {
+            throw new IllegalArgumentException(algoritmo + " esta limitado a n <= "
+                + MAX_N_QUADRATICOS + " para evitar experimentos quadraticos excessivamente longos.");
+        }
+        if ("QuickSort".equals(algoritmo) && n > 100_000) {
+            throw new IllegalArgumentException("QuickSort esta limitado a n <= 100000 por risco de degradacao/recursao.");
+        }
+        if ("QuickSort".equals(algoritmo) && n > 1_000 && !"ALEATORIO".equals(disposicao)) {
+            throw new IllegalArgumentException("QuickSort com disposicao " + disposicao
+                + " esta limitado a n <= 1000; com pivo no ultimo elemento pode degenerar para O(n^2).");
+        }
+        if (isQuadratico(algoritmo) && n >= 5_000 && repeticoes > 10) {
+            throw new IllegalArgumentException("Para algoritmo quadratico e n >= 5000, use no maximo 10 repeticoes.");
+        }
+        if (n >= 100_000) {
+            Logs.warn(CONTEXTO, "n elevado: tempo e memoria dependem da implementacao, JVM e hardware.");
+        }
+    }
+
+    private static boolean isQuadratico(String algoritmo) {
+        return "BubbleSort".equals(algoritmo)
+            || "InsertionSort".equals(algoritmo)
+            || "SelectionSort".equals(algoritmo);
+    }
+
+    private static void avisarSobreCaso(String algoritmo, String caso, String disposicao) {
+        if (("BubbleSort".equals(algoritmo) || "InsertionSort".equals(algoritmo))) {
+            String esperada = "MELHOR".equals(caso) ? "CRESCENTE"
+                : ("PIOR".equals(caso) ? "DECRESCENTE" : "ALEATORIO");
+            if (!esperada.equals(disposicao)) {
+                Logs.warn(CONTEXTO, "Para " + algoritmo + ", a disposicao geralmente associada ao caso "
+                    + caso + " e " + esperada + "; a combinacao informada sera mantida e registrada.");
+            }
+        }
+        if ("QuickSort".equals(algoritmo) && "PIOR".equals(caso)
+                && "ALEATORIO".equals(disposicao)) {
+            Logs.warn(CONTEXTO, "QuickSort com entrada aleatoria normalmente nao representa seu pior caso.");
+        }
+        Logs.info(CONTEXTO, "O rotulo caso e a disposicao sao registrados separadamente; a disposicao nao determina o caso teorico para todos os algoritmos.");
+    }
+
+    private static int minimo(Vector<Integer> vetor) {
+        int minimo = Integer.MAX_VALUE;
+        for (int valor : vetor) if (valor < minimo) minimo = valor;
+        return minimo;
+    }
+
+    private static int maximo(Vector<Integer> vetor) {
+        int maximo = Integer.MIN_VALUE;
+        for (int valor : vetor) if (valor > maximo) maximo = valor;
+        return maximo;
+    }
+
+    private static Path criarCaminhoCsv(String prefixoInformado, String algoritmo, int n) {
+        String prefixo = prefixoInformado.trim();
+        if (prefixo.toLowerCase(Locale.ROOT).endsWith(".csv")) {
+            prefixo = prefixo.substring(0, prefixo.length() - 4);
+        }
+        if (prefixo.isEmpty()) prefixo = "resultados_tp1";
+        Path caminhoPrefixo = Paths.get(prefixo).toAbsolutePath();
+        Path pasta = caminhoPrefixo.getParent();
+        String nomePrefixo = caminhoPrefixo.getFileName() == null
+            ? "resultados_tp1" : caminhoPrefixo.getFileName().toString();
+        String nomeArquivo = nomePrefixo + "_" + algoritmo + "_n" + n + ".csv";
+        return pasta == null ? Paths.get(nomeArquivo) : pasta.resolve(nomeArquivo);
+    }
+
+    private static String estimarRestante(long decorridoMs, int concluidas, int total) {
+        if (concluidas <= 0) return "calculando...";
+        if (concluidas >= total) return "00:00:00";
+        double mediaMs = decorridoMs / (double) concluidas;
+        long restanteMs = Math.max(0L, (long) (mediaMs * (total - concluidas)));
+        return formatarDuracao(restanteMs);
+    }
+
+    private static String formatarDuracao(long milissegundos) {
+        long segundos = Math.max(0L, milissegundos) / 1000L;
+        long horas = segundos / 3600L;
+        long minutos = (segundos % 3600L) / 60L;
+        long segundosRestantes = segundos % 60L;
+        return String.format(Locale.ROOT, "%02d:%02d:%02d", horas, minutos, segundosRestantes);
+    }
+
+    private static void imprimirAjuda() {
+        System.out.println("Uso: java Main --repeticoes N --caso MELHOR|MEDIO|PIOR"
+            + " --algoritmo NOME --disposicao CRESCENTE|DECRESCENTE|ALEATORIO|REPETIDOS --n TAMANHO [opcoes]");
+        System.out.println();
+        System.out.println("Parametros obrigatorios:");
+        System.out.println("  --repeticoes N       Medicoes oficiais (1.." + MAX_REPETICOES + ")");
+        System.out.println("  --caso VALOR         MELHOR, MEDIO ou PIOR (rotulo teorico/experimental)");
+        System.out.println("  --algoritmo NOME     " + String.join(", ", ALGORITMOS));
+        System.out.println("  --disposicao VALOR   CRESCENTE, DECRESCENTE, ALEATORIO ou REPETIDOS");
+        System.out.println("  --n TAMANHO          Numero de elementos (1.." + MAX_N + ")");
+        System.out.println();
+        System.out.println("Parametros opcionais:");
+        System.out.println("  --saida PREFIXO      Pasta/prefixo dos CSVs (padrao: resultados_tp1)");
+        System.out.println("  --semente INTEIRO    Semente do caso aleatorio (padrao: 2026; entrada reproduzivel)");
+        System.out.println("  --debug              Mostra configuracao, progresso e estimativa de tempo restante");
+        System.out.println("  --no-color           Desativa cores ANSI nos logs");
+        System.out.println("  --help, -h           Mostra esta ajuda");
+        System.out.println();
+        System.out.println("Exemplo:");
+        System.out.println("  java Main --repeticoes 10 --caso MEDIO --algoritmo InsertionSort"
+            + " --disposicao ALEATORIO --n 1000 --saida resultados/tp1 --debug");
+        System.out.println("CSV: <prefixo>_<Algoritmo>_n<Tamanho>.csv; novas medicoes sao acrescentadas ao arquivo.");
+        System.out.println("O programa nao usa Scanner, Console nem System.in: toda configuracao vem dos argumentos CLI.");
+    }
+}
+
+
+
+================================================
+FILE: makefile
+================================================
+JAVAC := javac
+JAVA := java
+
+all:
+	$(JAVAC) -encoding UTF-8 ./*.java
+
+test: all
+	$(JAVA) -cp . TestesCorretude
+
+benchmark:
+	./testes_tp1.sh desempenho
+
+run: all
+	$(JAVA) -cp . Main --help
+
+clean:
+	rm -f ./*.class
+	
+clean_all:
+	rm -rf ./*.class ../resultados/*.csv
+
+gen_ctx:
+	gitingest . -o ctx.txt
+
+.PHONY: all test benchmark run clean
+
+
+
+================================================
+FILE: MergeSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+
+public class MergeSort <T extends Comparable<T>> extends Ordenador<T> {
+
+    public MergeSort(){
+        super();
+    }
+
+    @Override 
+    public void sort(){
+    
+        this.tempoInicial = System.nanoTime();
+        if (this.vetor == null) {
+            throw new Error("Vetor Vazio!");
+        }
+        if (this.vetor.size() > 1) {
+            executarMergeSort(0, this.vetor.size() - 1);
+        }
+        this.tempoFinal = System.nanoTime();
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
+    }
+
+    private void intercalar(int inicio, int meio, int fim) {
+        // Cria cópias temporárias das duas sublistas usando a estrutura Vector
+        Vector<T> esquerda = new Vector<>(this.vetor.subList(inicio, meio + 1));
+        Vector<T> direita = new Vector<>(this.vetor.subList(meio + 1, fim + 1));
+
+        int i = 0; // Índice para a sublista esquerda
+        int j = 0; // Índice para a sublista direita
+        int k = inicio; // Índice para o vetor principal original
+
+        // Compara os elementos das duas metades e reinsere no vetor principal ordenadamente
+        while (i < esquerda.size() && j < direita.size()) {
+            if (esquerda.get(i).compareTo(direita.get(j)) <= 0) {
+                this.vetor.set(k, esquerda.get(i));
+                i++;
+            } else {
+                this.vetor.set(k, direita.get(j));
+                j++;
+            }
+            k++;
+        }
+
+        // Copia os elementos restantes da sublista esquerda, se houver
+        while (i < esquerda.size()) {
+            this.vetor.set(k, esquerda.get(i));
+            i++;
+            k++;
+        }
+
+        // Copia os elementos restantes da sublista direita, se houver
+        while (j < direita.size()) {
+            this.vetor.set(k, direita.get(j));
+            j++;
+            k++;
+        }
+    }
+
+    private void executarMergeSort(int inicio, int fim) {
+        if (inicio < fim) {
+            int meio = inicio + (fim - inicio) / 2;
+
+            // Divide recursivamente a metade esquerda e a direita
+            executarMergeSort(inicio, meio);
+            executarMergeSort(meio + 1, fim);
+
+            // Une as duas metades ordenadas
+            intercalar(inicio, meio, fim);
+        }
+    }
+
+    public static void main(String args[]){
+        MergeSort<Integer> merge = new MergeSort<>();
+        System.out.println("\nCrescente: ");
+        merge.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        merge.print();
+        merge.sort();
+        merge.print();
+
+        System.out.println("\nDecrescente: ");
+        merge.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        merge.print();
+        merge.sort();
+        merge.print();
+
+        System.out.println("\nAleatorio: ");
+        merge.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        merge.print();
+        merge.sort();
+        merge.print();
+
+        System.out.println("\nRepetido: ");
+        merge.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        merge.print();
+        merge.sort();
+        merge.print();
+    }  
+}
+
+
+================================================
+FILE: Ordenador.java
+================================================
+import java.util.Vector;
+
+public abstract class Ordenador<T extends Comparable<T>> 
+{
+    protected long tempoTotal;
+    protected long tempoInicial;
+    protected long tempoFinal;
+    protected long vezes_executado;
+    protected  Vector<T> vetor;
+
+    Ordenador(){
+        this.tempoFinal = this.tempoInicial = this.tempoTotal = 0;
+        this.vetor = new Vector<>();
+        this.clear();
+    }   
+
+    public abstract void sort();
+
+    public long getTempoTotal(){
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
+        return this.tempoTotal;
+    }
+
+    @Override
+    public String toString() {
+        if (this.vetor == null || this.vetor.isEmpty()) {
+            return "[]";
+        }
+        
+        StringBuilder aux = new StringBuilder("[");
+        int limite = this.vetor.size(); 
+        
+        for (int i = 0; i < limite; i++) {
+            aux.append(this.vetor.get(i));
+            if (i < limite - 1) {
+                aux.append(", ");
+            }
+        }
+        aux.append("]");
+        
+        return aux.toString();
+    }
+    
+    public void setVetor(Vector<T> v){
+        this.vetor = v;
+    }
+
+    public void clear(){
+        this.vetor.clear();
+    }
+
+    public void print(){
+        String aux = this.getClass().getName() + ":";
+        System.out.println(aux + this.toString());
+    }
+}
+
+
+================================================
+FILE: QuickSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+
+public class QuickSort<T extends Comparable<T>> extends Ordenador<T> {
+
+    @Override
+    public void sort() {
+        if (this.vetor == null || this.vetor.size() <= 1) {
+            return;
+        }
+        quicksort(0, this.vetor.size() - 1);
+    }
+
+    private void quicksort(int baixo, int alto) {
+        // Otimização de cauda com ciclo while para limitar a pilha de recursão a O(log N)
+        while (baixo < alto) {
+            int pi = particionar(baixo, alto);
+
+            // Recursão na menor partição primeiro
+            if(pi - baixo < alto - pi){
+                quicksort(baixo, pi - 1);
+                baixo = pi + 1;
+            } else {
+                quicksort(pi + 1, alto);
+                alto = pi - 1;
+            }
+        }
+    }
+
+    private int particionar(int baixo, int alto) {
+        int meio = baixo + (alto - baixo) / 2;
+        trocar(meio, alto);
+        
+        T pivo = this.vetor.get(alto);
+        int i = (baixo - 1);
+
+        for (int j = baixo; j < alto; j++) {
+            if (this.vetor.get(j).compareTo(pivo) <= 0) {
+                i++;
+                trocar(i, j);
+            }
+        }
+
+        trocar(i + 1, alto);
+        return (i + 1);
+    }
+
+    private void trocar(int i, int j) {
+        T temp = this.vetor.get(i);
+        this.vetor.set(i, this.vetor.get(j));
+        this.vetor.set(j, temp);
+    }
+
+    public static void main(String args[]){
+        QuickSort<Integer> quick = new QuickSort<>();
+        System.out.println("\nCrescente: ");
+        quick.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        quick.print();
+        quick.sort();
+        quick.print();
+
+        System.out.println("\nDecrescente: ");
+        quick.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        quick.print();
+        quick.sort();
+        quick.print();
+
+        System.out.println("\nAleatorio: ");
+        quick.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        quick.print();
+        quick.sort();
+        quick.print();
+
+        System.out.println("\nRepetido: ");
+        quick.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        quick.print();
+        quick.sort();
+        quick.print();
+    }
+}
+
+
+================================================
+FILE: RadixSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+
+public class RadixSort extends Ordenador<Integer> {
+
+    public RadixSort() {
+        super();
+    }
+
+    @Override
+    public void sort() {
+        if (this.vetor == null || this.vetor.size() <= 1) {
+            return;
+        }
+
+        // n: quantidade de elementos do vetor.
+        int n = this.vetor.size();
+
+        /*
+         * O Radix Sort LSD trabalha com chaves nao negativas.
+         * Deslocamos os valores para preservar a ordem e tambem suportar
+         * inteiros negativos, incluindo Integer.MIN_VALUE.
+         */
+        long[] valores = new long[n];
+        long[] auxiliar = new long[n];
+        long k = 0;
+
+        for (int i = 0; i < n; i++) {
+            valores[i] = (long) this.vetor.get(i) - Integer.MIN_VALUE;
+            if (valores[i] > k) {
+                k = valores[i];
+            }
+        }
+
+        // k e a maior chave apos o deslocamento; determina os digitos necessarios.
+        for (long exp = 1; k / exp > 0; exp *= 10) {
+            int[] contagem = new int[10];
+
+            // Conta quantos valores possuem cada digito nesta posicao.
+            for (int i = 0; i < n; i++) {
+                int digito = (int) ((valores[i] / exp) % 10);
+                contagem[digito]++;
+            }
+
+            // Converte as contagens em posicoes finais cumulativas.
+            for (int i = 1; i < contagem.length; i++) {
+                contagem[i] += contagem[i - 1];
+            }
+
+            // Percorrer de tras para frente preserva a estabilidade da passagem.
+            for (int i = n - 1; i >= 0; i--) {
+                int digito = (int) ((valores[i] / exp) % 10);
+                auxiliar[--contagem[digito]] = valores[i];
+            }
+
+            // Alterna os vetores de trabalho para a proxima passagem.
+            long[] troca = valores;
+            valores = auxiliar;
+            auxiliar = troca;
+        }
+
+        // Retorna as chaves ao intervalo original e grava o resultado no Vector.
+        for (int i = 0; i < n; i++) {
+            this.vetor.set(i, (int) (valores[i] + Integer.MIN_VALUE));
+        }
+    }
+
+    public static void main(String[] args) {
+        RadixSort radix = new RadixSort();
+        System.out.println("\nCrescente: ");
+        radix.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        radix.print();
+        radix.sort();
+        radix.print();
+
+        System.out.println("\nDecrescente: ");
+        radix.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        radix.print();
+        radix.sort();
+        radix.print();
+
+        System.out.println("\nAleatorio: ");
+        radix.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        radix.print();
+        radix.sort();
+        radix.print();
+
+        System.out.println("\nRepetido: ");
+        radix.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        radix.print();
+        radix.sort();
+        radix.print();
+    }
+}
+
+
+
+================================================
+FILE: SelectionSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+
+public class SelectionSort<T extends Comparable<T>> extends Ordenador<T> {
+
+    public SelectionSort() {
+        super();
+    }
+
+    @Override
+    public void sort() {
+        if (this.vetor == null || this.vetor.size() <= 1) {
+            return;
+        }
+
+        int n = this.vetor.size();
+
+        for (int i = 0; i < n - 1; i++) {
+            int minIndex = i;
+
+            for (int j = i + 1; j < n; j++) {
+                if (this.vetor.get(j).compareTo(this.vetor.get(minIndex)) < 0) {
+                    minIndex = j;
+                }
+            }
+
+            if (minIndex != i) {
+                T temp = this.vetor.get(i);
+                this.vetor.set(i, this.vetor.get(minIndex));
+                this.vetor.set(minIndex, temp);
+            }
+        }
+    }
+
+    public static void main(String args[]) {
+        SelectionSort<Integer> selection = new SelectionSort<>();
+        System.out.println("\nCrescente: ");
+        selection.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        selection.print();
+        selection.sort();
+        selection.print();
+
+        System.out.println("\nDecrescente: ");
+        selection.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        selection.print();
+        selection.sort();
+        selection.print();
+
+        System.out.println("\nAleatorio: ");
+        selection.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        selection.print();
+        selection.sort();
+        selection.print();
+
+        System.out.println("\nRepetido: ");
+        selection.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        selection.print();
+        selection.sort();
+        selection.print();
+    }
+}
+
+
+================================================
+FILE: ShellSort.java
+================================================
+import java.util.Arrays;
+import java.util.Vector;
+
+public class ShellSort<T extends Comparable<T>> extends Ordenador<T> {
+
+    public ShellSort() {
+        super();
+    }
+
+    @Override 
+    public void sort() {
+        if (vetor == null) return;
+        
+        int n = vetor.size();
+
+        // Inicia com um intervalo (gap) grande e vai dividindo por 2 a cada passo
+        for (int gap = n / 2; gap > 0; gap /= 2) {
+            
+            // Aplicação do Insertion Sort para o gap atual
+            for (int i = gap; i < n; i++) {
+                T temp = vetor.get(i);
+                int j = i;
+
+                // Desloca os elementos do sub-vetor até encontrar a posição correta da chave
+                while (j >= gap && vetor.get(j - gap).compareTo(temp) > 0) {
+                    vetor.set(j, vetor.get(j - gap));
+                    j -= gap;
+                }
+                
+                // Insere o elemento na posição correta do gap
+                vetor.set(j, temp);
+            }
+        }
+    }
+
+    public static void main(String args[]){
+        ShellSort<Integer> shell = new ShellSort<>();
+        System.out.println("\nCrescente: ");
+        shell.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
+        shell.print();
+        shell.sort();
+        shell.print();
+
+        System.out.println("\nDecrescente: ");
+        shell.setVetor(new Vector<>(Arrays.asList(15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1)));
+        shell.print();
+        shell.sort();
+        shell.print();
+
+        System.out.println("\nAleatorio: ");
+        shell.setVetor(new Vector<>(Arrays.asList(7, 2, 9, 1, 5, 8, 3, 10, 4, 6)));
+        shell.print();
+        shell.sort();
+        shell.print();
+
+        System.out.println("\nRepetido: ");
+        shell.setVetor(new Vector<>(Arrays.asList(4, 1, 4, 2, 1, 5, 4, 3, 2, 1, 5)));
+        shell.print();
+        shell.sort();
+        shell.print();
+    }
+}
+
+
+================================================
+FILE: testes_tp1.md
+================================================
+# Testes do TP1 — ACD
+
+Coloque `testes_tp1.sh`, `TestesCorretude.java`, `TesteGenerator.java`, `Logs.java` e os demais arquivos `.java` dentro de `TP1/src`.
+
+## Executar os testes de corretude
+
+```
+chmod +x testes_tp1.sh
+./testes_tp1.sh
+```
+
+O modo padrão testa os dez algoritmos com vetores de 10, 11 e 15 elementos. Para cada tamanho, usa as disposições crescente, decrescente, aleatória e com valores repetidos. O programa verifica se o resultado está ordenado e se todos os elementos originais foram preservados.
+
+## Executar os experimentos de desempenho
+
+```
+./testes_tp1.sh desempenho
+```
+
+O script compila uma vez, executa os testes de corretude e então roda a bateria de desempenho, com 10 repetições por configuração. Os CSVs são criados/acumulados na pasta `resultados/`.
+
+A bateria evita os piores tamanhos para algoritmos quadráticos e limita os casos ordenados de Quick Sort a `n=1000`, pois a implementação utiliza o último elemento como pivô. Para Merge, Heap, Shell, Counting, Radix e Bucket, usa `n=1000`, `10000`, `100000` nas três disposições e `n=1000000` na disposição aleatória.
+
+`MELHOR`, `MEDIO` e `PIOR` são rótulos experimentais independentes da disposição. Para algoritmos em que a disposição não define diretamente um caso teórico, o CSV também registra a disposição real para que a análise não confunda as duas coisas.
+
+## Makefile (opcional)
+
+```
+make test       # apenas corretude
+make benchmark  # corretude + desempenho
+make clean      # remove arquivos .class
+```
+
+O script não solicita dados ao usuário e não lê entradas pelo `stdin`.
+
+
+
+================================================
+FILE: testes_tp1.sh
+================================================
+#!/usr/bin/env bash
+# Testes do TP1: corretude em vetores pequenos e, opcionalmente, experimentos de desempenho.
+# Uso: ./testes_tp1.sh [corretude|desempenho]
+
+set -euo pipefail
+cd "$(dirname -- "${BASH_SOURCE[0]}")"
+
+MODO="${1:-corretude}"
+if [[ "$MODO" != "corretude" && "$MODO" != "desempenho" ]]; then
+    echo "Uso: $0 [corretude|desempenho]" >&2
+    exit 2
+fi
+
+if ! command -v javac >/dev/null 2>&1 || ! command -v java >/dev/null 2>&1; then
+    echo "Erro: instale um JDK e verifique se java e javac estao no PATH." >&2
+    exit 127
+fi
+
+printf '\n[TP1] Compilando o projeto...\n'
+javac -encoding UTF-8 ./*.java
+
+printf '\n[TP1] Executando testes de corretude...\n'
+java -cp . TestesCorretude
+
+if [[ "$MODO" == "corretude" ]]; then
+    echo "[TP1] Testes de corretude concluidos. Para medir desempenho: $0 desempenho"
+    exit 0
+fi
+
+# O enunciado pede no minimo 10 medicoes por configuracao.
+REPETICOES=10
+SEMENTE=2026
+SAIDA="resultados/tp1"
+mkdir -p resultados
+
+rodar() {
+    local caso="$1"
+    local algoritmo="$2"
+    local disposicao="$3"
+    local n="$4"
+
+    printf '\n[TP1] %s | n=%s | disposicao=%s | caso=%s\n' \
+        "$algoritmo" "$n" "$disposicao" "$caso"
+    java -Xms128m -Xmx1g -cp . Main \
+        --repeticoes "$REPETICOES" \
+        --caso "$caso" \
+        --algoritmo "$algoritmo" \
+        --disposicao "$disposicao" \
+        --n "$n" \
+        --semente "$SEMENTE" \
+        --saida "$SAIDA" \
+        --no-color
+}
+
+# Bubble e Insertion: melhor, medio e pior caso em n=1000.
+# Em n=10000, mede somente a entrada crescente para limitar o custo quadratico.
+for algoritmo in BubbleSort InsertionSort; do
+    rodar MELHOR "$algoritmo" CRESCENTE 1000
+    rodar MEDIO  "$algoritmo" ALEATORIO 1000
+    rodar PIOR   "$algoritmo" DECRESCENTE 1000
+    rodar MELHOR "$algoritmo" CRESCENTE 10000
+done
+
+# Selection tem custo quadratico nas tres disposicoes; n=1000.
+rodar MEDIO SelectionSort CRESCENTE 1000
+rodar MEDIO SelectionSort DECRESCENTE 1000
+rodar MEDIO SelectionSort ALEATORIO 1000
+
+# Quick Sort usa o ultimo elemento como pivo; entradas ordenadas limitadas a n=1000.
+rodar PIOR  QuickSort CRESCENTE 1000
+rodar PIOR  QuickSort DECRESCENTE 1000
+rodar MEDIO QuickSort ALEATORIO 1000
+rodar MEDIO QuickSort ALEATORIO 10000
+rodar MEDIO QuickSort ALEATORIO 100000
+
+# Algoritmos adequados a entradas maiores: tres disposicoes ate 100000 e aleatorio em 1 milhao.
+# Para esses algoritmos, MEDIO e um rótulo experimental; a disposicao real tambem fica registrada.
+for algoritmo in ShellSort MergeSort HeapSort CountingSort RadixSort BucketSort; do
+    for n in 1000 10000 100000; do
+        rodar MEDIO "$algoritmo" CRESCENTE "$n"
+        rodar MEDIO "$algoritmo" DECRESCENTE "$n"
+        rodar MEDIO "$algoritmo" ALEATORIO "$n"
+    done
+    rodar MEDIO "$algoritmo" ALEATORIO 1000000
+done
+
+echo
+echo "[TP1] Testes e experimentos concluidos. Os CSVs foram gravados com prefixo $SAIDA."
+
+
+
+================================================
+FILE: TestesCorretude.java
+================================================
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Random;
+import java.util.Vector;
+
+/**
+ * Testes pequenos de corretude exigidos no TP1.
+ * Confere se cada algoritmo ordena a entrada e preserva todos os elementos.
+ */
+public final class TestesCorretude {
+
+    private static final int[] TAMANHOS = {10, 11, 15};
+    private static final String[] DISPOSICOES = {
+        "CRESCENTE", "DECRESCENTE", "ALEATORIO", "REPETIDOS"
+    };
+    private static final String[] ALGORITMOS = {
+        "BubbleSort", "InsertionSort", "SelectionSort", "ShellSort",
+        "HeapSort", "MergeSort", "QuickSort", "CountingSort",
+        "RadixSort", "BucketSort"
+    };
+
+    private TestesCorretude() {
+        // Classe utilitaria.
+    }
+
+    public static void main(String[] args) {
+        int aprovados = 0;
+        int falhas = 0;
+
+        for (String algoritmo : ALGORITMOS) {
+            for (int tamanho : TAMANHOS) {
+                for (String disposicao : DISPOSICOES) {
+                    try {
+                        testar(algoritmo, tamanho, disposicao);
+                        aprovados++;
+                        System.out.println("[OK] " + algoritmo + " | n=" + tamanho
+                            + " | " + disposicao);
+                    } catch (Throwable erro) {
+                        falhas++;
+                        System.err.println("[FALHA] " + algoritmo + " | n=" + tamanho
+                            + " | " + disposicao + " | " + erro.getClass().getSimpleName()
+                            + ": " + erro.getMessage());
+                    }
+                }
+            }
+        }
+
+        System.out.println();
+        System.out.println("Testes de corretude: " + aprovados + " aprovados; "
+            + falhas + " falhas; " + (aprovados + falhas) + " configurações.");
+
+        if (falhas > 0) {
+            System.exit(1);
+        }
+    }
+
+    private static void testar(String algoritmo, int tamanho, String disposicao) {
+        Vector<Integer> original = gerarVetor(tamanho, disposicao);
+        Vector<Integer> esperado = new Vector<>(original);
+
+        Ordenador<Integer> ordenador = criarOrdenador(algoritmo);
+        ordenador.setVetor(new Vector<>(original));
+        ordenador.sort();
+
+        Vector<Integer> resultado = new Vector<>(ordenador.vetor);
+        if (resultado.size() != esperado.size()) {
+            throw new AssertionError("O tamanho do vetor mudou.");
+        }
+        if (!estaOrdenado(resultado)) {
+            throw new AssertionError("O vetor final não está em ordem crescente: " + resultado);
+        }
+        if (!mesmaMulticonjunto(esperado, resultado)) {
+            throw new AssertionError("O vetor final não preservou todos os elementos.");
+        }
+    }
+
+    private static Vector<Integer> gerarVetor(int tamanho, String disposicao) {
+        Vector<Integer> vetor = new Vector<>(tamanho);
+        Random aleatorio = new Random(2026L + tamanho);
+
+        for (int i = 0; i < tamanho; i++) {
+            switch (disposicao) {
+                case "CRESCENTE":
+                    vetor.add(i);
+                    break;
+                case "DECRESCENTE":
+                    vetor.add(tamanho - 1 - i);
+                    break;
+                case "ALEATORIO":
+                    // Valores não negativos e repetidos de propósito para testar duplicatas.
+                    vetor.add(aleatorio.nextInt(21));
+                    break;
+                case "REPETIDOS":
+                    vetor.add(5);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Disposição desconhecida: " + disposicao);
+            }
+        }
+        return vetor;
+    }
+
+    private static boolean estaOrdenado(Vector<Integer> vetor) {
+        for (int i = 1; i < vetor.size(); i++) {
+            if (vetor.get(i - 1) > vetor.get(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean mesmaMulticonjunto(Vector<Integer> original, Vector<Integer> resultado) {
+        Map<Integer, Integer> contagem = new HashMap<>();
+        for (Integer valor : original) {
+            contagem.put(valor, contagem.getOrDefault(valor, 0) + 1);
+        }
+        for (Integer valor : resultado) {
+            contagem.put(valor, contagem.getOrDefault(valor, 0) - 1);
+        }
+        for (Integer quantidade : contagem.values()) {
+            if (quantidade != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static Ordenador<Integer> criarOrdenador(String algoritmo) {
+        switch (algoritmo) {
+            case "BubbleSort": return new BubbleSort<>();
+            case "InsertionSort": return new InsertionSort<>();
+            case "SelectionSort": return new SelectionSort<>();
+            case "ShellSort": return new ShellSort<>();
+            case "HeapSort": return new HeapSort<>();
+            case "MergeSort": return new MergeSort<>();
+            case "QuickSort": return new QuickSort<>();
+            case "CountingSort": return (Ordenador<Integer>) new CountingSort();
+            case "RadixSort": return (Ordenador<Integer>) new RadixSort();
+            case "BucketSort": return (Ordenador<Integer>) new BucketSort();
+            default: throw new IllegalArgumentException("Algoritmo desconhecido: " + algoritmo);
+        }
+    }
+}
+
+
+
+================================================
+FILE: TestesGenerator.java
+================================================
+
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Vector;
+
+public class TestesGenerator {
+
+    private final int[] tamanhos = {1000, 10000, 100000, 1000000};
+    private final List<String> casos = Arrays.asList("CRESCENTE", "DECRESCENTE", "ALEATORIO", "REPETIDOS");
+    private int repeticoes = 10;
+
+    public TestesGenerator(int repeticoes) {
+        this.repeticoes = repeticoes;
+    }
+
+    public void rodarTeste(Path arquivoCsv) throws IOException {
+
+        try (BufferedWriter csv = Files.newBufferedWriter(arquivoCsv)) {
+
+            csv.write("algoritmo,n,caso,repeticao,t_ns");
+            csv.newLine();
+
+            for (int n : tamanhos) {
+                for (String caso : casos) {
+                    if (n == 1000000 && !caso.equals("ALEATORIO")) {
+                        continue; // Mantém a otimização padrão para 1M se desejado, ou remova se precisar de todos
+                    }
+
+                    System.out.println("-> Processando: N = " + n + " | Caso = " + caso);
+                    Vector<Integer> original = gerarVetor(n, caso);
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new MergeSort<>(), original,
+                            "MergeSort", n, caso, repeticao, csv);
+                    }        
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new BubbleSort<>(), original,
+                            "BubbleSort", n, caso, repeticao, csv);
+                    }
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new InsertionSort<>(), original, 
+                            "InsertionSort", n, caso, repeticao, csv);
+                    }        
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new QuickSort<>(), original,
+                            "QuickSort", n, caso, repeticao, csv);
+                    }
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new ShellSort<>(), original,
+                            "ShellSort", n, caso, repeticao, csv);
+                    }        
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new SelectionSort<>(), original,
+                            "SelectionSort", n, caso, repeticao, csv);
+                    }
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new HeapSort<>(), original,
+                            "HeapSort", n, caso, repeticao, csv);
+                    }        
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new CountingSort(), original,
+                            "CountingSort", n, caso, repeticao, csv);
+                    }
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new RadixSort(), original,
+                            "RadixSort", n, caso, repeticao, csv);
+                    }        
+
+                    for (int repeticao = 1; repeticao <= repeticoes; repeticao++) {
+                        executar(new BucketSort(), original,
+                            "BucketSort", n, caso, repeticao, csv);
+                    }
+                }
+            }
+
+            System.out.println("Testes finalizados com sucesso! Arquivo gerado: " + arquivoCsv.getFileName());
+        }
+    
+        System.out.println("Arquivo gerado com sucesso: " + arquivoCsv.toAbsolutePath());
+    }
+
+    private void executar(
+        Ordenador<Integer> ordenador,
+        Vector<Integer> original,
+        String algoritmo,
+        int n,
+        String caso,
+        int repeticao,
+        BufferedWriter csv
+    ) throws IOException {
+
+        ordenador.setVetor(new Vector<>(original));
+
+        long inicio = System.nanoTime();
+        ordenador.sort();
+        long fim = System.nanoTime();
+        long tempo = fim - inicio;
+
+        csv.write(String.format("%s,%d,%s,%d,%d", algoritmo, n, caso, repeticao, tempo));
+        csv.newLine();
+    }
+
+    private Vector<Integer> gerarVetor(int n, String caso) {
+
+        Integer[] dados = new Integer[n];
+
+        switch (caso) {
+            case "CRESCENTE":
+                CasosAlgoritmo.ordem_crescente(dados, n);
+                break;
+
+            case "DECRESCENTE":
+                CasosAlgoritmo.ordem_decrescente(dados, n);
+                break;
+
+            case "ALEATORIO":
+                CasosAlgoritmo.ordem_aleatoria(dados, n);
+                break;
+
+            case "REPETIDOS":
+                CasosAlgoritmo.ordem_repetidas(dados, n, 5);
+                break;
+        }
+
+        return new Vector<>(Arrays.asList(dados));
+    }
+
+    public static void main(String args[]) {
+        String nomeArquivo = "resultados_tp1.csv";
+        int reps = 10;
+
+        if (args.length > 0) {
+            nomeArquivo = args[0];
+        }
+        if (args.length > 1) {
+            try {
+                reps = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                System.out.println("Número de repetições inválidas. Usando o padrão: 10");
+            }
+        }
+
+        TestesGenerator gerador = new TestesGenerator(reps);
+        Path caminho = Paths.get(nomeArquivo);
+
+        try {
+            System.out.println("Iniciando experimentos...");
+            gerador.rodarTeste(caminho);
+        } catch (IOException e) {
+            System.err.println("Erro ao escrever o arquivo CSV: " + e.getMessage());
+        }
+    }
+}
+
+
+
+================================================
+FILE: TestesGenerator.md
+================================================
+# `Main.java`, `TestesGenerator.java` e os testes do TP1
+
+Há duas classes de propósito diferente no diretório; use a indicada para a tarefa.
+
+## Executor recomendado para a coleta atual: `Main.java`
+
+`Main.java` executa **uma configuração experimental por chamada da CLI**, sem solicitar dados pelo `stdin`. Seus argumentos são explícitos, o que permite chamá-lo em scripts Bash e automatizar a coleta.
+
+```bash
+java -cp . Main --help
+```
+
+Exemplo:
+
+```bash
+java -cp . Main --repeticoes 10 --caso MEDIO \
+  --algoritmo MergeSort --disposicao ALEATORIO --n 1000 \
+  --saida resultados/tp1 --semente 2026 --debug
+```
+
+Os resultados são acrescentados a arquivos CSV por algoritmo e tamanho, com campos para algoritmo, tamanho, caso, disposição, semente, sessão, repetição e tempo em nanossegundos. Dois aquecimentos não entram nas medições. A região cronometrada envolve apenas `sort()`.
+
+## Bateria automatizada: `testes_tp1.sh`
+
+O script executa primeiro a compilação e os testes de corretude. Quando chamado com `desempenho`, dispara uma matriz conservadora de configurações e usa `Main.java` para registrar os tempos:
+
+```bash
+./testes_tp1.sh corretude
+./testes_tp1.sh desempenho
+```
+
+A matriz, os tamanhos e os limites preventivos estão documentados em [`testes_tp1.md`](testes_tp1.md).
+
+## Testes de corretude: `TestesCorretude.java`
+
+Verifica se cada algoritmo ordena vetores pequenos (10, 11 e 15 elementos) em ordem crescente, decrescente, aleatória e com valores repetidos. Confere tanto a ordenação quanto a preservação dos elementos.
+
+## Classe antiga: `TestesGenerator.java`
+
+`TestesGenerator.java` é um executor de lote legado com configurações fixas e argumentos posicionais próprios. **Não é a classe chamada pelo script atualizado de desempenho e não implementa os mesmos parâmetros `--caso`, `--algoritmo`, `--disposicao` e `--n`.** Para os experimentos atuais, use `Main.java` diretamente ou `testes_tp1.sh desempenho`, evitando confundir os dois executores.
+
+## Significado de `caso` e `disposicao`
+
+O rótulo `MELHOR`, `MEDIO` ou `PIOR` é registrado separadamente da disposição de entrada. A relação é específica do algoritmo e da implementação. Para comparar os algoritmos, mantenha o mesmo tamanho, disposição e semente, e descreva no relatório as condições usadas nos algoritmos de tempo linear.
+
+
+
+================================================
+FILE: resultados/.gitkeep
+================================================
+[Empty file]
+
