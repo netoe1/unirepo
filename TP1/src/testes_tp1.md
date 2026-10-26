@@ -1,4 +1,3 @@
-
 # Testes do TP1 — ACD
 
 Coloque `testes_tp1.sh`, `TestesCorretude.java`, `TesteGenerator.java`, `Logs.java` e os demais arquivos `.java` dentro de `TP1/src`.

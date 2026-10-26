@@ -15,5 +15,7 @@ run: all
 
 clean:
 	rm -f ./*.class
+clean_all:
+	rm -rf ./*.class ../resultados/*.csv
 
 .PHONY: all test benchmark run clean
