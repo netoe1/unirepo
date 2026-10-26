@@ -9,18 +9,25 @@ public class HeapSort<T extends Comparable<T>> extends Ordenador<T> {
 
     @Override
     public void sort() {
-        if (this.vetor == null || this.vetor.size() <= 1) {
-            return;
-        }
+    if (this.vetor == null) {
+        this.tempoInicial = System.nanoTime();
+        this.tempoFinal = this.tempoInicial;
+        this.tempoTotal = 0;
+        return;
+    }
 
-        int n = this.vetor.size();
+    int n = this.vetor.size();
 
-        // Constrói o heap (reorganiza o vetor)
+    // Início da medição da ordenação
+    this.tempoInicial = System.nanoTime();
+
+    if (n > 1) {
+        // Constrói o heap
         for (int i = n / 2 - 1; i >= 0; i--) {
             heapify(n, i);
         }
 
-        // Extrai os elementos do heap um a um
+        // Extrai os elementos do heap
         for (int i = n - 1; i > 0; i--) {
             T temp = this.vetor.get(0);
             this.vetor.set(0, this.vetor.get(i));
@@ -29,6 +36,11 @@ public class HeapSort<T extends Comparable<T>> extends Ordenador<T> {
             heapify(i, 0);
         }
     }
+
+    // Fim da medição da ordenação
+    this.tempoFinal = System.nanoTime();
+    this.tempoTotal = this.tempoFinal - this.tempoInicial;
+}
 
     private void heapify(int n, int i) {
         int maior = i;

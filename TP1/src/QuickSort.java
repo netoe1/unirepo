@@ -6,18 +6,32 @@ public class QuickSort<T extends Comparable<T>> extends Ordenador<T> {
     @Override
     public void sort() {
         if (this.vetor == null || this.vetor.size() <= 1) {
+            this.tempoInicial = System.nanoTime();
+            this.tempoFinal = this.tempoInicial;
+            this.tempoTotal = 0;
             return;
         }
-        quicksort(0, this.vetor.size() - 1);
+
+        int n = this.vetor.size();
+
+        // Início da medição da ordenação
+        this.tempoInicial = System.nanoTime();
+
+        quicksort(0, n - 1);
+
+        // Fim da medição da ordenação
+        this.tempoFinal = System.nanoTime();
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
     }
 
     private void quicksort(int baixo, int alto) {
-        // Otimização de cauda com ciclo while para limitar a pilha de recursão a O(log N)
+        // Otimização de cauda com ciclo while para limitar a pilha de recursão a O(log
+        // N)
         while (baixo < alto) {
             int pi = particionar(baixo, alto);
 
             // Recursão na menor partição primeiro
-            if(pi - baixo < alto - pi){
+            if (pi - baixo < alto - pi) {
                 quicksort(baixo, pi - 1);
                 baixo = pi + 1;
             } else {
@@ -30,7 +44,7 @@ public class QuickSort<T extends Comparable<T>> extends Ordenador<T> {
     private int particionar(int baixo, int alto) {
         int meio = baixo + (alto - baixo) / 2;
         trocar(meio, alto);
-        
+
         T pivo = this.vetor.get(alto);
         int i = (baixo - 1);
 
@@ -51,7 +65,7 @@ public class QuickSort<T extends Comparable<T>> extends Ordenador<T> {
         this.vetor.set(j, temp);
     }
 
-    public static void main(String args[]){
+    public static void main(String args[]) {
         QuickSort<Integer> quick = new QuickSort<>();
         System.out.println("\nCrescente: ");
         quick.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));

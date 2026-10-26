@@ -10,6 +10,8 @@ public class BucketSort extends Ordenador<Integer> {
 
     @Override
     public void sort() {
+
+        this.tempoInicial = System.nanoTime();
         if (this.vetor == null || this.vetor.size() <= 1) {
             return;
         }
@@ -52,6 +54,7 @@ public class BucketSort extends Ordenador<Integer> {
                 }
             }
         }
+        this.tempoFinal = System.nanoTime();
     }
 
     public static void main(String args[]) {

@@ -10,6 +10,8 @@ public class CountingSort extends Ordenador<Integer> {
 
     @Override
     public void sort() {
+
+        this.tempoInicial = System.nanoTime();
         if (this.vetor == null || this.vetor.size() <= 1) {
             return;
         }
@@ -32,6 +34,8 @@ public class CountingSort extends Ordenador<Integer> {
                 count[i]--;
             }
         }
+
+        this.tempoFinal = System.nanoTime();
     }
 
     public static void main(String args[]) {
