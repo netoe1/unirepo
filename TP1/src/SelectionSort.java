@@ -10,10 +10,16 @@ public class SelectionSort<T extends Comparable<T>> extends Ordenador<T> {
     @Override
     public void sort() {
         if (this.vetor == null || this.vetor.size() <= 1) {
+            this.tempoInicial = System.nanoTime();
+            this.tempoFinal = this.tempoInicial;
+            this.tempoTotal = 0;
             return;
         }
 
         int n = this.vetor.size();
+
+        // Início da medição da ordenação
+        this.tempoInicial = System.nanoTime();
 
         for (int i = 0; i < n - 1; i++) {
             int minIndex = i;
@@ -30,6 +36,10 @@ public class SelectionSort<T extends Comparable<T>> extends Ordenador<T> {
                 this.vetor.set(minIndex, temp);
             }
         }
+
+        // Fim da medição da ordenação
+        this.tempoFinal = System.nanoTime();
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
     }
 
     public static void main(String args[]) {
