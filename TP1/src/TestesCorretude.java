@@ -125,7 +125,6 @@ public final class TestesCorretude {
         return true;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     private static Ordenador<Integer> criarOrdenador(String algoritmo) {
         switch (algoritmo) {
             case "BubbleSort": return new BubbleSort<>();

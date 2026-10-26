@@ -21,7 +21,7 @@ import java.util.Vector;
  * PIOR) e registrado separadamente porque sua relacao com a entrada depende do
  * algoritmo e da implementacao concreta.
  */
-public class ScriptParametrizavel {
+public class Main {
 
     private static final String CONTEXTO = "ScriptParametrizavel";
     private static final int MAX_N = 1_000_000;
@@ -51,7 +51,7 @@ public class ScriptParametrizavel {
     private final String sessao;
     private final boolean debug;
 
-    private ScriptParametrizavel(
+    private Main(
         int repeticoes,
         String caso,
         String algoritmo,
@@ -123,7 +123,7 @@ public class ScriptParametrizavel {
             Logs.info(CONTEXTO, "Apenas sort() sera cronometrado; geracao e copia ficam fora da medicao.");
             Logs.info(CONTEXTO, "Execucao nao interativa: nenhum dado sera lido de stdin.");
 
-            ScriptParametrizavel gerador = new ScriptParametrizavel(
+            Main gerador = new Main(
                 repeticoes, caso, algoritmo, disposicao, n, semente, csv, debug);
             gerador.executar();
         } catch (IllegalArgumentException e) {
