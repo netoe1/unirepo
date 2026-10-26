@@ -7,33 +7,45 @@ public class ShellSort<T extends Comparable<T>> extends Ordenador<T> {
         super();
     }
 
-    @Override 
+    @Override
     public void sort() {
-        if (vetor == null) return;
-        
-        int n = vetor.size();
+        if (this.vetor == null || this.vetor.size() <= 1) {
+            this.tempoInicial = System.nanoTime();
+            this.tempoFinal = this.tempoInicial;
+            this.tempoTotal = 0;
+            return;
+        }
 
-        // Inicia com um intervalo (gap) grande e vai dividindo por 2 a cada passo
+        int n = this.vetor.size();
+
+        // Início da medição da ordenação
+        this.tempoInicial = System.nanoTime();
+
+        // Inicia com um intervalo grande e divide por 2 a cada etapa
         for (int gap = n / 2; gap > 0; gap /= 2) {
-            
-            // Aplicação do Insertion Sort para o gap atual
+
+            // Aplicação do Insertion Sort para o intervalo atual
             for (int i = gap; i < n; i++) {
-                T temp = vetor.get(i);
+                T temp = this.vetor.get(i);
                 int j = i;
 
-                // Desloca os elementos do sub-vetor até encontrar a posição correta da chave
-                while (j >= gap && vetor.get(j - gap).compareTo(temp) > 0) {
-                    vetor.set(j, vetor.get(j - gap));
+                // Desloca os elementos até encontrar a posição correta
+                while (j >= gap && this.vetor.get(j - gap).compareTo(temp) > 0) {
+                    this.vetor.set(j, this.vetor.get(j - gap));
                     j -= gap;
                 }
-                
-                // Insere o elemento na posição correta do gap
-                vetor.set(j, temp);
+
+                // Insere o elemento na posição correta
+                this.vetor.set(j, temp);
             }
         }
+
+        // Fim da medição da ordenação
+        this.tempoFinal = System.nanoTime();
+        this.tempoTotal = this.tempoFinal - this.tempoInicial;
     }
 
-    public static void main(String args[]){
+    public static void main(String args[]) {
         ShellSort<Integer> shell = new ShellSort<>();
         System.out.println("\nCrescente: ");
         shell.setVetor(new Vector<>(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)));
