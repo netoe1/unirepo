@@ -386,20 +386,20 @@ public class Main {
     }
 
     private static void validarLimites(String algoritmo, String disposicao, int n, int repeticoes) {
-        if (isQuadratico(algoritmo) && n > MAX_N_QUADRATICOS) {
-            throw new IllegalArgumentException(algoritmo + " esta limitado a n <= "
-                + MAX_N_QUADRATICOS + " para evitar experimentos quadraticos excessivamente longos.");
-        }
-        if ("QuickSort".equals(algoritmo) && n > 100_000) {
-            throw new IllegalArgumentException("QuickSort esta limitado a n <= 100000 por risco de degradacao/recursao.");
-        }
-        if ("QuickSort".equals(algoritmo) && n > 1_000 && !"ALEATORIO".equals(disposicao)) {
-            throw new IllegalArgumentException("QuickSort com disposicao " + disposicao
-                + " esta limitado a n <= 1000; com pivo no ultimo elemento pode degenerar para O(n^2).");
-        }
-        if (isQuadratico(algoritmo) && n >= 5_000 && repeticoes > 10) {
-            throw new IllegalArgumentException("Para algoritmo quadratico e n >= 5000, use no maximo 10 repeticoes.");
-        }
+        //if (isQuadratico(algoritmo) && n > MAX_N_QUADRATICOS) {
+            //throw new IllegalArgumentException(algoritmo + " esta limitado a n <= "
+                //+ MAX_N_QUADRATICOS + " para evitar experimentos quadraticos excessivamente longos.");
+        //}
+        //if ("QuickSort".equals(algoritmo) && n > 100_000) {
+            //throw new IllegalArgumentException("QuickSort esta limitado a n <= 100000 por risco de degradacao/recursao.");
+        //}
+        //if ("QuickSort".equals(algoritmo) && n > 1_000 && !"ALEATORIO".equals(disposicao)) {
+            //throw new IllegalArgumentException("QuickSort com disposicao " + disposicao
+                //+ " esta limitado a n <= 1000; com pivo no ultimo elemento pode degenerar para O(n^2).");
+        //}
+        //if (isQuadratico(algoritmo) && n >= 5_000 && repeticoes > 10) {
+            //throw new IllegalArgumentException("Para algoritmo quadratico e n >= 5000, use no maximo 10 repeticoes.");
+        //}
         if (n >= 100_000) {
             Logs.warn(CONTEXTO, "n elevado: tempo e memoria dependem da implementacao, JVM e hardware.");
         }
