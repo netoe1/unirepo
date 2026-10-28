@@ -1,0 +1,18 @@
+RELATÓRIO ESTATÍSTICO — TP1 / ACD
+========================================
+Arquivo de entrada: /home/netoe1/Git/unirepo/TP1/src/resultados/centralizados/tempos_consolidados.csv
+Medições válidas utilizadas: 1130
+Configurações observadas: 113
+Configurações completas (10 medições): 113
+Configurações incompletas: 0
+Configurações ausentes: 7
+Configurações acima de 10 medições: 0
+Anomalias registradas: 0
+
+Definições e limitações:
+- Estatísticas calculadas por algoritmo, tamanho, caso e disposição.
+- Desvio-padrão amostral (n-1); fica vazio quando há menos de duas medições.
+- O CSV por sessão separa as medições por semente e sessão de execução.
+- Linhas inválidas não entram nas estatísticas; repetições duplicadas válidas são sinalizadas e mantidas.
+- A cobertura usa a matriz prevista de 10 algoritmos, 4 tamanhos e 3 cenários (melhor/médio/pior).
+- Este script não gera gráficos; use graficos_tp1.py após a geração destes arquivos.
