@@ -205,3 +205,4 @@ set format y "%g"
 print sprintf("Graficos gerados em: %s", OUTDIR)
 print sprintf("Resumo estatistico: %s", SUMMARY)
 print sprintf("Fonte de dados: %s", DATA)
+    

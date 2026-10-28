@@ -2,8 +2,10 @@ Directory structure:
 └── unirepo/
     ├── README.md
     ├── docs/
+    │   ├── AnaliseDados.md
     │   ├── EnunciadoTrabalho.md
     │   ├── EstatísticasGraficos.md
+    │   ├── gnuplot.md
     │   ├── TestesGenerator.md
     │   ├── TestesTP1.md
     │   └── .gitkeep
@@ -35,6 +37,8 @@ Directory structure:
             ├── testes_tp1.sh
             ├── TestesCorretude.java
             ├── TestesGenerator.java
+            ├── gnuplot/
+            │   └── main.gnuplot
             └── resultados/
                 ├── .gitkeep
                 ├── backup/
@@ -103,25 +107,8 @@ Directory structure:
                 │   ├── tp1_completo_ShellSort_n10000.csv
                 │   ├── tp1_completo_ShellSort_n100000.csv
                 │   └── tp1_completo_ShellSort_n1000000.csv
-                ├── centralizados/
-                │   ├── integridade_configuracoes.csv
-                │   ├── tempos_consolidados.csv
-                │   └── por_algoritmo/
-                │       ├── BubbleSort.csv
-                │       ├── BucketSort.csv
-                │       ├── CountingSort.csv
-                │       ├── HeapSort.csv
-                │       ├── InsertionSort.csv
-                │       ├── MergeSort.csv
-                │       ├── QuickSort.csv
-                │       ├── RadixSort.csv
-                │       ├── SelectionSort.csv
-                │       └── ShellSort.csv
-                └── estatisticas/
-                    ├── anomalias_dados.csv
-                    ├── cobertura_configuracoes.csv
-                    ├── estatisticas_por_configuracao.csv
-                    └── estatisticas_por_sessao.csv
+                └── centralizados/
+                    └── tempos_consolidados.csv
 
 ================================================
 FILE: README.md
@@ -160,6 +147,204 @@ Para executar a bateria experimental configurada:
 Os CSVs são gravados em `TP1/src/resultados/`. A aplicação acrescenta medições aos CSVs existentes com cabeçalho compatível; mantenha cópias dos dados originais e cuidado para não misturar sessões que respondem a experimentos diferentes.
 
 Consulte [`TP1/README.md`](TP1/README.md) para os passos, parâmetros e cuidados metodológicos.
+
+
+
+================================================
+FILE: docs/AnaliseDados.md
+================================================
+
+# Análise estatística dos resultados do TP1
+
+> **Fonte analisada:** `tempos_consolidados.csv`, com os tempos individuais fornecidos. Os tempos foram convertidos de nanossegundos para milissegundos dividindo `t_ns` por 1.000.000. A análise é descritiva: não foram removidas observações nem estimadas configurações ausentes.
+
+## 1. Resumo executivo
+
+- **Medições:** 1.130 registros válidos, correspondentes a 10 algoritmos.
+- **Configurações observadas:** 113 de 120 combinações esperadas de algoritmo × tamanho × disposição (94,2% de cobertura).
+- **Repetições:** cada configuração observada possui exatamente 10 medições, numeradas de 1 a 10; 113 sessões únicas.
+- **Qualidade básica:** 0 tempos nulos/negativos; 0 números de repetição duplicados dentro de uma configuração; 0 configurações com repetições diferentes de 1–10.
+- **Configurações ausentes:** 7. Todas se referem a entradas de um milhão de elementos para Bubble Sort, Insertion Sort e Selection Sort.
+
+A mediana é utilizada como medida principal para comparar desempenho, pois é menos sensível que a média a valores extremos. Média e coeficiente de variação são usados para avaliar estabilidade. O coeficiente de variação (CV) é o desvio-padrão amostral dividido pela média, multiplicado por 100.
+
+## 2. Integridade e cobertura experimental
+
+Cada combinação presente tem dez registros, com os números de repetição de 1 a 10. Os tempos são positivos e não foram detectadas repetições duplicadas por algoritmo, tamanho e disposição. Esta validação confirma a estrutura tabular, mas não prova que todos os algoritmos tenham cronometragem idêntica ou que o mesmo vetor tenha sido usado em todas as implementações.
+
+| Tamanho (`n`) | Registros | Configurações completas |
+| --------------: | --------: | ------------------------: |
+|           1.000 |       300 |                        30 |
+|          10.000 |       300 |                        30 |
+|         100.000 |       300 |                        30 |
+|       1.000.000 |       230 |                        23 |
+
+### Configurações ausentes
+
+| Algoritmo     |         n | Disposição |
+| ------------- | --------: | ------------ |
+| BubbleSort    | 1.000.000 | ALEATORIO    |
+| BubbleSort    | 1.000.000 | DECRESCENTE  |
+| InsertionSort | 1.000.000 | ALEATORIO    |
+| InsertionSort | 1.000.000 | DECRESCENTE  |
+| SelectionSort | 1.000.000 | ALEATORIO    |
+| SelectionSort | 1.000.000 | CRESCENTE    |
+| SelectionSort | 1.000.000 | DECRESCENTE  |
+
+As ausências não foram preenchidas com zero, interpoladas ou estimadas. Gráficos e tabelas devem manter essas configurações em branco.
+
+## 3. Medianas por algoritmo em entradas aleatórias
+
+A Tabela 2 contém a mediana das dez execuções para `ALEATORIO`. Os travessões indicam que a configuração não aparece no CSV. Os valores são em milissegundos.
+
+| Algoritmo     | n=1.000 |  n=10.000 |   n=100.000 | n=1.000.000 |
+| ------------- | ------: | --------: | ----------: | ----------: |
+| BubbleSort    |  35,703 | 3.256,275 | 325.089,550 |          — |
+| InsertionSort |  13,938 | 1.302,483 | 121.652,268 |          — |
+| SelectionSort |  16,452 | 1.637,438 | 162.589,079 |          — |
+| ShellSort     |   0,918 |    14,140 |     208,443 |   3.492,487 |
+| HeapSort      |   1,324 |    17,246 |     201,359 |   2.575,510 |
+| MergeSort     |   1,422 |     3,447 |      52,796 |     668,228 |
+| QuickSort     |   0,731 |     9,095 |     115,369 |   1.348,115 |
+| CountingSort  |   0,281 |     1,045 |       7,220 |      88,443 |
+| RadixSort     |   0,144 |     0,726 |       7,061 |      75,993 |
+| BucketSort    |   0,771 |     2,207 |      18,279 |     211,707 |
+
+### Comparação em n=100.000, disposição aleatória
+
+Ordenando pela mediana, Radix Sort e Counting Sort têm os menores tempos observados nesta configuração, seguidos por Bucket Sort e Merge Sort. A diferença entre Radix Sort (7,061 ms) e Counting Sort (7,220 ms) é pequena em termos absolutos; esta análise descritiva não permite afirmar que a diferença seja estatisticamente significativa.
+
+| Posição por mediana | Algoritmo     | Mediana (ms) | Média (ms) |    CV |
+| --------------------: | ------------- | -----------: | ----------: | ----: |
+|                     1 | RadixSort     |        7,061 |       7,099 | 2,76% |
+|                     2 | CountingSort  |        7,220 |       7,579 | 9,40% |
+|                     3 | BucketSort    |       18,279 |      18,431 | 7,41% |
+|                     4 | MergeSort     |       52,796 |      52,966 | 5,69% |
+|                     5 | QuickSort     |      115,369 |     116,111 | 1,35% |
+|                     6 | HeapSort      |      201,359 |     203,114 | 1,58% |
+|                     7 | ShellSort     |      208,443 |     210,022 | 1,77% |
+|                     8 | InsertionSort |  121.652,268 | 121.952,489 | 0,83% |
+|                     9 | SelectionSort |  162.589,079 | 162.643,572 | 0,08% |
+|                    10 | BubbleSort    |  325.089,550 | 325.159,441 | 0,06% |
+
+## 4. Influência da disposição dos dados
+
+Para n=100.000, a mediana por disposição mostra padrões coerentes com as características dos algoritmos:
+
+| Algoritmo     | Crescente (ms) | Aleatória (ms) | Decrescente (ms) |
+| ------------- | -------------: | --------------: | ---------------: |
+| BubbleSort    |          3,538 |     325.089,550 |      486.220,017 |
+| InsertionSort |          5,309 |     121.652,268 |      243.172,255 |
+| SelectionSort |    162.006,956 |     162.589,079 |      162.072,307 |
+| ShellSort     |         80,026 |         208,443 |          115,629 |
+| HeapSort      |        214,715 |         201,359 |          194,175 |
+| MergeSort     |         54,000 |          52,796 |           54,317 |
+| QuickSort     |         86,342 |         115,369 |           85,859 |
+| CountingSort  |          7,844 |           7,220 |            7,265 |
+| RadixSort     |          7,013 |           7,061 |            7,211 |
+| BucketSort    |         10,549 |          18,279 |           10,501 |
+
+### Interpretação dos padrões
+
+- **Bubble Sort:** a mediana passa de 3,538 ms em ordem crescente para 325.089,550 ms em ordem aleatória e 486.220,017 ms em ordem decrescente. A entrada crescente permite a parada antecipada quando não há trocas; a ordem decrescente exige muitas trocas.
+- **Insertion Sort:** passa de 5,309 ms em crescente para 121.652,268 ms em aleatória e 243.172,255 ms em decrescente. Isso é compatível com o número de deslocamentos necessário para inserir cada elemento na região ordenada.
+- **Selection Sort:** os valores são muito próximos (aproximadamente 162 s) para as três disposições. Isso corresponde ao seu padrão de Θ(n²) comparações, pouco sensível à ordem inicial.
+- **Merge Sort:** os tempos permanecem próximos de 53–54 ms nas três disposições, compatíveis com seu comportamento Θ(n log n) pouco sensível à ordem inicial.
+- **Quick Sort:** os resultados são menores nas entradas crescentes/decrescentes do que na aleatória nesta implementação. Esse comportamento depende da estratégia concreta de pivô e partição; não deve ser generalizado para todas as implementações.
+- **Counting Sort e Radix Sort:** as medianas ficam próximas entre disposições, coerente com o fato de que o custo depende sobretudo do tamanho e dos parâmetros das chaves/passagens, não da ordem inicial.
+- **Bucket Sort e Shell Sort:** mostram sensibilidade à disposição e aos detalhes internos de implementação; para Buckets, a distribuição entre baldes e a forma de ordenação interna importam. A complexidade de Shell Sort depende da sequência de gaps.
+
+## 5. Escalabilidade: fator de crescimento para cada aumento de 10× em n
+
+A tabela usa medianas de entrada aleatória e calcula a razão entre medianas consecutivas: tempo em n seguinte dividido pelo tempo no tamanho anterior. Se n aumenta dez vezes, uma razão próxima de 100 é um sinal compatível com comportamento quadrático; razões próximas de 10–15 podem ser compatíveis com famílias lineares ou n log n, conforme parâmetros e custos fixos. São referências descritivas, não uma prova da complexidade.
+
+| Algoritmo     | 1.000→10.000 | 10.000→100.000 | 100.000→1.000.000 |
+| ------------- | ------------: | --------------: | -----------------: |
+| BubbleSort    |       91,21× |         99,83× |                 — |
+| InsertionSort |       93,45× |         93,40× |                 — |
+| SelectionSort |       99,53× |         99,29× |                 — |
+| ShellSort     |       15,40× |         14,74× |            16,76× |
+| HeapSort      |       13,02× |         11,68× |            12,79× |
+| MergeSort     |        2,42× |         15,31× |            12,66× |
+| QuickSort     |       12,43× |         12,69× |            11,69× |
+| CountingSort  |        3,72× |          6,91× |            12,25× |
+| RadixSort     |        5,04× |          9,73× |            10,76× |
+| BucketSort    |        2,86× |          8,28× |            11,58× |
+
+Observações sobre os fatores:
+
+- **Bubble, Insertion e Selection Sort:** os fatores de aproximadamente 91–100× entre 1.000, 10.000 e 100.000 elementos em entradas aleatórias são compatíveis com o crescimento quadrático esperado. A ausência das execuções aleatórias em n=1.000.000 impede avaliar a mesma razão no último intervalo.
+- **Heap Sort e Quick Sort:** os fatores ficam em geral entre 11,7× e 13×, compatíveis com crescimento da ordem de n log n nos intervalos avaliados.
+- **Merge Sort:** a razão de 2,42× entre 1.000 e 10.000 elementos é muito menor que a esperada para uma escala n log n. As medições de n=10.000 também têm grande dispersão (CV de 75,55%) e uma observação máxima de 15,179 ms; essa transição deve ser investigada antes da conclusão final. Para os dois intervalos maiores, as razões são 15,31× e 12,66×.
+- **Counting Sort e Radix Sort:** nos tamanhos maiores, as razões se aproximam de uma escala linear, sobretudo de n=100.000 a 1.000.000. Nos tamanhos pequenos há sinais de custos fixos e variação entre repetições.
+- **Bucket Sort:** a progressão se aproxima de escala linear no maior intervalo, mas a interpretação depende da distribuição entre buckets e da implementação da ordenação interna.
+- **Shell Sort:** o crescimento medido ficou na faixa aproximada de 14,7× a 16,8× por fator 10 em n aleatório. A complexidade não tem uma única ordem universal: depende dos gaps implementados.
+
+## 6. Resultados em n=1.000.000, entrada aleatória
+
+Esta comparação inclui somente os algoritmos com medições nessa configuração. Os três algoritmos quadráticos não foram executados para entrada aleatória nesse tamanho, conforme a cobertura registrada.
+
+| Algoritmo    | Mediana (ms) | Mediana (s) |    CV |
+| ------------ | -----------: | ----------: | ----: |
+| RadixSort    |       75,993 |       0,076 | 7,65% |
+| CountingSort |       88,443 |       0,088 | 6,38% |
+| BucketSort   |      211,707 |       0,212 | 4,33% |
+| MergeSort    |      668,228 |       0,668 | 2,20% |
+| QuickSort    |    1.348,115 |       1,348 | 1,03% |
+| HeapSort     |    2.575,510 |       2,576 | 0,45% |
+| ShellSort    |    3.492,487 |       3,492 | 0,08% |
+
+Radix Sort apresentou a menor mediana observada nessa configuração (75,993 ms), seguido por Counting Sort (88,443 ms) e Bucket Sort (211,707 ms). Entre os algoritmos baseados em comparação disponíveis, Merge Sort apresentou 668,228 ms, seguido por Quick Sort (1.348,115 ms), Heap Sort (2.575,510 ms) e Shell Sort (3.492,487 ms). O ranking se refere somente às implementações e às entradas avaliadas, não a uma superioridade universal dos algoritmos.
+
+## 7. Dispersão e aquecimento das execuções
+
+Algumas configurações apresentam CV elevado e média acima da mediana. Os maiores exemplos são:
+
+| Algoritmo    |      n | Disposição | Mediana (ms) | Média (ms) | Mínimo (ms) | Máximo (ms) |     CV |
+| ------------ | -----: | ------------ | -----------: | ----------: | -----------: | -----------: | -----: |
+| MergeSort    | 10.000 | ALEATORIO    |        3,447 |       5,049 |        2,990 |       15,179 | 75,55% |
+| RadixSort    |  1.000 | CRESCENTE    |        0,128 |       0,209 |        0,122 |        0,496 | 70,94% |
+| MergeSort    | 10.000 | DECRESCENTE  |        3,084 |       4,158 |        2,839 |       12,331 | 70,43% |
+| RadixSort    |  1.000 | DECRESCENTE  |        0,137 |       0,208 |        0,124 |        0,485 | 70,42% |
+| RadixSort    |  1.000 | ALEATORIO    |        0,144 |       0,236 |        0,121 |        0,480 | 69,59% |
+| MergeSort    | 10.000 | CRESCENTE    |        3,246 |       4,436 |        2,965 |       12,476 | 66,61% |
+| CountingSort | 10.000 | ALEATORIO    |        1,045 |       1,500 |        0,849 |        3,005 | 50,86% |
+| BucketSort   | 10.000 | CRESCENTE    |        1,496 |       2,096 |        1,274 |        4,266 | 49,63% |
+| BucketSort   | 10.000 | DECRESCENTE  |        1,524 |       2,073 |        1,264 |        4,138 | 49,12% |
+| ShellSort    |  1.000 | DECRESCENTE  |        0,638 |       0,895 |        0,610 |        1,520 | 47,58% |
+
+O padrão de várias sequências sugere efeito de aquecimento da JVM/JIT ou outra fonte de variação durante as repetições. Por exemplo, Radix Sort com n=1.000 aleatório tem média 0,236 ms e mediana 0,144 ms; Merge Sort com n=10.000 aleatório tem média 5,049 ms e mediana 3,447 ms. Isso é consistente com algumas medições iniciais bem mais lentas, mas o CSV isoladamente não prova a causa. Como as repetições individuais foram preservadas, não é recomendado excluir automaticamente esses valores: é melhor reforçar o aquecimento, repetir a coleta em sessões controladas e documentar os critérios antes de remover qualquer observação.
+
+### Implicação metodológica
+
+Os resultados usam dez repetições por configuração. Para melhorar a estabilidade, recomenda-se executar mais aquecimentos antes das repetições registradas e, se possível, realizar 30 ou mais medições como sugere o enunciado. Idealmente, manter o mesmo processo JVM durante um conjunto balanceado de algoritmos ou documentar como cada sessão é iniciada; alternar a ordem dos algoritmos também reduz o risco de confundir diferenças de aquecimento com diferenças de desempenho.
+
+## 8. Limitações interpretativas
+
+1. **Caso teórico versus disposição:** `MELHOR`, `MEDIO` e `PIOR` são valores da coluna `caso`. Eles estão associados a crescente, aleatória e decrescente no CSV, mas não significam necessariamente melhor, médio e pior caso para todo algoritmo. A análise deve priorizar a coluna `disposicao` e discutir cada algoritmo individualmente.
+2. **Comparabilidade da medição:** o CSV registra os tempos, mas não descreve a fronteira exata do cronômetro. O contexto do projeto identificou diferenças na preparação interna medida entre Counting Sort, Bucket Sort e Radix Sort. Antes de afirmar comparação rigorosa entre esses métodos, confirme que o CSV foi coletado com as mesmas regras de cronometragem nas versões finais.
+3. **Proveniência das implementações:** o CSV não identifica hash ou versão do código que produziu cada sessão. Como houve alterações recentes nas implementações, confirme se estes tempos correspondem à versão corrigida; se não, regenere os dados afetados.
+4. **Bucket Sort:** o contexto do projeto registra o uso de `Collections.sort` dentro dos buckets na versão analisada anteriormente. Se essa for a versão que gerou estes dados, os tempos não representam uma implementação totalmente própria da ordenação interna e devem ser considerados provisórios para avaliação acadêmica.
+5. **Ambiente experimental:** não há informação suficiente no CSV sobre processador, RAM, sistema operacional, JDK e parâmetros da JVM. Esses dados devem ser documentados separadamente.
+6. **Entrada aleatória:** a semente 2026 aparece registrada, mas o CSV não contém hash dos vetores. A igualdade exata entre entradas usadas por algoritmos distintos depende do gerador e da forma como a semente é aplicada.
+
+## 9. Conclusões
+
+A base reúne 1.130 medições válidas e 113 configurações completas de 120 previstas, com dez repetições em cada configuração presente. Os resultados apoiam três conclusões descritivas principais: (i) Bubble Sort, Insertion Sort e Selection Sort apresentam crescimento compatível com custo quadrático em entradas aleatórias nos tamanhos disponíveis; (ii) Heap Sort e Quick Sort crescem, em geral, na faixa esperada para n log n; e (iii) Counting Sort e Radix Sort têm menores tempos observados para a família de entradas testada, com custos que crescem aproximadamente com o tamanho e os parâmetros das chaves. Merge Sort apresenta crescimento coerente nos intervalos maiores, mas a transição entre n=1.000 e n=10.000 merece investigação devido à baixa razão observada e à grande dispersão nessa última configuração.
+
+Os dados também mostram grande sensibilidade à disposição em Bubble Sort e Insertion Sort, e comportamento mais estável em relação à disposição em Selection Sort, Merge Sort, Counting Sort e Radix Sort. Antes da redação definitiva do relatório, devem ser confirmadas a versão dos códigos utilizada, a consistência dos cronômetros e a origem dos altos valores nas primeiras repetições de algumas sessões. As sete configurações ausentes devem continuar explicitamente identificadas, sem estimativa.
+
+## 10. Arquivos derivados
+
+- `estatisticas_descritivas_tp1.csv`: estatísticas por algoritmo, tamanho e disposição, com média, mediana, mínimo, máximo, desvio-padrão e CV.
+- `analise_estatistica_csv_tp1.md`: este documento de análise.
+
+### Fórmulas utilizadas
+
+- Conversão: $t_{ms}=t_{ns}/10^6$.
+- Média amostral: $ar{x}=rac{1}{n}\sum_{i=1}^{n}x_i$.
+- Desvio-padrão amostral: $s=\sqrt{rac{1}{n-1}\sum_{i=1}^{n}(x_i-ar{x})^2}$.
+- Coeficiente de variação: $CV=100\cdot s/ar{x}$.
 
 
 
@@ -1404,6 +1589,73 @@ Conferir as convenções definitivas no `CONTRIBUTING.md` do repositório instit
 ---
 
 **Fim do documento.**
+
+
+
+================================================
+FILE: docs/gnuplot.md
+================================================
+# Gráficos do TP1 com Gnuplot
+
+Este script lê diretamente `tempos_consolidados.csv`, calcula estatísticas descritivas usando o comando `stats` do próprio Gnuplot e gera figuras PDF para o relatório SBC/Overleaf.
+
+## Requisitos
+
+- Gnuplot 5.4 ou superior;
+- terminal `pdfcairo` habilitado;
+- CSV consolidado com cabeçalho e colunas nesta ordem:
+
+```text
+algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
+```
+
+## Estrutura esperada
+
+Salve `graficos_tp1.gnuplot` dentro de `TP1/src`. O CSV deve estar em:
+
+```text
+TP1/src/resultados/centralizados/tempos_consolidados.csv
+```
+
+## Executar
+
+No Debian/Ubuntu, instale o Gnuplot (se necessário):
+
+```bash
+sudo apt install gnuplot-nox
+```
+
+Depois execute a partir de `TP1/src`:
+
+```bash
+gnuplot graficos_tp1.gnuplot
+```
+
+Ou informe caminhos diferentes:
+
+```bash
+gnuplot -e "DATA='resultados/centralizados/tempos_consolidados.csv'; OUTDIR='figuras'" graficos_tp1.gnuplot
+```
+
+## Arquivos gerados
+
+A pasta `figuras/` conterá:
+
+- `resumo_estatistico_gnuplot.csv`: média, mediana, mínimo, máximo, desvio-padrão amostral e coeficiente de variação por algoritmo/tamanho/disposição; a cobertura de cada configuração aparece na coluna `n_medicoes`;
+- `10_matriz_cobertura_configuracoes.pdf`: cobertura de todas as configurações;
+- `01_comparacao_n100000_aleatorio.pdf`: comparação de medianas usada no relatório LaTeX;
+- outros 11 gráficos de comparação por tamanho/disposição;
+- `02_evolucao_BubbleSort.pdf`, `03_evolucao_SelectionSort.pdf`, `04_evolucao_MergeSort.pdf`, `05_evolucao_QuickSort.pdf`, `06_evolucao_CountingSort.pdf`, `07_evolucao_RadixSort.pdf`, `08_evolucao_BucketSort.pdf`;
+- `11_evolucao_InsertionSort.pdf`, `12_evolucao_HeapSort.pdf`, `13_evolucao_ShellSort.pdf`;
+- `09_boxplot_n100000_aleatorio.pdf` com as observações individuais do CSV bruto.
+
+As sete configurações ausentes ficam explícitas com `n_medicoes=0` e `NaN` nas estatísticas. O script não inventa tempos para completar a matriz. O gráfico de cobertura e os gráficos de evolução são produzidos a partir das mesmas estatísticas. Se algumas medições vierem de versões antigas dos algoritmos, regenere os dados antes do relatório final.
+
+## Usar no Overleaf
+
+Copie os PDFs para a pasta `figuras/` do projeto Overleaf. Os nomes dos arquivos principais são compatíveis com os `\includegraphics` do relatório SBC compartilhado na conversa.
+
+> Nota: o Gnuplot gera estatísticas com base no comando `stats`; o script utiliza `S_ssd` (desvio-padrão amostral) para a coluna de dispersão. Confira as tabelas acadêmicas finais contra o script estatístico do projeto caso os resultados sejam processados também por outra ferramenta.
 
 
 
@@ -4592,6 +4844,219 @@ public class TestesGenerator {
 
 
 ================================================
+FILE: TP1/src/gnuplot/main.gnuplot
+================================================
+# ============================================================================
+# TP1 - Algoritmos e Classificacao de Dados
+# Geracao de graficos a partir de tempos_consolidados.csv
+# Requer Gnuplot 5.4+ (terminal pdfcairo e estilo boxplot).
+#
+# Execucao a partir de TP1/src:
+#   gnuplot graficos_tp1.gnuplot
+#
+# Caminhos customizados:
+#   gnuplot -e "DATA='resultados/centralizados/tempos_consolidados.csv'; OUTDIR='figuras'" graficos_tp1.gnuplot
+#
+# Saidas:
+#   OUTDIR/resumo_estatistico_gnuplot.csv
+#   OUTDIR/cobertura_gnuplot.csv
+#   PDFs para comparacao, evolucao, boxplot e cobertura.
+# ============================================================================
+
+if (!exists("DATA")) DATA = "resultados/centralizados/tempos_consolidados.csv"
+if (!exists("OUTDIR")) OUTDIR = "figuras"
+
+system sprintf("mkdir -p '%s'", OUTDIR)
+
+# Dados: algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
+set datafile separator comma
+set datafile commentschars "#"
+set encoding utf8
+
+ALGS = "BubbleSort InsertionSort SelectionSort ShellSort HeapSort MergeSort QuickSort CountingSort RadixSort BucketSort"
+DISPS = "CRESCENTE ALEATORIO DECRESCENTE"
+SIZES = "1000 10000 100000 1000000"
+
+# Estatisticas para graficos: mediana em ms e cobertura por configuracao.
+SUMMARY = sprintf("%s/resumo_estatistico_gnuplot.csv", OUTDIR)
+
+set print SUMMARY
+print "algoritmo,algoritmo_id,n,tamanho_id,disposicao,disposicao_id,configuracao_id,n_medicoes,media_ms,mediana_ms,minimo_ms,maximo_ms,desvio_padrao_ms,cv_pct"
+
+do for [ia=1:words(ALGS)] {
+    alg = word(ALGS, ia)
+    do for [id=1:words(DISPS)] {
+        disp = word(DISPS, id)
+        do for [is=1:words(SIZES)] {
+            n = int(word(SIZES, is))
+            config_id = (is - 1) * words(DISPS) + id
+
+            # A coluna t_ns (coluna 8) e convertida de nanossegundos para ms.
+            # Reinicializa o contador para que uma configuracao ausente nao herde
+            # a contagem da configuracao anterior caso stats nao encontre pontos.
+            S_records = 0
+            stats DATA using ((strcol(1) eq alg && $2 == n && strcol(4) eq disp) ? $8/1000000.0 : 1/0) name "S" nooutput
+
+            if (S_records > 0) {
+                cv = (S_mean != 0 ? 100.0 * S_ssd / S_mean : 0.0)
+                print sprintf("%s,%d,%d,%d,%s,%d,%d,%d,%.9f,%.9f,%.9f,%.9f,%.9f,%.6f", alg, ia, n, is, disp, id, config_id, S_records, S_mean, S_median, S_min, S_max, S_ssd, cv)
+            } else {
+                # Mantem as configuracoes ausentes explicitas; NaN cria lacunas nos graficos.
+                print sprintf("%s,%d,%d,%d,%s,%d,%d,0,NaN,NaN,NaN,NaN,NaN,NaN", alg, ia, n, is, disp, id, config_id)
+            }
+        }
+    }
+}
+set print
+
+# ---------------------------------------------------------------------------
+# 1) Matriz de cobertura: cada combinacao algoritmo x tamanho/disposicao.
+# ---------------------------------------------------------------------------
+set terminal pdfcairo enhanced color size 20cm, 11cm font "Arial,9"
+set output sprintf("%s/10_matriz_cobertura_configuracoes.pdf", OUTDIR)
+set title "Cobertura das configuracoes experimentais"
+set xlabel "Tamanho e disposicao da entrada"
+set ylabel "Algoritmo"
+set xrange [0.5:12.5]
+set yrange [10.5:0.5]
+set xtics ("1k\nCresc." 1, "1k\nAleat." 2, "1k\nDecresc." 3, \
+           "10k\nCresc." 4, "10k\nAleat." 5, "10k\nDecresc." 6, \
+           "100k\nCresc." 7, "100k\nAleat." 8, "100k\nDecresc." 9, \
+           "1M\nCresc." 10, "1M\nAleat." 11, "1M\nDecresc." 12)
+set ytics ("BubbleSort" 1, "InsertionSort" 2, "SelectionSort" 3, "ShellSort" 4, "HeapSort" 5, "MergeSort" 6, "QuickSort" 7, "CountingSort" 8, "RadixSort" 9, "BucketSort" 10)
+set grid xtics ytics
+set key off
+set colorbox
+set cbrange [0:1]
+set cbtics ("Ausente" 0, "Completa" 1)
+set palette defined (0 "#c85b55", 1 "#4b956c")
+plot SUMMARY using 7:2:(($8 == 10) ? 1 : 0) with points pointtype 5 pointsize 2.5 palette notitle
+unset output
+
+# ---------------------------------------------------------------------------
+# 2) Comparacao de medianas entre algoritmos para cada tamanho/disposicao.
+#    E usado grafico de pontos, pois escala logaritmica nao combina com barras
+#    que partem de zero. O arquivo para n=100000 aleatorio segue o nome do LaTeX.
+# ---------------------------------------------------------------------------
+set terminal pdfcairo enhanced color size 17cm, 9.5cm font "Arial,10"
+set logscale y 10
+set format y "10^{%L}"
+set xlabel "Algoritmo"
+set ylabel "Mediana do tempo (ms) - escala logaritmica"
+set xrange [0.4:10.6]
+set xtics ("Bubble" 1, "Insertion" 2, "Selection" 3, "Shell" 4, "Heap" 5, "Merge" 6, "Quick" 7, "Counting" 8, "Radix" 9, "Bucket" 10) rotate by -25
+set grid ytics
+set key off
+
+do for [is=1:words(SIZES)] {
+    n = int(word(SIZES, is))
+    do for [id=1:words(DISPS)] {
+        disp = word(DISPS, id)
+        if (n == 100000 && disp eq "ALEATORIO") {
+            fname = sprintf("%s/01_comparacao_n100000_aleatorio.pdf", OUTDIR)
+        } else {
+            fname = sprintf("%s/comparacao_n%d_%s.pdf", OUTDIR, n, disp)
+        }
+        set output fname
+        set title sprintf("Comparacao dos algoritmos - n=%d - %s", n, disp)
+        plot SUMMARY using ((($3 == n && strcol(5) eq disp) ? $2 : 1/0)):((($3 == n && strcol(5) eq disp) ? $10 : 1/0)) with points pointtype 7 pointsize 1.5 notitle
+        unset output
+    }
+}
+unset logscale y
+set format y "%g"
+
+# ---------------------------------------------------------------------------
+# 3) Evolucao das medianas para cada algoritmo, por disposicao.
+#    NaN nas configuracoes ausentes evita inventar tempos ou interpolar dados.
+# ---------------------------------------------------------------------------
+set terminal pdfcairo enhanced color size 16cm, 9cm font "Arial,10"
+set logscale x 10
+set logscale y 10
+set format x "10^{%L}"
+set format y "10^{%L}"
+set xlabel "Tamanho da entrada (n)"
+set ylabel "Mediana do tempo (ms) - escala logaritmica"
+set xrange [800:1300000]
+set grid xtics ytics mxtics mytics
+set key outside top center horizontal
+
+# Os nomes dos arquivos Bubble, Selection, Merge, Quick, Counting, Radix e
+# Bucket correspondem aos includes ja usados no documento SBC do projeto.
+do for [ia=1:words(ALGS)] {
+    alg = word(ALGS, ia)
+    if (alg eq "BubbleSort") {
+        fname = sprintf("%s/02_evolucao_BubbleSort.pdf", OUTDIR)
+    } else if (alg eq "SelectionSort") {
+        fname = sprintf("%s/03_evolucao_SelectionSort.pdf", OUTDIR)
+    } else if (alg eq "MergeSort") {
+        fname = sprintf("%s/04_evolucao_MergeSort.pdf", OUTDIR)
+    } else if (alg eq "QuickSort") {
+        fname = sprintf("%s/05_evolucao_QuickSort.pdf", OUTDIR)
+    } else if (alg eq "CountingSort") {
+        fname = sprintf("%s/06_evolucao_CountingSort.pdf", OUTDIR)
+    } else if (alg eq "RadixSort") {
+        fname = sprintf("%s/07_evolucao_RadixSort.pdf", OUTDIR)
+    } else if (alg eq "BucketSort") {
+        fname = sprintf("%s/08_evolucao_BucketSort.pdf", OUTDIR)
+    } else if (alg eq "InsertionSort") {
+        fname = sprintf("%s/11_evolucao_InsertionSort.pdf", OUTDIR)
+    } else if (alg eq "HeapSort") {
+        fname = sprintf("%s/12_evolucao_HeapSort.pdf", OUTDIR)
+    } else {
+        fname = sprintf("%s/13_evolucao_ShellSort.pdf", OUTDIR)
+    }
+
+    set output fname
+    set title sprintf("Evolucao do tempo - %s", alg)
+    plot SUMMARY using ((strcol(1) eq alg && strcol(5) eq "CRESCENTE") ? $3 : 1/0):((strcol(1) eq alg && strcol(5) eq "CRESCENTE") ? $10 : 1/0) with linespoints linewidth 2 pointtype 7 title "Crescente", \
+         SUMMARY using ((strcol(1) eq alg && strcol(5) eq "ALEATORIO") ? $3 : 1/0):((strcol(1) eq alg && strcol(5) eq "ALEATORIO") ? $10 : 1/0) with linespoints linewidth 2 pointtype 5 title "Aleatoria", \
+         SUMMARY using ((strcol(1) eq alg && strcol(5) eq "DECRESCENTE") ? $3 : 1/0):((strcol(1) eq alg && strcol(5) eq "DECRESCENTE") ? $10 : 1/0) with linespoints linewidth 2 pointtype 9 title "Decrescente"
+    unset output
+}
+unset logscale x
+unset logscale y
+set format x "%g"
+set format y "%g"
+
+# ---------------------------------------------------------------------------
+# 4) Boxplot das 10 repeticoes para n=100000 aleatorio, diretamente do CSV bruto.
+# ---------------------------------------------------------------------------
+set terminal pdfcairo enhanced color size 19cm, 10cm font "Arial,9"
+set output sprintf("%s/09_boxplot_n100000_aleatorio.pdf", OUTDIR)
+set title "Distribuicao das medicoes - n=100000 - entrada aleatoria"
+set xlabel "Algoritmo"
+set ylabel "Tempo de execucao (ms) - escala logaritmica"
+set logscale y 10
+set format y "10^{%L}"
+set xrange [0.5:10.5]
+set xtics ("Bubble" 1, "Insertion" 2, "Selection" 3, "Shell" 4, "Heap" 5, "Merge" 6, "Quick" 7, "Counting" 8, "Radix" 9, "Bucket" 10) rotate by -25
+set grid ytics
+set key off
+set style data boxplot
+set style boxplot outliers pointtype 7
+set style boxplot range 1.5
+plot DATA using ((strcol(1) eq "BubbleSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 1 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "InsertionSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 2 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "SelectionSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 3 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "ShellSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 4 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "HeapSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 5 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "MergeSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 6 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "QuickSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 7 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "CountingSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 8 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "RadixSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 9 : 1/0):($8/1000000.0) with boxplot, \
+     DATA using ((strcol(1) eq "BucketSort" && $2 == 100000 && strcol(4) eq "ALEATORIO") ? 10 : 1/0):($8/1000000.0) with boxplot
+unset output
+unset logscale y
+set format y "%g"
+
+print sprintf("Graficos gerados em: %s", OUTDIR)
+print sprintf("Resumo estatistico: %s", SUMMARY)
+print sprintf("Fonte de dados: %s", DATA)
+
+
+
+================================================
 FILE: TP1/src/resultados/.gitkeep
 ================================================
 [Empty file]
@@ -6856,126 +7321,6 @@ ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,10,3490304896
 
 
 ================================================
-FILE: TP1/src/resultados/centralizados/integridade_configuracoes.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,quantidade_medicoes,tempos_zero,tempos_negativos,repeticoes_duplicadas,repeticoes_encontradas
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,10,0,0,0,1;2;3;4;5;6;7;8;9;10
-
-
-
-================================================
 FILE: TP1/src/resultados/centralizados/tempos_consolidados.csv
 ================================================
 algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
@@ -8109,1579 +8454,5 @@ ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,7,1370493634
 ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,8,1363406946
 ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,9,1362276853
 ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,10,1363036428
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/BubbleSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,1,35857498
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,2,35739698
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,3,35205559
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,4,35013720
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,5,35900326
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,6,35665567
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,7,36045903
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,8,35622904
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,9,36383666
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,10,35643213
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,1,106406
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,2,107283
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,3,106294
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,4,103118
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,5,117278
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,6,115345
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,7,101632
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,8,101747
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,9,101387
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,10,101265
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,1,51651470
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,2,49546729
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,3,49158771
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,4,48698162
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,5,49818880
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,6,53667605
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,7,53277338
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,8,53265353
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,9,52557316
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,10,48444888
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,1,3261851256
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,2,3268531574
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,3,3240032368
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,4,3258192813
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,5,3240115591
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,6,3255177272
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,7,3251346348
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,8,3238270806
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,9,3257372669
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,10,3280010071
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,1,897098
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,2,889974
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,3,897560
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,4,889605
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,5,779650
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,6,373940
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,7,339442
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,8,320018
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,9,330205
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,10,319063
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,1,4866041186
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,2,4855141921
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,3,4861265098
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,4,4875043972
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,5,4879372604
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,6,4861065573
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,7,4858218562
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,8,4951829528
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,9,4903222751
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,10,4969256640
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,1,325055611733
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,2,325250118679
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,3,325263838133
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,4,325111895457
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,5,325084201903
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,6,325634692294
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,7,325094898880
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,8,325039386878
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,9,325054686436
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,10,325005083307
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,1,3711013
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,2,3545798
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,3,3539611
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,4,3537316
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,5,3536966
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,6,3539721
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,7,3538873
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,8,3533386
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,9,3533113
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,10,3532204
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,1,491641916051
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,2,489882346923
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,3,486418765002
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,4,487956205957
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,5,488737659184
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,6,485455991967
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,7,485514947988
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,8,485693945073
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,9,486021269420
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,10,485559302461
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,1,34949544
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,2,34596096
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,3,34206422
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,4,34636090
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,5,35411420
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,6,35075107
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,7,33108627
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,8,35090927
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,9,35070984
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,10,34771243
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/BucketSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,1,810402
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,2,783658
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,3,827477
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,4,775354
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,5,795251
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,6,766827
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,7,741970
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,8,689178
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,9,696427
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,10,734063
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,1,688733
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,2,461684
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,3,436074
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,4,424259
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,5,434311
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,6,466221
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,7,430882
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,8,532296
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,9,427306
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,10,448280
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,1,529215
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,2,494105
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,3,451757
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,4,439775
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,5,444602
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,6,434256
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,7,440678
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,8,454253
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,9,422843
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,10,419844
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,1,5272884
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,2,4311252
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,3,3334966
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,4,3067933
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,5,2232495
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,6,1958800
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,7,2180740
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,8,1956745
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,9,1998751
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,10,1900603
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,1,4265695
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,2,3310822
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,3,2561011
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,4,2540098
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,5,1611826
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,6,1379661
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,7,1274298
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,8,1376514
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,9,1317046
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,10,1323749
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,1,4137561
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,2,3381708
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,3,2496285
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,4,2460644
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,5,1670384
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,6,1378567
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,7,1319600
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,8,1293090
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,9,1264022
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,10,1329091
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,1,21753149
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,2,18721565
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,3,18847733
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,4,17610418
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,5,17520931
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,6,18099904
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,7,19047981
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,8,18458162
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,9,17326783
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,10,16925389
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,1,11340835
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,2,10378350
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,3,9710086
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,4,9428350
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,5,9472656
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,6,10718789
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,7,10774647
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,8,10762481
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,9,10783691
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,10,9848040
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,1,11419514
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,2,10425360
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,3,10046191
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,4,10115747
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,5,10030345
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,6,10577297
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,7,11045348
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,8,11067300
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,9,11024544
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,10,10043849
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,1,230103430
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,2,212304241
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,3,221781061
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,4,212996636
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,5,202464160
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,6,211589665
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,7,200203503
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,8,207798105
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,9,202765419
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,10,211824877
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,1,123506959
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,2,111044033
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,3,115574269
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,4,115965910
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,5,109182788
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,6,110616542
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,7,118996743
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,8,104283379
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,9,102903524
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,10,107687352
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,1,129206152
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,2,114224892
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,3,117781315
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,4,122416834
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,5,116239712
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,6,112309863
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,7,120007120
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,8,106952522
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,9,102083494
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,10,99380043
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/CountingSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,1,315752
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,2,293672
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,3,284108
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,4,277475
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,5,281349
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,6,280706
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,7,286774
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,8,279791
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,9,276748
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,10,273358
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,1,284836
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,2,281752
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,3,273812
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,4,281387
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,5,275999
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,6,275939
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,7,274403
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,8,280697
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,9,318093
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,10,328942
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,1,280454
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,2,276881
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,3,295220
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,4,271768
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,5,291232
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,6,307017
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,7,283462
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,8,289137
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,9,296079
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,10,272371
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,1,3005280
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,2,2165197
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,3,2127061
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,4,2008070
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,5,1146991
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,6,912476
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,7,848662
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,8,916409
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,9,924252
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,10,942578
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,1,2869055
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,2,1978171
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,3,1947272
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,4,1973466
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,5,1135272
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,6,905758
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,7,841446
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,8,950422
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,9,926298
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,10,1136185
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,1,2776841
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,2,2496473
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,3,2482614
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,4,2472263
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,5,1268051
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,6,1063290
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,7,1030958
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,8,956988
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,9,1119805
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,10,1165212
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,1,9413380
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,2,8020859
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,3,7827143
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,4,7363382
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,5,7133917
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,6,7198166
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,7,7210668
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,8,7229423
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,9,7182081
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,10,7209549
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,1,8187394
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,2,7761472
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,3,7806676
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,4,9947314
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,5,7459042
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,6,7296909
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,7,7275726
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,8,8505871
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,9,7887863
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,10,7881526
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,1,7623400
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,2,7688118
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,3,7683243
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,4,10077847
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,5,7241866
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,6,7164561
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,7,7288489
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,8,7229070
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,9,7185233
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,10,7190249
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,1,87266941
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,2,89618853
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,3,81898917
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,4,81308335
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,5,91572297
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,6,78554661
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,7,94590688
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,8,90455728
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,9,82245358
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,10,92201325
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,1,73953931
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,2,81957987
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,3,78197538
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,4,77634112
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,5,87054907
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,6,76306186
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,7,90055277
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,8,75396685
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,9,73281712
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,10,73692152
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,1,82057036
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,2,82020266
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,3,76877862
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,4,77915866
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,5,83995123
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,6,73677380
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,7,89097901
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,8,75609359
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,9,73303935
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,10,73694858
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/HeapSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,1,1499935
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,2,1540546
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,3,1327424
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,4,1526788
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,5,1437442
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,6,1320205
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,7,1320092
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,8,1321179
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,9,1320382
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,10,1320317
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,1,1324249
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,2,1398286
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,3,1477014
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,4,1397873
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,5,1463365
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,6,1392715
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,7,1396685
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,8,1409825
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,9,1391503
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,10,1405629
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,1,1160319
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,2,1167582
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,3,1238707
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,4,1241439
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,5,1241809
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,6,1232459
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,7,1235272
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,8,1236742
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,9,1234687
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,10,1234620
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,1,18452370
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,2,27553367
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,3,17448957
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,4,17219761
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,5,17194422
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,6,17272657
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,7,17296597
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,8,17183473
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,9,16949500
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,10,16454879
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,1,18860979
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,2,18909630
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,3,18221579
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,4,18194009
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,5,18210313
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,6,18316381
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,7,18362679
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,8,18234290
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,9,18025667
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,10,17083239
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,1,17290944
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,2,17029122
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,3,15800687
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,4,15331751
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,5,16289347
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,6,16447783
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,7,16330679
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,8,16314527
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,9,16140929
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,10,16283841
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,1,206817625
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,2,201272137
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,3,209922770
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,4,201446206
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,5,200874554
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,6,205749833
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,7,201079044
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,8,201023709
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,9,202070913
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,10,200883794
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,1,216343781
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,2,226926975
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,3,227081308
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,4,227054124
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,5,218648715
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,6,208221803
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,7,213085486
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,8,208169716
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,9,208971233
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,10,208001810
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,1,195547326
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,2,192135411
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,3,192502106
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,4,195258142
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,5,192088937
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,6,192261999
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,7,199771772
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,8,197222588
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,9,200712888
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,10,193090861
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,1,2585118664
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,2,2561463665
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,3,2582902220
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,4,2555906523
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,5,2579138004
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,6,2565128040
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,7,2575345272
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,8,2575675020
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,9,2583718329
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,10,2555215494
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,1,2593141627
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,2,2570462680
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,3,2578872699
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,4,2567968706
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,5,2587805736
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,6,2571278824
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,7,2580937442
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,8,2572767878
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,9,2603942559
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,10,2587480065
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,1,2462576315
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,2,2432977772
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,3,2449368635
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,4,2429495551
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,5,2445737993
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,6,2429477166
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,7,2443906859
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,8,2428185683
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,9,2496903505
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,10,2432087382
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/InsertionSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,1,14455971
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,2,13923180
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,3,14123077
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,4,13960630
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,5,13952001
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,6,13920712
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,7,13860179
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,8,13899277
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,9,13901847
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,10,13967214
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,1,125497
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,2,125640
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,3,122945
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,4,126538
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,5,120836
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,6,120495
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,7,127260
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,8,122221
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,9,122557
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,10,130402
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,1,26952789
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,2,26852138
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,3,26569778
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,4,25934056
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,5,26662474
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,6,26367423
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,7,26610525
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,8,26646753
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,9,26869029
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,10,26947037
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,1,1314190017
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,2,1311589144
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,3,1308674372
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,4,1305115756
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,5,1299850089
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,6,1326983448
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,7,1290746671
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,8,1290946309
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,9,1288539468
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,10,1297963995
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,1,1213907
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,2,1241067
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,3,1264721
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,4,1311650
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,5,1105353
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,6,606400
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,7,522829
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,8,518329
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,9,543896
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,10,564191
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,1,2561800959
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,2,2585258393
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,3,2603329043
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,4,2630877703
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,5,2628390059
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,6,2628625965
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,7,2549825986
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,8,2506202992
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,9,2525192834
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,10,2599146573
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,1,121534126682
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,2,121431049593
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,3,121861680898
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,4,121675399274
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,5,121801969024
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,6,123142041845
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,7,124308390606
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,8,121080959194
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,9,121060137169
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,10,121629136973
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,1,5441327
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,2,5308851
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,3,5310927
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,4,5308675
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,5,5305743
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,6,5306997
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,7,5384602
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,8,5308082
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,9,5358344
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,10,5309946
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,1,244445565730
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,2,243070838849
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,3,242974084406
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,4,244291110821
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,5,243578571897
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,6,243159943101
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,7,243234859135
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,8,243184566999
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,9,243099735241
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,10,242909713021
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,1,54547954
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,2,53090790
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,3,52927583
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,4,53291284
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,5,52836194
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,6,54387075
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,7,54174545
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,8,52827477
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,9,52593536
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,10,52655950
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/MergeSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,1,1576091
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,2,1689248
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,3,1701764
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,4,1617665
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,5,1416682
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,6,1371431
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,7,1364613
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,8,1427837
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,9,1318170
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,10,1404623
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,1,1556988
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,2,1134853
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,3,1133387
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,4,1176049
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,5,1118345
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,6,1131100
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,7,1170731
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,8,1116380
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,9,1120040
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,10,1127183
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,1,1595957
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,2,1421674
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,3,1489782
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,4,1440696
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,5,1210920
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,6,1166500
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,7,1159880
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,8,1137963
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,9,1149297
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,10,1134725
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,1,15178525
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,2,7407384
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,3,4271511
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,4,3816472
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,5,4695764
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,6,3078436
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,7,3038184
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,8,3010352
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,9,2990021
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,10,2999275
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,1,12475714
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,2,5634600
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,3,3385072
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,4,3424888
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,5,4444872
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,6,3106529
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,7,2978170
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,8,2965084
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,9,2970915
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,10,2970035
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,1,12330660
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,2,3864060
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,3,3216700
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,4,3199600
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,5,4611079
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,6,2967948
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,7,2843876
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,8,2839171
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,9,2859341
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,10,2847698
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,1,51646896
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,2,53581675
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,3,55019295
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,4,55244302
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,5,55945873
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,6,57643865
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,7,50599611
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,8,49760892
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,9,52009920
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,10,48206401
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,1,54192571
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,2,53869251
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,3,57021566
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,4,54978905
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,5,54909899
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,6,54130874
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,7,47874067
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,8,49029953
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,9,48179859
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,10,47573828
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,1,52418057
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,2,56215618
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,3,58523535
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,4,59225779
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,5,58603378
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,6,57480059
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,7,51888909
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,8,52361174
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,9,50281904
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,10,51169996
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,1,669138898
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,2,669807379
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,3,667016650
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,4,644418391
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,5,658213412
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,6,636581546
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,7,675675479
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,8,671250719
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,9,686192965
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,10,667317793
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,1,646616989
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,2,653513462
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,3,632300312
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,4,628487165
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,5,616677579
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,6,638971339
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,7,613769452
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,8,620748990
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,9,642516846
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,10,621211947
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,1,639870082
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,2,639376211
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,3,633464701
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,4,642422395
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,5,625421228
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,6,635597569
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,7,612735818
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,8,615353594
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,9,645638150
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,10,610801042
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/QuickSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,1,738418
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,2,728863
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,3,735233
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,4,701819
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,5,733973
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,6,735238
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,7,727207
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,8,723307
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,9,740154
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,10,724062
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,1,522258
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,2,516451
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,3,502572
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,4,513974
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,5,505815
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,6,502972
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,7,501706
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,8,520063
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,9,503623
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,10,502062
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,1,660397
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,2,656322
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,3,585292
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,4,550909
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,5,549990
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,6,641114
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,7,639168
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,8,635622
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,9,653454
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,10,638382
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,1,9253858
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,2,9231928
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,3,9043064
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,4,9093194
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,5,9093487
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,6,9054660
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,7,9095873
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,8,9115166
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,9,9792918
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,10,9082308
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,1,6885690
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,2,6824470
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,3,6823965
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,4,6817351
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,5,6818409
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,6,6765246
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,7,6674268
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,8,6857446
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,9,6815970
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,10,6821173
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,1,7645478
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,2,7346451
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,3,7338915
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,4,7355314
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,5,7350378
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,6,7331675
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,7,7378394
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,8,7332605
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,9,7425565
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,10,7087122
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,1,119539401
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,2,117600723
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,3,115435077
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,4,116734708
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,5,115037212
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,6,115302334
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,7,114826147
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,8,114984560
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,9,114716271
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,10,116931052
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,1,83578714
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,2,80338956
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,3,80337610
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,4,81130153
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,5,87210242
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,6,85601365
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,7,87214873
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,8,87083165
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,9,87233033
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,10,87230142
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,1,91644261
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,2,88479647
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,3,87156503
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,4,84764500
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,5,85637080
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,6,86273733
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,7,86080865
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,8,85047879
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,9,84481830
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,10,84355658
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,1,1341024551
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,2,1347069565
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,3,1349159906
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,4,1359740733
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,5,1382100682
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,6,1338986320
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,7,1335978686
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,8,1354155250
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,9,1361549041
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,10,1341064862
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,1,1007518231
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,2,994583266
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,3,991143380
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,4,993839636
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,5,993597544
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,6,993611729
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,7,974969680
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,8,979204713
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,9,976916250
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,10,975860435
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,1,1033894485
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,2,1036417744
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,3,1030897263
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,4,1055034830
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,5,1039565939
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,6,1028369401
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,7,1032708232
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,8,1042549824
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,9,1028903617
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,10,1032322017
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/RadixSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,1,465865
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,2,479785
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,3,473009
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,4,145678
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,5,156675
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,6,142541
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,7,122717
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,8,121434
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,9,122516
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,10,127344
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,1,496259
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,2,473741
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,3,211584
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,4,150980
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,5,128362
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,6,121822
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,7,127814
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,8,127929
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,9,127921
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,10,121596
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,1,484822
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,2,481041
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,3,194184
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,4,139549
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,5,135959
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,6,129174
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,7,138145
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,8,123603
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,9,124127
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,10,128176
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,1,1733139
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,2,734248
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,3,737267
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,4,721516
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,5,725829
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,6,725463
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,7,724429
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,8,727737
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,9,721131
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,10,726241
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,1,1367962
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,2,746263
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,3,735774
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,4,729258
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,5,723652
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,6,745373
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,7,731560
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,8,733242
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,9,732724
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,10,727179
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,1,1339181
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,2,1244419
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,3,1231513
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,4,732583
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,5,729865
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,6,729723
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,7,734883
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,8,728985
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,9,728016
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,10,734667
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,1,7360724
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,2,7337233
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,3,7255074
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,4,7268493
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,5,7166226
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,6,6908778
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,7,6896236
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,8,6949309
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,9,6892581
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,10,6956161
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,1,7422254
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,2,7343323
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,3,7183674
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,4,7003815
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,5,9227922
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,6,6861411
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,7,7000614
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,8,7021345
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,9,6957813
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,10,6796009
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,1,9693844
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,2,9512809
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,3,7302404
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,4,7290039
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,5,9566028
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,6,7131434
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,7,7064542
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,8,7040407
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,9,7038491
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,10,7084761
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,1,78603750
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,2,70884318
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,3,75827642
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,4,86267807
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,5,71748858
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,6,76844239
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,7,75946535
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,8,76040401
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,9,88418296
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,10,71742035
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,1,69694904
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,2,74710132
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,3,75350648
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,4,84407411
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,5,71818088
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,6,73250810
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,7,71906502
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,8,72059497
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,9,71962908
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,10,71755786
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,1,68443624
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,2,71109180
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,3,71972921
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,4,82966025
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,5,66708258
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,6,71521588
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,7,73219682
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,8,72787555
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,9,71802937
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,10,71726798
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/SelectionSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,1,18067206
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,2,17855687
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,3,17133695
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,4,16268960
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,5,16247957
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,6,16509083
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,7,16312110
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,8,16394861
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,9,16652052
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,10,16238951
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,1,17818738
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,2,17709753
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,3,16875698
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,4,17147339
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,5,17045177
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,6,16883128
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,7,16443113
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,8,16281220
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,9,16121211
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,10,16234981
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,1,17853899
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,2,17809754
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,3,16956182
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,4,17368388
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,5,17685855
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,6,17805706
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,7,17083941
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,8,16958190
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,9,16421301
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,10,16362899
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,1,1745275989
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,2,1680214927
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,3,1688739379
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,4,1634808694
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,5,1633857286
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,6,1628785738
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,7,1645230494
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,8,1638728292
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,9,1629840263
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,10,1636148435
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,1,1745334487
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,2,1713892709
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,3,1696059127
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,4,1704613514
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,5,1682982147
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,6,1793469479
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,7,1796612611
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,8,1659631440
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,9,1617012249
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,10,1631608717
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,1,1720501196
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,2,1765957155
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,3,1798076799
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,4,1715622227
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,5,1687825487
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,6,1679652926
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,7,1738314340
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,8,1716981998
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,9,1677345234
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,10,1687094110
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,1,162581592606
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,2,162663848103
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,3,162963700711
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,4,162585711536
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,5,162534451095
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,6,162567854194
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,7,162730926297
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,8,162575939175
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,9,162639250491
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,10,162592446149
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,1,162529793674
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,2,162033342807
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,3,161946082809
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,4,161980569388
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,5,161866729808
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,6,162105099160
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,7,162169314052
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,8,162078655258
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,9,161954815605
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,10,161920233426
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,1,161996615610
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,2,162018784215
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,3,162054707395
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,4,162089906014
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,5,163438739354
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,6,162355872518
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,7,162568670714
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,8,162238945858
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,9,161975746842
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,10,162053559735
-
-
-
-================================================
-FILE: TP1/src/resultados/centralizados/por_algoritmo/ShellSort.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,repeticao,t_ns
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,1,2102533
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,2,2054165
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,3,1007456
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,4,919392
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,5,925470
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,6,911210
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,7,907345
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,8,917115
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,9,911300
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,10,916929
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,1,997711
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,2,972796
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,3,984175
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,4,986053
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,5,984654
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,6,988464
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,7,552745
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,8,457491
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,9,395892
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,10,395788
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,1,1502678
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,2,1509732
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,3,1520356
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,4,696038
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,5,652276
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,6,624387
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,7,612391
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,8,611495
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,9,609653
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,10,610899
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,1,14198376
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,2,14407656
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,3,14145184
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,4,14085648
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,5,14083576
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,6,14120474
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,7,14167822
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,8,14134940
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,9,14121354
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,10,14158691
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,1,6423002
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,2,6386160
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,3,6384813
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,4,6380159
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,5,6379548
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,6,6161878
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,7,6119791
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,8,6166784
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,9,6147638
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,10,6089725
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,1,9974157
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,2,9868661
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,3,10013055
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,4,9734874
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,5,9612450
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,6,9516973
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,7,9563177
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,8,9488654
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,9,9052707
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,10,8711297
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,1,212165206
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,2,208491058
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,3,218563364
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,4,208395417
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,5,208789505
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,6,207861583
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,7,207161867
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,8,213872412
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,9,207647488
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,10,207272450
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,1,79716380
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,2,80336494
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,3,80419261
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,4,80360975
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,5,80361771
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,6,81185444
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,7,78817849
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,8,73753484
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,9,73440542
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,10,73147918
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,1,122342288
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,2,120587764
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,3,122737139
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,4,119121150
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,5,114777214
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,6,112672942
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,7,115081859
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,8,116175880
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,9,113568480
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,10,113752516
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,1,3492334051
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,2,3493132809
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,3,3492682084
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,4,3489664313
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,5,3492571697
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,6,3496195572
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,7,3494493450
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,8,3485965523
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,9,3492401887
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,10,3490304896
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,1,915433052
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,2,922114410
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,3,928332386
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,4,924435224
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,5,918392221
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,6,917135096
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,7,930480249
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,8,916495664
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,9,922152658
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,10,923108421
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,1,1362785360
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,2,1367158866
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,3,1370548232
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,4,1402485512
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,5,1362777006
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,6,1364329364
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,7,1370493634
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,8,1363406946
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,9,1362276853
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,10,1363036428
-
-
-
-================================================
-FILE: TP1/src/resultados/estatisticas/anomalias_dados.csv
-================================================
-linha_csv,motivo,algoritmo,n,caso,disposicao,repeticao,t_ns
-
-
-
-================================================
-FILE: TP1/src/resultados/estatisticas/cobertura_configuracoes.csv
-================================================
-algoritmo,n,caso,disposicao,medicoes_encontradas,repeticoes_esperadas_minimas,status
-BubbleSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-BubbleSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-BubbleSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-BubbleSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-BubbleSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-BubbleSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-BubbleSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-BubbleSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-BubbleSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-BubbleSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-BubbleSort,1000000,MEDIO,ALEATORIO,0,10,AUSENTE
-BubbleSort,1000000,PIOR,DECRESCENTE,0,10,AUSENTE
-InsertionSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-InsertionSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-InsertionSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-InsertionSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-InsertionSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-InsertionSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-InsertionSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-InsertionSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-InsertionSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-InsertionSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-InsertionSort,1000000,MEDIO,ALEATORIO,0,10,AUSENTE
-InsertionSort,1000000,PIOR,DECRESCENTE,0,10,AUSENTE
-SelectionSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-SelectionSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-SelectionSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-SelectionSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-SelectionSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-SelectionSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-SelectionSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-SelectionSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-SelectionSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-SelectionSort,1000000,MELHOR,CRESCENTE,0,10,AUSENTE
-SelectionSort,1000000,MEDIO,ALEATORIO,0,10,AUSENTE
-SelectionSort,1000000,PIOR,DECRESCENTE,0,10,AUSENTE
-ShellSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-ShellSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-ShellSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-ShellSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-ShellSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-ShellSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-ShellSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-ShellSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-ShellSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-ShellSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-ShellSort,1000000,MEDIO,ALEATORIO,10,10,COMPLETA
-ShellSort,1000000,PIOR,DECRESCENTE,10,10,COMPLETA
-HeapSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-HeapSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-HeapSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-HeapSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-HeapSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-HeapSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-HeapSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-HeapSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-HeapSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-HeapSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-HeapSort,1000000,MEDIO,ALEATORIO,10,10,COMPLETA
-HeapSort,1000000,PIOR,DECRESCENTE,10,10,COMPLETA
-MergeSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-MergeSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-MergeSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-MergeSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-MergeSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-MergeSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-MergeSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-MergeSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-MergeSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-MergeSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-MergeSort,1000000,MEDIO,ALEATORIO,10,10,COMPLETA
-MergeSort,1000000,PIOR,DECRESCENTE,10,10,COMPLETA
-QuickSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-QuickSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-QuickSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-QuickSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-QuickSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-QuickSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-QuickSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-QuickSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-QuickSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-QuickSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-QuickSort,1000000,MEDIO,ALEATORIO,10,10,COMPLETA
-QuickSort,1000000,PIOR,DECRESCENTE,10,10,COMPLETA
-CountingSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-CountingSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-CountingSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-CountingSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-CountingSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-CountingSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-CountingSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-CountingSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-CountingSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-CountingSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-CountingSort,1000000,MEDIO,ALEATORIO,10,10,COMPLETA
-CountingSort,1000000,PIOR,DECRESCENTE,10,10,COMPLETA
-RadixSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-RadixSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-RadixSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-RadixSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-RadixSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-RadixSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-RadixSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-RadixSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-RadixSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-RadixSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-RadixSort,1000000,MEDIO,ALEATORIO,10,10,COMPLETA
-RadixSort,1000000,PIOR,DECRESCENTE,10,10,COMPLETA
-BucketSort,1000,MELHOR,CRESCENTE,10,10,COMPLETA
-BucketSort,1000,MEDIO,ALEATORIO,10,10,COMPLETA
-BucketSort,1000,PIOR,DECRESCENTE,10,10,COMPLETA
-BucketSort,10000,MELHOR,CRESCENTE,10,10,COMPLETA
-BucketSort,10000,MEDIO,ALEATORIO,10,10,COMPLETA
-BucketSort,10000,PIOR,DECRESCENTE,10,10,COMPLETA
-BucketSort,100000,MELHOR,CRESCENTE,10,10,COMPLETA
-BucketSort,100000,MEDIO,ALEATORIO,10,10,COMPLETA
-BucketSort,100000,PIOR,DECRESCENTE,10,10,COMPLETA
-BucketSort,1000000,MELHOR,CRESCENTE,10,10,COMPLETA
-BucketSort,1000000,MEDIO,ALEATORIO,10,10,COMPLETA
-BucketSort,1000000,PIOR,DECRESCENTE,10,10,COMPLETA
-
-
-
-================================================
-FILE: TP1/src/resultados/estatisticas/estatisticas_por_configuracao.csv
-================================================
-algoritmo,n,caso,disposicao,quantidade_medicoes,quantidade_sessoes,quantidade_sementes,media_ns,mediana_ns,minimo_ns,maximo_ns,desvio_padrao_ns,media_ms,mediana_ms,minimo_ms,maximo_ms,desvio_padrao_ms,coeficiente_variacao_pct
-BubbleSort,1000,MEDIO,ALEATORIO,10,1,1,35707805.400000,35702632.500000,35013720,36383666,391401.644905,35.708,35.703,35.014,36.384,0.391,1.096
-BubbleSort,1000,MELHOR,CRESCENTE,10,1,1,106175.500000,104706.000000,101265,117278,5824.135782,0.106,0.105,0.101,0.117,0.006,5.485
-BubbleSort,1000,PIOR,DECRESCENTE,10,1,1,51008651.200000,50735175.000000,48444888,53667605,2081861.551168,51.009,50.735,48.445,53.668,2.082,4.081
-BubbleSort,10000,MEDIO,ALEATORIO,10,1,1,3255090076.800000,3256274970.500000,3238270806,3280010071,13375398.224655,3255.090,3256.275,3238.271,3280.010,13.375,0.411
-BubbleSort,10000,MELHOR,CRESCENTE,10,1,1,603655.500000,576795.000000,319063,897560,284019.581266,0.604,0.577,0.319,0.898,0.284,47.050
-BubbleSort,10000,PIOR,DECRESCENTE,10,1,1,4888045783.500000,4870542579.000000,4855141921,4969256640,40879018.332910,4888.046,4870.543,4855.142,4969.257,40.879,0.836
-BubbleSort,100000,MEDIO,ALEATORIO,10,1,1,325159441370.000000,325089550391.500000,325005083307,325634692294,187695233.434845,325159.441,325089.550,325005.083,325634.692,187.695,0.058
-BubbleSort,100000,MELHOR,CRESCENTE,10,1,1,3554800.100000,3538094.500000,3532204,3711013,55033.822991,3.555,3.538,3.532,3.711,0.055,1.548
-BubbleSort,100000,PIOR,DECRESCENTE,10,1,1,487288235002.599976,486220017211.000000,485455991967,491641916051,2176255202.059651,487288.235,486220.017,485455.992,491641.916,2176.255,0.447
-BubbleSort,1000000,MELHOR,CRESCENTE,10,1,1,34691646.000000,34860393.500000,33108627,35411420,649349.623494,34.692,34.860,33.109,35.411,0.649,1.872
-BucketSort,1000,MEDIO,ALEATORIO,10,1,1,762060.700000,771090.500000,689178,827477,46176.978848,0.762,0.771,0.689,0.827,0.046,6.059
-BucketSort,1000,MELHOR,CRESCENTE,10,1,1,475004.600000,442177.000000,424259,688733,81581.291856,0.475,0.442,0.424,0.689,0.082,17.175
-BucketSort,1000,PIOR,DECRESCENTE,10,1,1,453132.800000,442640.000000,419844,529215,33761.660016,0.453,0.443,0.420,0.529,0.034,7.451
-BucketSort,10000,MEDIO,ALEATORIO,10,1,1,2821516.900000,2206617.500000,1900603,5272884,1170353.273352,2.822,2.207,1.901,5.273,1.170,41.480
-BucketSort,10000,MELHOR,CRESCENTE,10,1,1,2096072.000000,1495743.500000,1274298,4265695,1040319.840984,2.096,1.496,1.274,4.266,1.040,49.632
-BucketSort,10000,PIOR,DECRESCENTE,10,1,1,2073095.200000,1524475.500000,1264022,4137561,1018311.278055,2.073,1.524,1.264,4.138,1.018,49.120
-BucketSort,100000,MEDIO,ALEATORIO,10,1,1,18431201.500000,18279033.000000,16925389,21753149,1365183.583276,18.431,18.279,16.925,21.753,1.365,7.407
-BucketSort,100000,MELHOR,CRESCENTE,10,1,1,10321792.500000,10548569.500000,9428350,11340835,660789.505479,10.322,10.549,9.428,11.341,0.661,6.402
-BucketSort,100000,PIOR,DECRESCENTE,10,1,1,10579549.500000,10501328.500000,10030345,11419514,523916.171397,10.580,10.501,10.030,11.420,0.524,4.952
-BucketSort,1000000,MEDIO,ALEATORIO,10,1,1,211383109.700000,211707271.000000,200203503,230103430,9152447.627829,211.383,211.707,200.204,230.103,9.152,4.330
-BucketSort,1000000,MELHOR,CRESCENTE,10,1,1,111976149.900000,110830287.500000,102903524,123506959,6510830.559916,111.976,110.830,102.904,123.507,6.511,5.814
-BucketSort,1000000,PIOR,DECRESCENTE,10,1,1,114060194.700000,115232302.000000,99380043,129206152,9224089.274280,114.060,115.232,99.380,129.206,9.224,8.087
-CountingSort,1000,MEDIO,ALEATORIO,10,1,1,284973.300000,281027.500000,273358,315752,12220.128705,0.285,0.281,0.273,0.316,0.012,4.288
-CountingSort,1000,MELHOR,CRESCENTE,10,1,1,287586.000000,281042.000000,273812,328942,19441.952080,0.288,0.281,0.274,0.329,0.019,6.760
-CountingSort,1000,PIOR,DECRESCENTE,10,1,1,286362.100000,286299.500000,271768,307017,11415.717941,0.286,0.286,0.272,0.307,0.011,3.986
-CountingSort,10000,MEDIO,ALEATORIO,10,1,1,1499697.600000,1044784.500000,848662,3005280,762781.396611,1.500,1.045,0.849,3.005,0.763,50.862
-CountingSort,10000,MELHOR,CRESCENTE,10,1,1,1466334.500000,1135728.500000,841446,2869055,683066.817220,1.466,1.136,0.841,2.869,0.683,46.583
-CountingSort,10000,PIOR,DECRESCENTE,10,1,1,1683249.500000,1216631.500000,956988,2776841,761162.330201,1.683,1.217,0.957,2.777,0.761,45.220
-CountingSort,100000,MEDIO,ALEATORIO,10,1,1,7578856.800000,7220045.500000,7133917,9413380,712062.724543,7.579,7.220,7.134,9.413,0.712,9.395
-CountingSort,100000,MELHOR,CRESCENTE,10,1,1,8000979.300000,7844101.000000,7275726,9947314,782834.601128,8.001,7.844,7.276,9.947,0.783,9.784
-CountingSort,100000,PIOR,DECRESCENTE,10,1,1,7637207.600000,7265177.500000,7164561,10077847,884027.792323,7.637,7.265,7.165,10.078,0.884,11.575
-CountingSort,1000000,MEDIO,ALEATORIO,10,1,1,86971310.300000,88442897.000000,78554661,94590688,5545650.639090,86.971,88.443,78.555,94.591,5.546,6.376
-CountingSort,1000000,MELHOR,CRESCENTE,10,1,1,78753048.700000,76970149.000000,73281712,90055277,5814975.900518,78.753,76.970,73.282,90.055,5.815,7.384
-CountingSort,1000000,PIOR,DECRESCENTE,10,1,1,78824958.600000,77396864.000000,73303935,89097901,5282835.662055,78.825,77.397,73.304,89.098,5.283,6.702
-HeapSort,1000,MEDIO,ALEATORIO,10,1,1,1393431.000000,1324301.500000,1320092,1540546,96440.383288,1.393,1.324,1.320,1.541,0.096,6.921
-HeapSort,1000,MELHOR,CRESCENTE,10,1,1,1405714.400000,1398079.500000,1324249,1477014,41673.182688,1.406,1.398,1.324,1.477,0.042,2.965
-HeapSort,1000,PIOR,DECRESCENTE,10,1,1,1222363.600000,1234979.500000,1160319,1241809,30978.532144,1.222,1.235,1.160,1.242,0.031,2.534
-HeapSort,10000,MEDIO,ALEATORIO,10,1,1,18302598.300000,17246209.000000,16454879,27553367,3288002.579369,18.303,17.246,16.455,27.553,3.288,17.965
-HeapSort,10000,MELHOR,CRESCENTE,10,1,1,18241876.600000,18227934.500000,17083239,18909630,499140.517586,18.242,18.228,17.083,18.910,0.499,2.736
-HeapSort,10000,PIOR,DECRESCENTE,10,1,1,16325961.000000,16301937.000000,15331751,17290944,552000.301668,16.326,16.302,15.332,17.291,0.552,3.381
-HeapSort,100000,MEDIO,ALEATORIO,10,1,1,203114058.500000,201359171.500000,200874554,209922770,3210834.589081,203.114,201.359,200.875,209.923,3.211,1.581
-HeapSort,100000,MELHOR,CRESCENTE,10,1,1,216250495.100000,214714633.500000,208001810,227081308,8263553.999937,216.250,214.715,208.002,227.081,8.264,3.821
-HeapSort,100000,PIOR,DECRESCENTE,10,1,1,195059203.000000,194174501.500000,192088937,200712888,3244466.081569,195.059,194.175,192.089,200.713,3.244,1.663
-HeapSort,1000000,MEDIO,ALEATORIO,10,1,1,2571961123.100000,2575510146.000000,2555215494,2585118664,11560793.020847,2571.961,2575.510,2555.215,2585.119,11.561,0.449
-HeapSort,1000000,MELHOR,CRESCENTE,10,1,1,2581465821.600000,2579905070.500000,2567968706,2603942559,11583358.088904,2581.466,2579.905,2567.969,2603.943,11.583,0.449
-HeapSort,1000000,PIOR,DECRESCENTE,10,1,1,2445071686.100000,2438442315.500000,2428185683,2496903505,21341173.283459,2445.072,2438.442,2428.186,2496.904,21.341,0.873
-InsertionSort,1000,MEDIO,ALEATORIO,10,1,1,13996408.800000,13937590.500000,13860179,14455971,176186.234112,13.996,13.938,13.860,14.456,0.176,1.259
-InsertionSort,1000,MELHOR,CRESCENTE,10,1,1,124439.100000,124221.000000,120495,130402,3157.235164,0.124,0.124,0.120,0.130,0.003,2.537
-InsertionSort,1000,PIOR,DECRESCENTE,10,1,1,26641200.200000,26654613.500000,25934056,26952789,310654.654209,26.641,26.655,25.934,26.953,0.311,1.166
-InsertionSort,10000,MEDIO,ALEATORIO,10,1,1,1303459926.900000,1302482922.500000,1288539468,1326983448,12241010.562363,1303.460,1302.483,1288.539,1326.983,12.241,0.939
-InsertionSort,10000,MELHOR,CRESCENTE,10,1,1,889234.300000,855876.500000,518329,1311650,360872.662045,0.889,0.856,0.518,1.312,0.361,40.582
-InsertionSort,10000,PIOR,DECRESCENTE,10,1,1,2581865050.700000,2592202483.000000,2506202992,2630877703,44584283.546763,2581.865,2592.202,2506.203,2630.878,44.584,1.727
-InsertionSort,100000,MEDIO,ALEATORIO,10,1,1,121952489125.800003,121652268123.500000,121060137169,124308390606,1009968539.098276,121952.489,121652.268,121060.137,124308.391,1009.969,0.828
-InsertionSort,100000,MELHOR,CRESCENTE,10,1,1,5334349.400000,5309398.500000,5305743,5441327,46254.376031,5.334,5.309,5.306,5.441,0.046,0.867
-InsertionSort,100000,PIOR,DECRESCENTE,10,1,1,243394898920.000000,243172255050.000000,242909713021,244445565730,544723732.737252,243394.899,243172.255,242909.713,244445.566,544.724,0.224
-InsertionSort,1000000,MELHOR,CRESCENTE,10,1,1,53333238.800000,53009186.500000,52593536,54547954,747419.784779,53.333,53.009,52.594,54.548,0.747,1.401
-MergeSort,1000,MEDIO,ALEATORIO,10,1,1,1488812.400000,1422259.500000,1318170,1701764,143013.100418,1.489,1.422,1.318,1.702,0.143,9.606
-MergeSort,1000,MELHOR,CRESCENTE,10,1,1,1178505.600000,1132243.500000,1116380,1556988,134592.000127,1.179,1.132,1.116,1.557,0.135,11.421
-MergeSort,1000,PIOR,DECRESCENTE,10,1,1,1290739.400000,1188710.000000,1134725,1595957,176075.871571,1.291,1.189,1.135,1.596,0.176,13.641
-MergeSort,10000,MEDIO,ALEATORIO,10,1,1,5048592.400000,3447454.000000,2990021,15178525,3814315.090306,5.049,3.447,2.990,15.179,3.814,75.552
-MergeSort,10000,MELHOR,CRESCENTE,10,1,1,4435587.900000,3245800.500000,2965084,12475714,2954326.395868,4.436,3.246,2.965,12.476,2.954,66.605
-MergeSort,10000,PIOR,DECRESCENTE,10,1,1,4158013.300000,3083774.000000,2839171,12330660,2928300.438792,4.158,3.084,2.839,12.331,2.928,70.425
-MergeSort,100000,MEDIO,ALEATORIO,10,1,1,52965873.000000,52795797.500000,48206401,57643865,3013455.401656,52.966,52.796,48.206,57.644,3.013,5.689
-MergeSort,100000,MELHOR,CRESCENTE,10,1,1,52176077.300000,54000062.500000,47573828,57021566,3576443.751315,52.176,54.000,47.574,57.022,3.576,6.855
-MergeSort,100000,PIOR,DECRESCENTE,10,1,1,54816840.900000,54316837.500000,50281904,59225779,3508527.188615,54.817,54.317,50.282,59.226,3.509,6.400
-MergeSort,1000000,MEDIO,ALEATORIO,10,1,1,664561323.200000,668228345.500000,636581546,686192965,14633310.845150,664.561,668.228,636.582,686.193,14.633,2.202
-MergeSort,1000000,MELHOR,CRESCENTE,10,1,1,631481408.100000,630393738.500000,613769452,653513462,13562721.099362,631.481,630.394,613.769,653.513,13.563,2.148
-MergeSort,1000000,PIOR,DECRESCENTE,10,1,1,630068079.000000,634531135.000000,610801042,645638150,13036804.306562,630.068,634.531,610.801,645.638,13.037,2.069
-QuickSort,1000,MEDIO,ALEATORIO,10,1,1,728827.400000,731418.000000,701819,740154,11126.248576,0.729,0.731,0.702,0.740,0.011,1.527
-QuickSort,1000,MELHOR,CRESCENTE,10,1,1,509149.600000,504719.000000,501706,522258,8139.406274,0.509,0.505,0.502,0.522,0.008,1.599
-QuickSort,1000,PIOR,DECRESCENTE,10,1,1,621065.000000,638775.000000,549990,660397,42601.255631,0.621,0.639,0.550,0.660,0.043,6.859
-QuickSort,10000,MEDIO,ALEATORIO,10,1,1,9185645.600000,9094680.000000,9043064,9792918,224550.701805,9.186,9.095,9.043,9.793,0.225,2.445
-QuickSort,10000,MELHOR,CRESCENTE,10,1,1,6810398.800000,6819791.000000,6674268,6885690,56856.771685,6.810,6.820,6.674,6.886,0.057,0.835
-QuickSort,10000,PIOR,DECRESCENTE,10,1,1,7359189.700000,7348414.500000,7087122,7645478,134530.508611,7.359,7.348,7.087,7.645,0.135,1.828
-QuickSort,100000,MEDIO,ALEATORIO,10,1,1,116110748.500000,115368705.500000,114716271,119539401,1569271.625523,116.111,115.369,114.716,119.539,1.569,1.352
-QuickSort,100000,MELHOR,CRESCENTE,10,1,1,84695825.300000,86342265.000000,80337610,87233033,3054791.809644,84.696,86.342,80.338,87.233,3.055,3.607
-QuickSort,100000,PIOR,DECRESCENTE,10,1,1,86392195.600000,85858972.500000,84355658,91644261,2247480.861952,86.392,85.859,84.356,91.644,2.247,2.601
-QuickSort,1000000,MEDIO,ALEATORIO,10,1,1,1351082959.600000,1348114735.500000,1335978686,1382100682,13951666.871142,1351.083,1348.115,1335.979,1382.101,13.952,1.033
-QuickSort,1000000,MELHOR,CRESCENTE,10,1,1,988124486.400000,992370462.000000,974969680,1007518231,10792573.664655,988.124,992.370,974.970,1007.518,10.793,1.092
-QuickSort,1000000,PIOR,DECRESCENTE,10,1,1,1036066335.200000,1033301358.500000,1028369401,1055034830,8038037.914093,1036.066,1033.301,1028.369,1055.035,8.038,0.776
-RadixSort,1000,MEDIO,ALEATORIO,10,1,1,235756.400000,144109.500000,121434,479785,164069.758927,0.236,0.144,0.121,0.480,0.164,69.593
-RadixSort,1000,MELHOR,CRESCENTE,10,1,1,208800.800000,128145.500000,121596,496259,148120.656011,0.209,0.128,0.122,0.496,0.148,70.939
-RadixSort,1000,PIOR,DECRESCENTE,10,1,1,207878.000000,137052.000000,123603,484822,146390.136841,0.208,0.137,0.124,0.485,0.146,70.421
-RadixSort,10000,MEDIO,ALEATORIO,10,1,1,827700.000000,726035.000000,721131,1733139,318179.668746,0.828,0.726,0.721,1.733,0.318,38.441
-RadixSort,10000,MELHOR,CRESCENTE,10,1,1,797298.700000,732983.000000,723652,1367962,200640.000069,0.797,0.733,0.724,1.368,0.201,25.165
-RadixSort,10000,PIOR,DECRESCENTE,10,1,1,893383.500000,733625.000000,728016,1339181,262542.983713,0.893,0.734,0.728,1.339,0.263,29.387
-RadixSort,100000,MEDIO,ALEATORIO,10,1,1,7099081.500000,7061193.500000,6892581,7360724,195952.795219,7.099,7.061,6.893,7.361,0.196,2.760
-RadixSort,100000,MELHOR,CRESCENTE,10,1,1,7281818.000000,7012580.000000,6796009,9227922,711992.304124,7.282,7.013,6.796,9.228,0.712,9.778
-RadixSort,100000,PIOR,DECRESCENTE,10,1,1,7872475.900000,7210736.500000,7038491,9693844,1190269.454998,7.872,7.211,7.038,9.694,1.190,15.119
-RadixSort,1000000,MEDIO,ALEATORIO,10,1,1,77232388.100000,75993468.000000,70884318,88418296,5910003.384018,77.232,75.993,70.884,88.418,5.910,7.652
-RadixSort,1000000,MELHOR,CRESCENTE,10,1,1,73691668.600000,72011202.500000,69694904,84407411,4094474.080220,73.692,72.011,69.695,84.407,4.094,5.556
-RadixSort,1000000,PIOR,DECRESCENTE,10,1,1,72225856.800000,71764867.500000,66708258,82966025,4264041.468578,72.226,71.765,66.708,82.966,4.264,5.904
-SelectionSort,1000,MEDIO,ALEATORIO,10,1,1,16768056.200000,16451972.000000,16238951,18067206,685700.038623,16.768,16.452,16.239,18.067,0.686,4.089
-SelectionSort,1000,MELHOR,CRESCENTE,10,1,1,16856035.800000,16879413.000000,16121211,17818738,596655.131613,16.856,16.879,16.121,17.819,0.597,3.540
-SelectionSort,1000,PIOR,DECRESCENTE,10,1,1,17230611.500000,17226164.500000,16362899,17853899,563698.280496,17.231,17.226,16.363,17.854,0.564,3.271
-SelectionSort,10000,MEDIO,ALEATORIO,10,1,1,1656162949.700000,1637438363.500000,1628785738,1745275989,37713634.775558,1656.163,1637.438,1628.786,1745.276,37.714,2.277
-SelectionSort,10000,MELHOR,CRESCENTE,10,1,1,1704121648.000000,1700336320.500000,1617012249,1796612611,61163951.544080,1704.122,1700.336,1617.012,1796.613,61.164,3.589
-SelectionSort,10000,PIOR,DECRESCENTE,10,1,1,1718737147.200000,1716302112.500000,1677345234,1798076799,39611096.189170,1718.737,1716.302,1677.345,1798.077,39.611,2.305
-SelectionSort,100000,MEDIO,ALEATORIO,10,1,1,162643572035.700012,162589078842.500000,162534451095,162963700711,125857436.495119,162643.572,162589.079,162534.451,162963.701,125.857,0.077
-SelectionSort,100000,MELHOR,CRESCENTE,10,1,1,162058463598.700012,162006956097.500000,161866729808,162529793674,189432714.360792,162058.464,162006.956,161866.730,162529.794,189.433,0.117
-SelectionSort,100000,PIOR,DECRESCENTE,10,1,1,162279154825.500000,162072306704.500000,161975746842,163438739354,448791051.105251,162279.155,162072.307,161975.747,163438.739,448.791,0.277
-ShellSort,1000,MEDIO,ALEATORIO,10,1,1,1157291.500000,918253.500000,907345,2102533,486444.205260,1.157,0.918,0.907,2.103,0.486,42.033
-ShellSort,1000,MELHOR,CRESCENTE,10,1,1,771576.900000,978485.500000,395788,997711,279714.013902,0.772,0.978,0.396,0.998,0.280,36.252
-ShellSort,1000,PIOR,DECRESCENTE,10,1,1,894990.500000,638331.500000,609653,1520356,425878.118095,0.895,0.638,0.610,1.520,0.426,47.585
-ShellSort,10000,MEDIO,ALEATORIO,10,1,1,14162372.100000,14140062.000000,14083576,14407656,93145.658586,14.162,14.140,14.084,14.408,0.093,0.658
-ShellSort,10000,MELHOR,CRESCENTE,10,1,1,6263949.800000,6273166.000000,6089725,6423002,135905.478120,6.264,6.273,6.090,6.423,0.136,2.170
-ShellSort,10000,PIOR,DECRESCENTE,10,1,1,9553600.500000,9587813.500000,8711297,10013055,406826.947485,9.554,9.588,8.711,10.013,0.407,4.258
-ShellSort,100000,MEDIO,ALEATORIO,10,1,1,210022035.000000,208443237.500000,207161867,218563364,3725715.411046,210.022,208.443,207.162,218.563,3.726,1.774
-ShellSort,100000,MELHOR,CRESCENTE,10,1,1,78154011.800000,80026437.000000,73147918,81185444,3305771.766588,78.154,80.026,73.148,81.185,3.306,4.230
-ShellSort,100000,PIOR,DECRESCENTE,10,1,1,117081723.200000,115628869.500000,112672942,122737139,3787457.004617,117.082,115.629,112.673,122.737,3.787,3.235
-ShellSort,1000000,MEDIO,ALEATORIO,10,1,1,3491974628.200000,3492486792.000000,3485965523,3496195572,2806853.507802,3491.975,3492.487,3485.966,3496.196,2.807,0.080
-ShellSort,1000000,MELHOR,CRESCENTE,10,1,1,921807938.100000,922133534.000000,915433052,930480249,5043654.385626,921.808,922.134,915.433,930.480,5.044,0.547
-ShellSort,1000000,PIOR,DECRESCENTE,10,1,1,1368929820.100000,1363868155.000000,1362276853,1402485512,12204085.818119,1368.930,1363.868,1362.277,1402.486,12.204,0.892
-
-
-
-================================================
-FILE: TP1/src/resultados/estatisticas/estatisticas_por_sessao.csv
-================================================
-algoritmo,n,caso,disposicao,semente,sessao,quantidade_medicoes,quantidade_sessoes,quantidade_sementes,media_ns,mediana_ns,minimo_ns,maximo_ns,desvio_padrao_ns,media_ms,mediana_ms,minimo_ms,maximo_ms,desvio_padrao_ms,coeficiente_variacao_pct
-BubbleSort,1000,MEDIO,ALEATORIO,2026,20261027_000537_629,10,1,1,35707805.400000,35702632.500000,35013720,36383666,391401.644905,35.708,35.703,35.014,36.384,0.391,1.096
-BubbleSort,1000,MELHOR,CRESCENTE,2026,20261027_000536_749,10,1,1,106175.500000,104706.000000,101265,117278,5824.135782,0.106,0.105,0.101,0.117,0.006,5.485
-BubbleSort,1000,PIOR,DECRESCENTE,2026,20261027_000536_883,10,1,1,51008651.200000,50735175.000000,48444888,53667605,2081861.551168,51.009,50.735,48.445,53.668,2.082,4.081
-BubbleSort,10000,MEDIO,ALEATORIO,2026,20261027_000637_091,10,1,1,3255090076.800000,3256274970.500000,3238270806,3280010071,13375398.224655,3255.090,3256.275,3238.271,3280.010,13.375,0.411
-BubbleSort,10000,MELHOR,CRESCENTE,2026,20261027_000538_154,10,1,1,603655.500000,576795.000000,319063,897560,284019.581266,0.604,0.577,0.319,0.898,0.284,47.050
-BubbleSort,10000,PIOR,DECRESCENTE,2026,20261027_000538_264,10,1,1,4888045783.500000,4870542579.000000,4855141921,4969256640,40879018.332910,4888.046,4870.543,4855.142,4969.257,40.879,0.836
-BubbleSort,100000,MEDIO,ALEATORIO,2026,20261027_014453_812,10,1,1,325159441370.000000,325089550391.500000,325005083307,325634692294,187695233.434845,325159.441,325089.550,325005.083,325634.692,187.695,0.058
-BubbleSort,100000,MELHOR,CRESCENTE,2026,20261027_000716_307,10,1,1,3554800.100000,3538094.500000,3532204,3711013,55033.822991,3.555,3.538,3.532,3.711,0.055,1.548
-BubbleSort,100000,PIOR,DECRESCENTE,2026,20261027_000716_530,10,1,1,487288235002.599976,486220017211.000000,485455991967,491641916051,2176255202.059651,487288.235,486220.017,485455.992,491641.916,2176.255,0.447
-BubbleSort,1000000,MELHOR,CRESCENTE,2026,20261027_142810_105,10,1,1,34691646.000000,34860393.500000,33108627,35411420,649349.623494,34.692,34.860,33.109,35.411,0.649,1.872
-BucketSort,1000,MEDIO,ALEATORIO,2026,20261027_071213_776,10,1,1,762060.700000,771090.500000,689178,827477,46176.978848,0.762,0.771,0.689,0.827,0.046,6.059
-BucketSort,1000,MELHOR,CRESCENTE,2026,20261027_071213_582,10,1,1,475004.600000,442177.000000,424259,688733,81581.291856,0.475,0.442,0.424,0.689,0.082,17.175
-BucketSort,1000,PIOR,DECRESCENTE,2026,20261027_071213_678,10,1,1,453132.800000,442640.000000,419844,529215,33761.660016,0.453,0.443,0.420,0.529,0.034,7.451
-BucketSort,10000,MEDIO,ALEATORIO,2026,20261027_071214_142,10,1,1,2821516.900000,2206617.500000,1900603,5272884,1170353.273352,2.822,2.207,1.901,5.273,1.170,41.480
-BucketSort,10000,MELHOR,CRESCENTE,2026,20261027_071213_877,10,1,1,2096072.000000,1495743.500000,1274298,4265695,1040319.840984,2.096,1.496,1.274,4.266,1.040,49.632
-BucketSort,10000,PIOR,DECRESCENTE,2026,20261027_071214_011,10,1,1,2073095.200000,1524475.500000,1264022,4137561,1018311.278055,2.073,1.524,1.264,4.138,1.018,49.120
-BucketSort,100000,MEDIO,ALEATORIO,2026,20261027_071214_942,10,1,1,18431201.500000,18279033.000000,16925389,21753149,1365183.583276,18.431,18.279,16.925,21.753,1.365,7.407
-BucketSort,100000,MELHOR,CRESCENTE,2026,20261027_071214_338,10,1,1,10321792.500000,10548569.500000,9428350,11340835,660789.505479,10.322,10.549,9.428,11.341,0.661,6.402
-BucketSort,100000,PIOR,DECRESCENTE,2026,20261027_071214_636,10,1,1,10579549.500000,10501328.500000,10030345,11419514,523916.171397,10.580,10.501,10.030,11.420,0.524,4.952
-BucketSort,1000000,MEDIO,ALEATORIO,2026,20261027_071218_618,10,1,1,211383109.700000,211707271.000000,200203503,230103430,9152447.627829,211.383,211.707,200.204,230.103,9.152,4.330
-BucketSort,1000000,MELHOR,CRESCENTE,2026,20261027_071215_350,10,1,1,111976149.900000,110830287.500000,102903524,123506959,6510830.559916,111.976,110.830,102.904,123.507,6.511,5.814
-BucketSort,1000000,PIOR,DECRESCENTE,2026,20261027_071216_969,10,1,1,114060194.700000,115232302.000000,99380043,129206152,9224089.274280,114.060,115.232,99.380,129.206,9.224,8.087
-CountingSort,1000,MEDIO,ALEATORIO,2026,20261027_071202_441,10,1,1,284973.300000,281027.500000,273358,315752,12220.128705,0.285,0.281,0.273,0.316,0.012,4.288
-CountingSort,1000,MELHOR,CRESCENTE,2026,20261027_071202_222,10,1,1,287586.000000,281042.000000,273812,328942,19441.952080,0.288,0.281,0.274,0.329,0.019,6.760
-CountingSort,1000,PIOR,DECRESCENTE,2026,20261027_071202_319,10,1,1,286362.100000,286299.500000,271768,307017,11415.717941,0.286,0.286,0.272,0.307,0.011,3.986
-CountingSort,10000,MEDIO,ALEATORIO,2026,20261027_071203_018,10,1,1,1499697.600000,1044784.500000,848662,3005280,762781.396611,1.500,1.045,0.849,3.005,0.763,50.862
-CountingSort,10000,MELHOR,CRESCENTE,2026,20261027_071202_630,10,1,1,1466334.500000,1135728.500000,841446,2869055,683066.817220,1.466,1.136,0.841,2.869,0.683,46.583
-CountingSort,10000,PIOR,DECRESCENTE,2026,20261027_071202_807,10,1,1,1683249.500000,1216631.500000,956988,2776841,761162.330201,1.683,1.217,0.957,2.777,0.761,45.220
-CountingSort,100000,MEDIO,ALEATORIO,2026,20261027_071203_688,10,1,1,7578856.800000,7220045.500000,7133917,9413380,712062.724543,7.579,7.220,7.134,9.413,0.712,9.395
-CountingSort,100000,MELHOR,CRESCENTE,2026,20261027_071203_205,10,1,1,8000979.300000,7844101.000000,7275726,9947314,782834.601128,8.001,7.844,7.276,9.947,0.783,9.784
-CountingSort,100000,PIOR,DECRESCENTE,2026,20261027_071203_467,10,1,1,7637207.600000,7265177.500000,7164561,10077847,884027.792323,7.637,7.265,7.165,10.078,0.884,11.575
-CountingSort,1000000,MEDIO,ALEATORIO,2026,20261027_071206_465,10,1,1,86971310.300000,88442897.000000,78554661,94590688,5545650.639090,86.971,88.443,78.555,94.591,5.546,6.376
-CountingSort,1000000,MELHOR,CRESCENTE,2026,20261027_071203_989,10,1,1,78753048.700000,76970149.000000,73281712,90055277,5814975.900518,78.753,76.970,73.282,90.055,5.815,7.384
-CountingSort,1000000,PIOR,DECRESCENTE,2026,20261027_071205_244,10,1,1,78824958.600000,77396864.000000,73303935,89097901,5282835.662055,78.825,77.397,73.304,89.098,5.283,6.702
-HeapSort,1000,MEDIO,ALEATORIO,2026,20261027_000238_900,10,1,1,1393431.000000,1324301.500000,1320092,1540546,96440.383288,1.393,1.324,1.320,1.541,0.096,6.921
-HeapSort,1000,MELHOR,CRESCENTE,2026,20261027_000238_651,10,1,1,1405714.400000,1398079.500000,1324249,1477014,41673.182688,1.406,1.398,1.324,1.477,0.042,2.965
-HeapSort,1000,PIOR,DECRESCENTE,2026,20261027_000238_789,10,1,1,1222363.600000,1234979.500000,1160319,1241809,30978.532144,1.222,1.235,1.160,1.242,0.031,2.534
-HeapSort,10000,MEDIO,ALEATORIO,2026,20261027_000239_797,10,1,1,18302598.300000,17246209.000000,16454879,27553367,3288002.579369,18.303,17.246,16.455,27.553,3.288,17.965
-HeapSort,10000,MELHOR,CRESCENTE,2026,20261027_000239_108,10,1,1,18241876.600000,18227934.500000,17083239,18909630,499140.517586,18.242,18.228,17.083,18.910,0.499,2.736
-HeapSort,10000,PIOR,DECRESCENTE,2026,20261027_000239_462,10,1,1,16325961.000000,16301937.000000,15331751,17290944,552000.301668,16.326,16.302,15.332,17.291,0.552,3.381
-HeapSort,100000,MEDIO,ALEATORIO,2026,20261027_000245_381,10,1,1,203114058.500000,201359171.500000,200874554,209922770,3210834.589081,203.114,201.359,200.875,209.923,3.211,1.581
-HeapSort,100000,MELHOR,CRESCENTE,2026,20261027_000240_171,10,1,1,216250495.100000,214714633.500000,208001810,227081308,8263553.999937,216.250,214.715,208.002,227.081,8.264,3.821
-HeapSort,100000,PIOR,DECRESCENTE,2026,20261027_000242_931,10,1,1,195059203.000000,194174501.500000,192088937,200712888,3244466.081569,195.059,194.175,192.089,200.713,3.244,1.663
-HeapSort,1000000,MEDIO,ALEATORIO,2026,20261027_000348_756,10,1,1,2571961123.100000,2575510146.000000,2555215494,2585118664,11560793.020847,2571.961,2575.510,2555.215,2585.119,11.561,0.449
-HeapSort,1000000,MELHOR,CRESCENTE,2026,20261027_000247_985,10,1,1,2581465821.600000,2579905070.500000,2567968706,2603942559,11583358.088904,2581.466,2579.905,2567.969,2603.943,11.583,0.449
-HeapSort,1000000,PIOR,DECRESCENTE,2026,20261027_000319_220,10,1,1,2445071686.100000,2438442315.500000,2428185683,2496903505,21341173.283459,2445.072,2438.442,2428.186,2496.904,21.341,0.873
-InsertionSort,1000,MEDIO,ALEATORIO,2026,20261027_131130_060,10,1,1,13996408.800000,13937590.500000,13860179,14455971,176186.234112,13.996,13.938,13.860,14.456,0.176,1.259
-InsertionSort,1000,MELHOR,CRESCENTE,2026,20261027_131129_530,10,1,1,124439.100000,124221.000000,120495,130402,3157.235164,0.124,0.124,0.120,0.130,0.003,2.537
-InsertionSort,1000,PIOR,DECRESCENTE,2026,20261027_131129_633,10,1,1,26641200.200000,26654613.500000,25934056,26952789,310654.654209,26.641,26.655,25.934,26.953,0.311,1.166
-InsertionSort,10000,MEDIO,ALEATORIO,2026,20261027_131201_606,10,1,1,1303459926.900000,1302482922.500000,1288539468,1326983448,12241010.562363,1303.460,1302.483,1288.539,1326.983,12.241,0.939
-InsertionSort,10000,MELHOR,CRESCENTE,2026,20261027_131130_333,10,1,1,889234.300000,855876.500000,518329,1311650,360872.662045,0.889,0.856,0.518,1.312,0.361,40.582
-InsertionSort,10000,PIOR,DECRESCENTE,2026,20261027_131130_499,10,1,1,2581865050.700000,2592202483.000000,2506202992,2630877703,44584283.546763,2581.865,2592.202,2506.203,2630.878,44.584,1.727
-InsertionSort,100000,MEDIO,ALEATORIO,2026,20261027_140106_632,10,1,1,121952489125.800003,121652268123.500000,121060137169,124308390606,1009968539.098276,121952.489,121652.268,121060.137,124308.391,1009.969,0.828
-InsertionSort,100000,MELHOR,CRESCENTE,2026,20261027_131217_334,10,1,1,5334349.400000,5309398.500000,5305743,5441327,46254.376031,5.334,5.309,5.306,5.441,0.046,0.867
-InsertionSort,100000,PIOR,DECRESCENTE,2026,20261027_131217_560,10,1,1,243394898920.000000,243172255050.000000,242909713021,244445565730,544723732.737252,243394.899,243172.255,242909.713,244445.566,544.724,0.224
-InsertionSort,1000000,MELHOR,CRESCENTE,2026,20261027_142529_492,10,1,1,53333238.800000,53009186.500000,52593536,54547954,747419.784779,53.333,53.009,52.594,54.548,0.747,1.401
-MergeSort,1000,MEDIO,ALEATORIO,2026,20261027_000124_967,10,1,1,1488812.400000,1422259.500000,1318170,1701764,143013.100418,1.489,1.422,1.318,1.702,0.143,9.606
-MergeSort,1000,MELHOR,CRESCENTE,2026,20261027_000124_618,10,1,1,1178505.600000,1132243.500000,1116380,1556988,134592.000127,1.179,1.132,1.116,1.557,0.135,11.421
-MergeSort,1000,PIOR,DECRESCENTE,2026,20261027_000124_825,10,1,1,1290739.400000,1188710.000000,1134725,1595957,176075.871571,1.291,1.189,1.135,1.596,0.176,13.641
-MergeSort,10000,MEDIO,ALEATORIO,2026,20261027_000125_570,10,1,1,5048592.400000,3447454.000000,2990021,15178525,3814315.090306,5.049,3.447,2.990,15.179,3.814,75.552
-MergeSort,10000,MELHOR,CRESCENTE,2026,20261027_000125_117,10,1,1,4435587.900000,3245800.500000,2965084,12475714,2954326.395868,4.436,3.246,2.965,12.476,2.954,66.605
-MergeSort,10000,PIOR,DECRESCENTE,2026,20261027_000125_345,10,1,1,4158013.300000,3083774.000000,2839171,12330660,2928300.438792,4.158,3.084,2.839,12.331,2.928,70.425
-MergeSort,100000,MEDIO,ALEATORIO,2026,20261027_000127_478,10,1,1,52965873.000000,52795797.500000,48206401,57643865,3013455.401656,52.966,52.796,48.206,57.644,3.013,5.689
-MergeSort,100000,MELHOR,CRESCENTE,2026,20261027_000125_821,10,1,1,52176077.300000,54000062.500000,47573828,57021566,3576443.751315,52.176,54.000,47.574,57.022,3.576,6.855
-MergeSort,100000,PIOR,DECRESCENTE,2026,20261027_000126_623,10,1,1,54816840.900000,54316837.500000,50281904,59225779,3508527.188615,54.817,54.317,50.282,59.226,3.509,6.400
-MergeSort,1000000,MEDIO,ALEATORIO,2026,20261027_000143_985,10,1,1,664561323.200000,668228345.500000,636581546,686192965,14633310.845150,664.561,668.228,636.582,686.193,14.633,2.202
-MergeSort,1000000,MELHOR,CRESCENTE,2026,20261027_000128_289,10,1,1,631481408.100000,630393738.500000,613769452,653513462,13562721.099362,631.481,630.394,613.769,653.513,13.563,2.148
-MergeSort,1000000,PIOR,DECRESCENTE,2026,20261027_000136_138,10,1,1,630068079.000000,634531135.000000,610801042,645638150,13036804.306562,630.068,634.531,610.801,645.638,13.037,2.069
-QuickSort,1000,MEDIO,ALEATORIO,2026,20261027_000152_565,10,1,1,728827.400000,731418.000000,701819,740154,11126.248576,0.729,0.731,0.702,0.740,0.011,1.527
-QuickSort,1000,MELHOR,CRESCENTE,2026,20261027_000152_225,10,1,1,509149.600000,504719.000000,501706,522258,8139.406274,0.509,0.505,0.502,0.522,0.008,1.599
-QuickSort,1000,PIOR,DECRESCENTE,2026,20261027_000152_361,10,1,1,621065.000000,638775.000000,549990,660397,42601.255631,0.621,0.639,0.550,0.660,0.043,6.859
-QuickSort,10000,MEDIO,ALEATORIO,2026,20261027_000153_168,10,1,1,9185645.600000,9094680.000000,9043064,9792918,224550.701805,9.186,9.095,9.043,9.793,0.225,2.445
-QuickSort,10000,MELHOR,CRESCENTE,2026,20261027_000152_739,10,1,1,6810398.800000,6819791.000000,6674268,6885690,56856.771685,6.810,6.820,6.674,6.886,0.057,0.835
-QuickSort,10000,PIOR,DECRESCENTE,2026,20261027_000152_948,10,1,1,7359189.700000,7348414.500000,7087122,7645478,134530.508611,7.359,7.348,7.087,7.645,0.135,1.828
-QuickSort,100000,MEDIO,ALEATORIO,2026,20261027_000155_787,10,1,1,116110748.500000,115368705.500000,114716271,119539401,1569271.625523,116.111,115.369,114.716,119.539,1.569,1.352
-QuickSort,100000,MELHOR,CRESCENTE,2026,20261027_000153_432,10,1,1,84695825.300000,86342265.000000,80337610,87233033,3054791.809644,84.696,86.342,80.338,87.233,3.055,3.607
-QuickSort,100000,PIOR,DECRESCENTE,2026,20261027_000154_628,10,1,1,86392195.600000,85858972.500000,84355658,91644261,2247480.861952,86.392,85.859,84.356,91.644,2.247,2.601
-QuickSort,1000000,MEDIO,ALEATORIO,2026,20261027_000222_143,10,1,1,1351082959.600000,1348114735.500000,1335978686,1382100682,13951666.871142,1351.083,1348.115,1335.979,1382.101,13.952,1.033
-QuickSort,1000000,MELHOR,CRESCENTE,2026,20261027_000157_347,10,1,1,988124486.400000,992370462.000000,974969680,1007518231,10792573.664655,988.124,992.370,974.970,1007.518,10.793,1.092
-QuickSort,1000000,PIOR,DECRESCENTE,2026,20261027_000209_495,10,1,1,1036066335.200000,1033301358.500000,1028369401,1055034830,8038037.914093,1036.066,1033.301,1028.369,1055.035,8.038,0.776
-RadixSort,1000,MEDIO,ALEATORIO,2026,20261027_071207_997,10,1,1,235756.400000,144109.500000,121434,479785,164069.758927,0.236,0.144,0.121,0.480,0.164,69.593
-RadixSort,1000,MELHOR,CRESCENTE,2026,20261027_071207_790,10,1,1,208800.800000,128145.500000,121596,496259,148120.656011,0.209,0.128,0.122,0.496,0.148,70.939
-RadixSort,1000,PIOR,DECRESCENTE,2026,20261027_071207_896,10,1,1,207878.000000,137052.000000,123603,484822,146390.136841,0.208,0.137,0.124,0.485,0.146,70.421
-RadixSort,10000,MEDIO,ALEATORIO,2026,20261027_071208_325,10,1,1,827700.000000,726035.000000,721131,1733139,318179.668746,0.828,0.726,0.721,1.733,0.318,38.441
-RadixSort,10000,MELHOR,CRESCENTE,2026,20261027_071208_100,10,1,1,797298.700000,732983.000000,723652,1367962,200640.000069,0.797,0.733,0.724,1.368,0.201,25.165
-RadixSort,10000,PIOR,DECRESCENTE,2026,20261027_071208_217,10,1,1,893383.500000,733625.000000,728016,1339181,262542.983713,0.893,0.734,0.728,1.339,0.263,29.387
-RadixSort,100000,MEDIO,ALEATORIO,2026,20261027_071209_013,10,1,1,7099081.500000,7061193.500000,6892581,7360724,195952.795219,7.099,7.061,6.893,7.361,0.196,2.760
-RadixSort,100000,MELHOR,CRESCENTE,2026,20261027_071208_438,10,1,1,7281818.000000,7012580.000000,6796009,9227922,711992.304124,7.282,7.013,6.796,9.228,0.712,9.778
-RadixSort,100000,PIOR,DECRESCENTE,2026,20261027_071208_729,10,1,1,7872475.900000,7210736.500000,7038491,9693844,1190269.454998,7.872,7.211,7.038,9.694,1.190,15.119
-RadixSort,1000000,MEDIO,ALEATORIO,2026,20261027_071212_121,10,1,1,77232388.100000,75993468.000000,70884318,88418296,5910003.384018,77.232,75.993,70.884,88.418,5.910,7.652
-RadixSort,1000000,MELHOR,CRESCENTE,2026,20261027_071209_292,10,1,1,73691668.600000,72011202.500000,69694904,84407411,4094474.080220,73.692,72.011,69.695,84.407,4.094,5.556
-RadixSort,1000000,PIOR,DECRESCENTE,2026,20261027_071210_720,10,1,1,72225856.800000,71764867.500000,66708258,82966025,4264041.468578,72.226,71.765,66.708,82.966,4.264,5.904
-SelectionSort,1000,MEDIO,ALEATORIO,2026,20261027_071222_244,10,1,1,16768056.200000,16451972.000000,16238951,18067206,685700.038623,16.768,16.452,16.239,18.067,0.686,4.089
-SelectionSort,1000,MELHOR,CRESCENTE,2026,20261027_071221_559,10,1,1,16856035.800000,16879413.000000,16121211,17818738,596655.131613,16.856,16.879,16.121,17.819,0.597,3.540
-SelectionSort,1000,PIOR,DECRESCENTE,2026,20261027_071221_912,10,1,1,17230611.500000,17226164.500000,16362899,17853899,563698.280496,17.231,17.226,16.363,17.854,0.564,3.271
-SelectionSort,10000,MEDIO,ALEATORIO,2026,20261027_071303_947,10,1,1,1656162949.700000,1637438363.500000,1628785738,1745275989,37713634.775558,1656.163,1637.438,1628.786,1745.276,37.714,2.277
-SelectionSort,10000,MELHOR,CRESCENTE,2026,20261027_071222_581,10,1,1,1704121648.000000,1700336320.500000,1617012249,1796612611,61163951.544080,1704.122,1700.336,1617.012,1796.613,61.164,3.589
-SelectionSort,10000,PIOR,DECRESCENTE,2026,20261027_071243_164,10,1,1,1718737147.200000,1716302112.500000,1677345234,1798076799,39611096.189170,1718.737,1716.302,1677.345,1798.077,39.611,2.305
-SelectionSort,100000,MEDIO,ALEATORIO,2026,20261027_081819_275,10,1,1,162643572035.700012,162589078842.500000,162534451095,162963700711,125857436.495119,162643.572,162589.079,162534.451,162963.701,125.857,0.077
-SelectionSort,100000,MELHOR,CRESCENTE,2026,20261027_071324_007,10,1,1,162058463598.700012,162006956097.500000,161866729808,162529793674,189432714.360792,162058.464,162006.956,161866.730,162529.794,189.433,0.117
-SelectionSort,100000,PIOR,DECRESCENTE,2026,20261027_074552_470,10,1,1,162279154825.500000,162072306704.500000,161975746842,163438739354,448791051.105251,162279.155,162072.307,161975.747,163438.739,448.791,0.277
-ShellSort,1000,MEDIO,ALEATORIO,2026,20261027_000420_239,10,1,1,1157291.500000,918253.500000,907345,2102533,486444.205260,1.157,0.918,0.907,2.103,0.486,42.033
-ShellSort,1000,MELHOR,CRESCENTE,2026,20261027_000419_954,10,1,1,771576.900000,978485.500000,395788,997711,279714.013902,0.772,0.978,0.396,0.998,0.280,36.252
-ShellSort,1000,PIOR,DECRESCENTE,2026,20261027_000420_051,10,1,1,894990.500000,638331.500000,609653,1520356,425878.118095,0.895,0.638,0.610,1.520,0.426,47.585
-ShellSort,10000,MEDIO,ALEATORIO,2026,20261027_000420_904,10,1,1,14162372.100000,14140062.000000,14083576,14407656,93145.658586,14.162,14.140,14.084,14.408,0.093,0.658
-ShellSort,10000,MELHOR,CRESCENTE,2026,20261027_000420_433,10,1,1,6263949.800000,6273166.000000,6089725,6423002,135905.478120,6.264,6.273,6.090,6.423,0.136,2.170
-ShellSort,10000,PIOR,DECRESCENTE,2026,20261027_000420_642,10,1,1,9553600.500000,9587813.500000,8711297,10013055,406826.947485,9.554,9.588,8.711,10.013,0.407,4.258
-ShellSort,100000,MEDIO,ALEATORIO,2026,20261027_000423_889,10,1,1,210022035.000000,208443237.500000,207161867,218563364,3725715.411046,210.022,208.443,207.162,218.563,3.726,1.774
-ShellSort,100000,MELHOR,CRESCENTE,2026,20261027_000421_226,10,1,1,78154011.800000,80026437.000000,73147918,81185444,3305771.766588,78.154,80.026,73.148,81.185,3.306,4.230
-ShellSort,100000,PIOR,DECRESCENTE,2026,20261027_000422_329,10,1,1,117081723.200000,115628869.500000,112672942,122737139,3787457.004617,117.082,115.629,112.673,122.737,3.787,3.235
-ShellSort,1000000,MEDIO,ALEATORIO,2026,20261027_000454_513,10,1,1,3491974628.200000,3492486792.000000,3485965523,3496195572,2806853.507802,3491.975,3492.487,3485.966,3496.196,2.807,0.080
-ShellSort,1000000,MELHOR,CRESCENTE,2026,20261027_000426_530,10,1,1,921807938.100000,922133534.000000,915433052,930480249,5043654.385626,921.808,922.134,915.433,930.480,5.044,0.547
-ShellSort,1000000,PIOR,DECRESCENTE,2026,20261027_000437_854,10,1,1,1368929820.100000,1363868155.000000,1362276853,1402485512,12204085.818119,1368.930,1363.868,1362.277,1402.486,12.204,0.892
 
 
