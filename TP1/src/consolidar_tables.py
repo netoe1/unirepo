@@ -18,8 +18,8 @@ from collections import defaultdict
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent
-RESULTADOS = BASE / "resultados"
-SAIDA = RESULTADOS / "centralizados"
+RESULTADOS = BASE / "resultados" / 'brutos'
+SAIDA = 'resultados'
 POR_ALGORITMO = SAIDA / "por_algoritmo"
 
 COLUNAS = [
