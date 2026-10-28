@@ -1,250 +1,192 @@
 
-# Análise preliminar dos dados experimentais — TP1 (ACD)
+# Análise estatística dos resultados do TP1
 
-**Projeto:** Trabalho Prático 1 — Algoritmos e Classificação de Dados (ACD)**Data da análise:** 28/10/2026**Versão:** 1.0**Status:** análise preliminar dos CSVs disponíveis; requer validação metodológica antes da versão definitiva do relatório.
+> **Fonte analisada:** `tempos_consolidados.csv`, com os tempos individuais fornecidos. Os tempos foram convertidos de nanossegundos para milissegundos dividindo `t_ns` por 1.000.000. A análise é descritiva: não foram removidas observações nem estimadas configurações ausentes.
 
-> **Objetivo deste documento.** Consolidar uma leitura estatística dos resultados atuais, relacionar os padrões observados às complexidades teóricas e registrar limitações que precisam ser tratadas antes de transpor a análise para o relatório em Overleaf. Os valores abaixo vêm dos CSVs consolidados e das tabelas estatísticas associadas; não são tempos estimados.
+## 1. Resumo executivo
 
-## 1. Síntese dos resultados
+- **Medições:** 1.130 registros válidos, correspondentes a 10 algoritmos.
+- **Configurações observadas:** 113 de 120 combinações esperadas de algoritmo × tamanho × disposição (94,2% de cobertura).
+- **Repetições:** cada configuração observada possui exatamente 10 medições, numeradas de 1 a 10; 113 sessões únicas.
+- **Qualidade básica:** 0 tempos nulos/negativos; 0 números de repetição duplicados dentro de uma configuração; 0 configurações com repetições diferentes de 1–10.
+- **Configurações ausentes:** 7. Todas se referem a entradas de um milhão de elementos para Bubble Sort, Insertion Sort e Selection Sort.
 
-- Foram analisadas **1.130 medições individuais**, distribuídas em **113 configurações completas**, cada uma com dez repetições.
-- A matriz planejada contém 120 configurações: 10 algoritmos, quatro tamanhos (`1.000`, `10.000`, `100.000` e `1.000.000`) e três disposições de entrada. Sete configurações de `n = 1.000.000` estão ausentes.
-- Não foram identificadas, nos arquivos verificados, linhas inválidas, tempos iguais a zero ou negativos, nem números de repetição duplicados. Isso comprova consistência estrutural básica, mas não demonstra por si só que todas as implementações e fronteiras de cronometragem estejam metodologicamente corretas.
-- Os resultados são, em geral, coerentes com a teoria: Bubble Sort e Insertion Sort ficam muito mais lentos em entradas aleatórias/decrescentes do que em entradas crescentes; Selection Sort apresenta tempos semelhantes entre disposições; algoritmos com crescimento próximo de `n log n` aumentam muito menos que os quadráticos; Radix Sort e Counting Sort têm os menores tempos entre os algoritmos completos em grandes entradas aleatórias, sob a distribuição de chaves usada.
-- **Há ressalvas importantes antes da conclusão final:** a implementação de Bucket Sort chama `Collections.sort`, a fronteira de cronometragem não é uniforme entre Counting Sort, Radix Sort e Bucket Sort, e os nomes `MELHOR`/`MEDIO`/`PIOR` são atribuídos principalmente pela disposição do vetor, não por uma demonstração de que cada entrada seja realmente o melhor, médio ou pior caso de todos os algoritmos.
+A mediana é utilizada como medida principal para comparar desempenho, pois é menos sensível que a média a valores extremos. Média e coeficiente de variação são usados para avaliar estabilidade. O coeficiente de variação (CV) é o desvio-padrão amostral dividido pela média, multiplicado por 100.
 
-## 2. Escopo experimental e origem dos dados
+## 2. Integridade e cobertura experimental
 
-O enunciado do TP1 exige implementar dez algoritmos, verificar a corretude, coletar tempos de execução, organizar estatísticas e comparar os resultados com a teoria. Para cada configuração, recomenda pelo menos dez repetições, preservação dos tempos individuais e apresentação de medidas como média, mediana e dispersão.
+Cada combinação presente tem dez registros, com os números de repetição de 1 a 10. Os tempos são positivos e não foram detectadas repetições duplicadas por algoritmo, tamanho e disposição. Esta validação confirma a estrutura tabular, mas não prova que todos os algoritmos tenham cronometragem idêntica ou que o mesmo vetor tenha sido usado em todas as implementações.
 
-### 2.1 Algoritmos considerados
+| Tamanho (`n`) | Registros | Configurações completas |
+| --------------: | --------: | ------------------------: |
+|           1.000 |       300 |                        30 |
+|          10.000 |       300 |                        30 |
+|         100.000 |       300 |                        30 |
+|       1.000.000 |       230 |                        23 |
 
-| Família                                   | Algoritmos                                                                                  |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------- |
-| Baseados em comparação                   | Bubble Sort, Insertion Sort, Selection Sort, Shell Sort, Heap Sort, Merge Sort e Quick Sort |
-| Não baseados em comparação convencional | Counting Sort, Radix Sort e Bucket Sort                                                     |
+### Configurações ausentes
 
-### 2.2 Configurações registradas
+| Algoritmo     |         n | Disposição |
+| ------------- | --------: | ------------ |
+| BubbleSort    | 1.000.000 | ALEATORIO    |
+| BubbleSort    | 1.000.000 | DECRESCENTE  |
+| InsertionSort | 1.000.000 | ALEATORIO    |
+| InsertionSort | 1.000.000 | DECRESCENTE  |
+| SelectionSort | 1.000.000 | ALEATORIO    |
+| SelectionSort | 1.000.000 | CRESCENTE    |
+| SelectionSort | 1.000.000 | DECRESCENTE  |
 
-| Dimensão                                  | Valores observados                                                        |
-| ------------------------------------------ | ------------------------------------------------------------------------- |
-| Tamanho do vetor (`n`)                   | 1.000; 10.000; 100.000; 1.000.000                                         |
-| Disposição                               | `CRESCENTE`, `ALEATORIO`, `DECRESCENTE`                             |
-| Repetições por configuração encontrada | 10                                                                        |
-| Semente registrada                         | 2026                                                                      |
-| Campos principais no CSV bruto             | algoritmo, n, caso, disposição, semente, sessão, repetição, `t_ns` |
-| Unidade original                           | nanossegundos; as tabelas resumidas também apresentam milissegundos      |
+As ausências não foram preenchidas com zero, interpoladas ou estimadas. Gráficos e tabelas devem manter essas configurações em branco.
 
-De acordo com a implementação de geração de entrada registrada no contexto do projeto, os vetores crescentes contêm os valores de `0` a `n-1`, os decrescentes contêm os mesmos valores em ordem inversa, e os aleatórios são permutações reprodutíveis desses valores. Portanto, **a entrada aleatória é uma permutação sem duplicatas**, e não uma amostra aleatória com valores repetidos. Os testes de corretude com repetidos constituem um cenário separado.
+## 3. Medianas por algoritmo em entradas aleatórias
 
-A mesma semente e o mesmo tamanho/disposição são utilizados para gerar entradas comparáveis entre algoritmos. Para a versão final do relatório, recomenda-se preservar também a identificação da revisão do código e, se possível, uma confirmação automatizada de que a entrada inicial é idêntica em todas as execuções correspondentes.
+A Tabela 2 contém a mediana das dez execuções para `ALEATORIO`. Os travessões indicam que a configuração não aparece no CSV. Os valores são em milissegundos.
 
-## 3. Integridade e cobertura
+| Algoritmo     | n=1.000 |  n=10.000 |   n=100.000 | n=1.000.000 |
+| ------------- | ------: | --------: | ----------: | ----------: |
+| BubbleSort    |  35,703 | 3.256,275 | 325.089,550 |          — |
+| InsertionSort |  13,938 | 1.302,483 | 121.652,268 |          — |
+| SelectionSort |  16,452 | 1.637,438 | 162.589,079 |          — |
+| ShellSort     |   0,918 |    14,140 |     208,443 |   3.492,487 |
+| HeapSort      |   1,324 |    17,246 |     201,359 |   2.575,510 |
+| MergeSort     |   1,422 |     3,447 |      52,796 |     668,228 |
+| QuickSort     |   0,731 |     9,095 |     115,369 |   1.348,115 |
+| CountingSort  |   0,281 |     1,045 |       7,220 |      88,443 |
+| RadixSort     |   0,144 |     0,726 |       7,061 |      75,993 |
+| BucketSort    |   0,771 |     2,207 |      18,279 |     211,707 |
 
-| Indicador                                                        | Resultado |
-| ---------------------------------------------------------------- | --------: |
-| Medições individuais válidas                                  |     1.130 |
-| Configurações previstas                                        |       120 |
-| Configurações presentes e completas                            |       113 |
-| Configurações ausentes                                         |         7 |
-| Repetições em cada configuração presente                     |        10 |
-| Linhas consideradas inválidas pelo processamento                |         0 |
-| Configurações com tempo zero/negativo ou repetição duplicada |         0 |
+### Comparação em n=100.000, disposição aleatória
 
-A cobertura observada é de **94,2%** das configurações previstas (`113 / 120`). As sete ausências são:
+Ordenando pela mediana, Radix Sort e Counting Sort têm os menores tempos observados nesta configuração, seguidos por Bucket Sort e Merge Sort. A diferença entre Radix Sort (7,061 ms) e Counting Sort (7,220 ms) é pequena em termos absolutos; esta análise descritiva não permite afirmar que a diferença seja estatisticamente significativa.
 
-| Algoritmo      |     `n` | Disposição ausente |
-| -------------- | --------: | -------------------- |
-| Bubble Sort    | 1.000.000 | `ALEATORIO`        |
-| Bubble Sort    | 1.000.000 | `DECRESCENTE`      |
-| Insertion Sort | 1.000.000 | `ALEATORIO`        |
-| Insertion Sort | 1.000.000 | `DECRESCENTE`      |
-| Selection Sort | 1.000.000 | `CRESCENTE`        |
-| Selection Sort | 1.000.000 | `ALEATORIO`        |
-| Selection Sort | 1.000.000 | `DECRESCENTE`      |
+| Posição por mediana | Algoritmo     | Mediana (ms) | Média (ms) |    CV |
+| --------------------: | ------------- | -----------: | ----------: | ----: |
+|                     1 | RadixSort     |        7,061 |       7,099 | 2,76% |
+|                     2 | CountingSort  |        7,220 |       7,579 | 9,40% |
+|                     3 | BucketSort    |       18,279 |      18,431 | 7,41% |
+|                     4 | MergeSort     |       52,796 |      52,966 | 5,69% |
+|                     5 | QuickSort     |      115,369 |     116,111 | 1,35% |
+|                     6 | HeapSort      |      201,359 |     203,114 | 1,58% |
+|                     7 | ShellSort     |      208,443 |     210,022 | 1,77% |
+|                     8 | InsertionSort |  121.652,268 | 121.952,489 | 0,83% |
+|                     9 | SelectionSort |  162.589,079 | 162.643,572 | 0,08% |
+|                    10 | BubbleSort    |  325.089,550 | 325.159,441 | 0,06% |
 
-Os tempos dessas configurações devem permanecer ausentes nos gráficos e tabelas; não devem ser preenchidos com zero, interpolados ou estimados como se fossem medições. O padrão é compatível com a dificuldade de completar a bateria de algoritmos quadráticos em um milhão de elementos, mas os CSVs, isoladamente, não comprovam o motivo de cada ausência.
+## 4. Influência da disposição dos dados
 
-Para comparar **todos os dez algoritmos** sob uma matriz comum, o tamanho de `100.000` é atualmente a escolha mais completa: existem as três disposições para todos os algoritmos. Para `n = 1.000.000`, as comparações devem usar apenas os algoritmos com medição disponível para a disposição correspondente.
-
-## 4. Estatística descritiva: entradas aleatórias
-
-A tabela abaixo apresenta a **mediana dos dez tempos**, em milissegundos, para cada algoritmo e tamanho com uma configuração aleatória registrada. A mediana foi selecionada como referência principal para a comparação, pois algumas configurações pequenas contêm valores extremos; a média e as medidas de dispersão continuam necessárias no relatório.
-
-| Algoritmo      | `n = 1.000` (ms) | `n = 10.000` (ms) | `n = 100.000` (ms) | `n = 1.000.000` (ms) |
-| -------------- | -----------------: | ------------------: | -------------------: | ---------------------: |
-| Bubble Sort    |             35,703 |           3.256,275 |          325.089,550 |                     — |
-| Insertion Sort |             13,938 |           1.302,483 |          121.652,268 |                     — |
-| Selection Sort |             16,452 |           1.637,438 |          162.589,079 |                     — |
-| Shell Sort     |              0,918 |              14,140 |              208,443 |              3.492,487 |
-| Heap Sort      |              1,324 |              17,246 |              201,359 |              2.575,510 |
-| Merge Sort     |              1,422 |               3,447 |               52,796 |                668,228 |
-| Quick Sort     |              0,731 |               9,095 |              115,369 |              1.348,115 |
-| Counting Sort  |              0,281 |               1,045 |                7,220 |                 88,443 |
-| Radix Sort     |              0,144 |               0,726 |                7,061 |                 75,993 |
-| Bucket Sort    |              0,771 |               2,207 |               18,279 |                211,707 |
-
-`—` indica que não existe medição para a configuração; não significa tempo igual a zero.
-
-### 4.1 Leitura dos resultados da tabela
-
-1. **Os três algoritmos quadráticos mais tradicionais degradam rapidamente.** Entre `n = 1.000` e `n = 10.000`, Bubble Sort aleatório passa de aproximadamente 35,7 ms para 3,26 s; entre `n = 10.000` e `n = 100.000`, chega a aproximadamente 325 s. Insertion Sort e Selection Sort também exibem crescimento próximo de duas ordens de grandeza por aumento de dez vezes no tamanho.
-2. **Merge Sort mantém crescimento mais contido.** Para a entrada aleatória, a mediana passa de 3,447 ms em `n = 10.000` para 52,796 ms em `n = 100.000` e 668,228 ms em `n = 1.000.000`. O padrão é compatível com crescimento da família `n log n`, sem que a medição seja uma prova formal da complexidade.
-3. **Quick Sort apresenta crescimento compatível com `n log n` nas configurações observadas.** A mediana aleatória aumenta de 9,095 ms (`n = 10.000`) para 115,369 ms (`n = 100.000`) e 1.348,115 ms (`n = 1.000.000`). O resultado depende, contudo, da estratégia de escolha do pivô da implementação.
-4. **Counting Sort e Radix Sort apresentam os menores tempos entre os algoritmos completamente medidos para entradas aleatórias grandes.** Em `n = 1.000.000`, as medianas são 88,443 ms e 75,993 ms, respectivamente. A conclusão é específica à distribuição de chaves, à implementação e à região cronometrada; não representa uma classificação universal de algoritmos.
-5. **Bucket Sort fica atrás de Counting Sort e Radix Sort neste conjunto.** Sua mediana é 211,707 ms para um milhão de elementos aleatórios. A interpretação precisa ser cautelosa porque a implementação usa uma ordenação pronta dentro dos buckets e, assim, não representa uma implementação independente de Bucket Sort conforme a restrição do enunciado.
-
-## 5. Efeito da disposição da entrada
-
-### 5.1 Bubble Sort e Insertion Sort
-
-Os dados exibem claramente a sensibilidade desses algoritmos à ordem inicial dos elementos. Em `n = 100.000`:
-
-| Algoritmo      | Crescente (ms) | Aleatória (ms) | Decrescente (ms) |
-| -------------- | -------------: | --------------: | ---------------: |
-| Bubble Sort    |          3,538 |     325.089,550 |      486.220,017 |
-| Insertion Sort |          5,309 |     121.652,268 |      243.172,255 |
-
-Em entrada crescente, o Bubble Sort pode encerrar após uma passagem sem trocas; o Insertion Sort faz poucas movimentações. Esse comportamento explica o crescimento observado próximo de linear no melhor cenário da implementação. Em entradas aleatórias e decrescentes, o número de comparações e, principalmente, de trocas/deslocamentos cresce substancialmente, aproximando-se do comportamento quadrático.
-
-Os tempos de um milhão de elementos reforçam o ponto apenas para o cenário crescente: Bubble Sort tem mediana de 34,860 ms e Insertion Sort de 53,009 ms. Não há dados para os seus cenários aleatório e decrescente nesse tamanho.
-
-### 5.2 Selection Sort
-
-Em `n = 100.000`, as medianas são próximas nas três disposições: 162.006,956 ms em ordem crescente, 162.589,079 ms em ordem aleatória e 162.072,307 ms em ordem decrescente. Esse padrão é esperado: a implementação percorre repetidamente a parte não ordenada para encontrar o menor elemento, mantendo aproximadamente o mesmo número de comparações independentemente da disposição inicial. O resultado é compatível com `Θ(n²)` em melhor, médio e pior caso.
-
-### 5.3 Algoritmos da família `n log n`
-
-Heap Sort, Merge Sort e Quick Sort permanecem em escalas de tempo muito inferiores às dos algoritmos quadráticos aleatórios/decrescentes nas maiores entradas disponíveis. Heap Sort mostra pouca variação entre as três disposições em `n = 1.000.000` (medianas de aproximadamente 2,44 a 2,58 s), comportamento compatível com sua classe `Θ(n log n)`. Merge Sort também apresenta tempos próximos entre disposições (aproximadamente 630 a 668 ms).
-
-Quick Sort apresenta mediana de 992,370 ms na entrada crescente, 1.348,115 ms na aleatória e 1.033,301 ms na decrescente, todas para `n = 1.000.000`. Na versão do código analisada, o pivô é escolhido pelo elemento da posição central antes de ser movido para o fim da partição. Assim, não se deve assumir automaticamente que a entrada crescente ou decrescente corresponda ao pior caso teórico de Quick Sort.
-
-### 5.4 Counting Sort, Radix Sort e Bucket Sort
-
-Em `n = 1.000.000`, as medianas registradas por disposição são:
+Para n=100.000, a mediana por disposição mostra padrões coerentes com as características dos algoritmos:
 
 | Algoritmo     | Crescente (ms) | Aleatória (ms) | Decrescente (ms) |
 | ------------- | -------------: | --------------: | ---------------: |
-| Counting Sort |         76,970 |          88,443 |           77,397 |
-| Radix Sort    |         72,011 |          75,993 |           71,765 |
-| Bucket Sort   |        110,830 |         211,707 |          115,232 |
+| BubbleSort    |          3,538 |     325.089,550 |      486.220,017 |
+| InsertionSort |          5,309 |     121.652,268 |      243.172,255 |
+| SelectionSort |    162.006,956 |     162.589,079 |      162.072,307 |
+| ShellSort     |         80,026 |         208,443 |          115,629 |
+| HeapSort      |        214,715 |         201,359 |          194,175 |
+| MergeSort     |         54,000 |          52,796 |           54,317 |
+| QuickSort     |         86,342 |         115,369 |           85,859 |
+| CountingSort  |          7,844 |           7,220 |            7,265 |
+| RadixSort     |          7,013 |           7,061 |            7,211 |
+| BucketSort    |         10,549 |          18,279 |           10,501 |
 
-Counting Sort e Radix Sort variam relativamente pouco entre as disposições. Isso é coerente com algoritmos cujo trabalho depende principalmente do tamanho do vetor e das propriedades das chaves, e não da ordem original. Neste experimento, os valores são `0` a `n-1`, portanto o intervalo de chaves do Counting Sort é proporcional a `n`. No Radix Sort atual, a transformação para lidar com inteiros com sinal faz com que a quantidade de passagens seja aproximadamente constante para os tipos utilizados; a preparação dessa transformação está fora da região cronometrada no código registrado.
+### Interpretação dos padrões
 
-Bucket Sort é mais lento na entrada aleatória do que nas entradas crescente e decrescente. Isso pode estar ligado ao trabalho realizado dentro dos buckets e à ordenação auxiliar usada por sua implementação. Por causa do uso de `Collections.sort`, os resultados não devem ser interpretados como evidência isolada da complexidade de uma implementação manual convencional de Bucket Sort.
+- **Bubble Sort:** a mediana passa de 3,538 ms em ordem crescente para 325.089,550 ms em ordem aleatória e 486.220,017 ms em ordem decrescente. A entrada crescente permite a parada antecipada quando não há trocas; a ordem decrescente exige muitas trocas.
+- **Insertion Sort:** passa de 5,309 ms em crescente para 121.652,268 ms em aleatória e 243.172,255 ms em decrescente. Isso é compatível com o número de deslocamentos necessário para inserir cada elemento na região ordenada.
+- **Selection Sort:** os valores são muito próximos (aproximadamente 162 s) para as três disposições. Isso corresponde ao seu padrão de Θ(n²) comparações, pouco sensível à ordem inicial.
+- **Merge Sort:** os tempos permanecem próximos de 53–54 ms nas três disposições, compatíveis com seu comportamento Θ(n log n) pouco sensível à ordem inicial.
+- **Quick Sort:** os resultados são menores nas entradas crescentes/decrescentes do que na aleatória nesta implementação. Esse comportamento depende da estratégia concreta de pivô e partição; não deve ser generalizado para todas as implementações.
+- **Counting Sort e Radix Sort:** as medianas ficam próximas entre disposições, coerente com o fato de que o custo depende sobretudo do tamanho e dos parâmetros das chaves/passagens, não da ordem inicial.
+- **Bucket Sort e Shell Sort:** mostram sensibilidade à disposição e aos detalhes internos de implementação; para Buckets, a distribuição entre baldes e a forma de ordenação interna importam. A complexidade de Shell Sort depende da sequência de gaps.
 
-## 6. Comparação com a teoria assintótica
+## 5. Escalabilidade: fator de crescimento para cada aumento de 10× em n
 
-A tabela sintetiza as complexidades convencionais relevantes para orientar a discussão. A complexidade concreta pode variar conforme detalhes da implementação e, nos algoritmos não baseados em comparação, conforme os parâmetros dos valores de entrada.
+A tabela usa medianas de entrada aleatória e calcula a razão entre medianas consecutivas: tempo em n seguinte dividido pelo tempo no tamanho anterior. Se n aumenta dez vezes, uma razão próxima de 100 é um sinal compatível com comportamento quadrático; razões próximas de 10–15 podem ser compatíveis com famílias lineares ou n log n, conforme parâmetros e custos fixos. São referências descritivas, não uma prova da complexidade.
 
-| Algoritmo      | Melhor caso                                 | Médio/esperado                            | Pior caso                                                             | Relação com os dados observados                                                                                                                                                  |
-| -------------- | ------------------------------------------- | ------------------------------------------ | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bubble Sort    | `O(n)` com parada antecipada              | `O(n²)`                                 | `O(n²)`                                                            | Crescente cresce próximo de linear; aleatório/decrescente crescem muito mais rapidamente.                                                                                        |
-| Insertion Sort | `O(n)`                                    | `O(n²)`                                 | `O(n²)`                                                            | Forte diferença entre crescente e as demais disposições.                                                                                                                        |
-| Selection Sort | `Θ(n²)`                                 | `Θ(n²)`                                | `Θ(n²)`                                                           | Tempos próximos nas três disposições e crescimento aproximadamente quadrático.                                                                                                |
-| Shell Sort     | Depende dos intervalos                      | Depende dos intervalos                     | Depende dos intervalos                                                | A implementação usa gaps que começam em `n/2` e são divididos por dois; não se deve atribuir uma ordem única sem especificar essa sequência e a análise aplicável.      |
-| Heap Sort      | `Θ(n log n)`                             | `Θ(n log n)`                            | `Θ(n log n)`                                                       | Crescimento semelhante entre disposições e escalas compatíveis com `n log n`.                                                                                                 |
-| Merge Sort     | `Θ(n log n)`                             | `Θ(n log n)`                            | `Θ(n log n)`                                                       | Crescimento consistente com a família `n log n`.                                                                                                                                |
-| Quick Sort     | `Θ(n log n)` em partições equilibradas | `Θ(n log n)` esperado                   | `Θ(n²)`                                                           | As medições observadas crescem de forma próxima a `n log n`; a escolha de pivô e o particionamento importam.                                                                 |
-| Counting Sort  | `O(n+k)`                                  | `O(n+k)`                                 | `O(n+k)`                                                            | `k` é o intervalo de chaves. Como `k` é proporcional a `n` neste experimento, espera-se crescimento aproximadamente linear.                                                |
-| Radix Sort     | `O(d(n+b))` na formulação por passagens | `O(d(n+b))`                              | `O(d(n+b))` para a configuração de dígitos/passagens considerada | Com base fixa e número de passagens limitado, o crescimento pode ser aproximadamente linear. `d` e a base devem ser descritos.                                                  |
-| Bucket Sort    | Dependente da distribuição                | Linear esperado sob hipóteses favoráveis | Pode chegar a `O(n²)`                                              | Os resultados mostram dependência da disposição, mas a implementação usa ordenação pronta dentro dos buckets; é necessário corrigir isso antes de uma comparação final. |
+| Algoritmo     | 1.000→10.000 | 10.000→100.000 | 100.000→1.000.000 |
+| ------------- | ------------: | --------------: | -----------------: |
+| BubbleSort    |       91,21× |         99,83× |                 — |
+| InsertionSort |       93,45× |         93,40× |                 — |
+| SelectionSort |       99,53× |         99,29× |                 — |
+| ShellSort     |       15,40× |         14,74× |            16,76× |
+| HeapSort      |       13,02× |         11,68× |            12,79× |
+| MergeSort     |        2,42× |         15,31× |            12,66× |
+| QuickSort     |       12,43× |         12,69× |            11,69× |
+| CountingSort  |        3,72× |          6,91× |            12,25× |
+| RadixSort     |        5,04× |          9,73× |            10,76× |
+| BucketSort    |        2,86× |          8,28× |            11,58× |
 
-`k` representa o intervalo de chaves em Counting Sort; `d`, o número de dígitos/passagens em Radix Sort; `b`, a base utilizada. Para Shell Sort, a complexidade é particularmente dependente da sequência de gaps. Para Bucket Sort, o comportamento esperado depende de como os elementos se distribuem pelos buckets e do método usado para ordenar cada bucket.
+Observações sobre os fatores:
 
-## 7. Variação entre repetições
+- **Bubble, Insertion e Selection Sort:** os fatores de aproximadamente 91–100× entre 1.000, 10.000 e 100.000 elementos em entradas aleatórias são compatíveis com o crescimento quadrático esperado. A ausência das execuções aleatórias em n=1.000.000 impede avaliar a mesma razão no último intervalo.
+- **Heap Sort e Quick Sort:** os fatores ficam em geral entre 11,7× e 13×, compatíveis com crescimento da ordem de n log n nos intervalos avaliados.
+- **Merge Sort:** a razão de 2,42× entre 1.000 e 10.000 elementos é muito menor que a esperada para uma escala n log n. As medições de n=10.000 também têm grande dispersão (CV de 75,55%) e uma observação máxima de 15,179 ms; essa transição deve ser investigada antes da conclusão final. Para os dois intervalos maiores, as razões são 15,31× e 12,66×.
+- **Counting Sort e Radix Sort:** nos tamanhos maiores, as razões se aproximam de uma escala linear, sobretudo de n=100.000 a 1.000.000. Nos tamanhos pequenos há sinais de custos fixos e variação entre repetições.
+- **Bucket Sort:** a progressão se aproxima de escala linear no maior intervalo, mas a interpretação depende da distribuição entre buckets e da implementação da ordenação interna.
+- **Shell Sort:** o crescimento medido ficou na faixa aproximada de 14,7× a 16,8× por fator 10 em n aleatório. A complexidade não tem uma única ordem universal: depende dos gaps implementados.
 
-A análise das dez repetições mostra que a estabilidade depende do tamanho e da configuração. Em algumas medições pequenas, poucos tempos altos afetam bastante a média e o desvio-padrão; nas grandes entradas, as repetições de vários algoritmos têm variação relativa menor.
+## 6. Resultados em n=1.000.000, entrada aleatória
 
-| Configuração                          | Média (ms) | Mediana (ms) | Mínimo (ms) | Máximo (ms) | Desvio-padrão amostral (ms) |      CV |
-| --------------------------------------- | ----------: | -----------: | -----------: | -----------: | ---------------------------: | ------: |
-| Merge Sort, `n=10.000`, aleatória    |       5,049 |        3,447 |        2,990 |       15,179 |                        3,814 | 75,552% |
-| Radix Sort, `n=1.000`, crescente      |       0,209 |        0,128 |        0,122 |        0,496 |                        0,148 | 70,939% |
-| Counting Sort, `n=10.000`, aleatória |       1,500 |        1,045 |        0,849 |        3,005 |                        0,763 | 50,862% |
-| Heap Sort, `n=1.000.000`, aleatória  |   2.571,961 |    2.575,510 |    2.555,215 |    2.585,119 |                       11,561 |  0,449% |
-| Quick Sort, `n=1.000.000`, aleatória |   1.351,083 |    1.348,115 |    1.335,979 |    1.382,101 |                       13,952 |  1,033% |
-| Bubble Sort, `n=100.000`, aleatória  | 325.159,441 |  325.089,550 |  325.005,083 |  325.634,692 |                      187,695 |  0,058% |
+Esta comparação inclui somente os algoritmos com medições nessa configuração. Os três algoritmos quadráticos não foram executados para entrada aleatória nesse tamanho, conforme a cobertura registrada.
 
-O coeficiente de variação (CV) é o desvio-padrão dividido pela média, expresso em porcentagem. Por exemplo, no Merge Sort aleatório de 10.000 elementos, a média supera a mediana porque há uma medição máxima de 15,179 ms, muito acima das demais. Por isso:
+| Algoritmo    | Mediana (ms) | Mediana (s) |    CV |
+| ------------ | -----------: | ----------: | ----: |
+| RadixSort    |       75,993 |       0,076 | 7,65% |
+| CountingSort |       88,443 |       0,088 | 6,38% |
+| BucketSort   |      211,707 |       0,212 | 4,33% |
+| MergeSort    |      668,228 |       0,668 | 2,20% |
+| QuickSort    |    1.348,115 |       1,348 | 1,03% |
+| HeapSort     |    2.575,510 |       2,576 | 0,45% |
+| ShellSort    |    3.492,487 |       3,492 | 0,08% |
 
-- use **mediana** como resumo principal nos gráficos de comparação;
-- apresente também **média, desvio-padrão, mínimo e máximo** em tabelas, atendendo ao enunciado;
-- interprete CVs muito elevados como indício de alta variação/outlier ou de execução ainda sensível a fatores externos;
-- não descreva diferenças pequenas entre algoritmos como estatisticamente significativas sem teste estatístico apropriado e desenho experimental adequado.
+Radix Sort apresentou a menor mediana observada nessa configuração (75,993 ms), seguido por Counting Sort (88,443 ms) e Bucket Sort (211,707 ms). Entre os algoritmos baseados em comparação disponíveis, Merge Sort apresentou 668,228 ms, seguido por Quick Sort (1.348,115 ms), Heap Sort (2.575,510 ms) e Shell Sort (3.492,487 ms). O ranking se refere somente às implementações e às entradas avaliadas, não a uma superioridade universal dos algoritmos.
 
-O TP1 exige pelo menos dez repetições e recomenda trinta ou mais quando viável. A base atual tem dez repetições por configuração, atendendo ao mínimo informado, mas uma coleta adicional pode melhorar a avaliação da variabilidade, sobretudo para tempos curtos.
+## 7. Dispersão e aquecimento das execuções
 
-## 8. Limitações metodológicas que precisam ser resolvidas
+Algumas configurações apresentam CV elevado e média acima da mediana. Os maiores exemplos são:
 
-Esta seção é importante para evitar que o relatório atribua à teoria diferenças que também podem ser provocadas pela implementação ou pela medição.
+| Algoritmo    |      n | Disposição | Mediana (ms) | Média (ms) | Mínimo (ms) | Máximo (ms) |     CV |
+| ------------ | -----: | ------------ | -----------: | ----------: | -----------: | -----------: | -----: |
+| MergeSort    | 10.000 | ALEATORIO    |        3,447 |       5,049 |        2,990 |       15,179 | 75,55% |
+| RadixSort    |  1.000 | CRESCENTE    |        0,128 |       0,209 |        0,122 |        0,496 | 70,94% |
+| MergeSort    | 10.000 | DECRESCENTE  |        3,084 |       4,158 |        2,839 |       12,331 | 70,43% |
+| RadixSort    |  1.000 | DECRESCENTE  |        0,137 |       0,208 |        0,124 |        0,485 | 70,42% |
+| RadixSort    |  1.000 | ALEATORIO    |        0,144 |       0,236 |        0,121 |        0,480 | 69,59% |
+| MergeSort    | 10.000 | CRESCENTE    |        3,246 |       4,436 |        2,965 |       12,476 | 66,61% |
+| CountingSort | 10.000 | ALEATORIO    |        1,045 |       1,500 |        0,849 |        3,005 | 50,86% |
+| BucketSort   | 10.000 | CRESCENTE    |        1,496 |       2,096 |        1,274 |        4,266 | 49,63% |
+| BucketSort   | 10.000 | DECRESCENTE  |        1,524 |       2,073 |        1,264 |        4,138 | 49,12% |
+| ShellSort    |  1.000 | DECRESCENTE  |        0,638 |       0,895 |        0,610 |        1,520 | 47,58% |
 
-### 8.1 Fronteira de cronometragem
+O padrão de várias sequências sugere efeito de aquecimento da JVM/JIT ou outra fonte de variação durante as repetições. Por exemplo, Radix Sort com n=1.000 aleatório tem média 0,236 ms e mediana 0,144 ms; Merge Sort com n=10.000 aleatório tem média 5,049 ms e mediana 3,447 ms. Isso é consistente com algumas medições iniciais bem mais lentas, mas o CSV isoladamente não prova a causa. Como as repetições individuais foram preservadas, não é recomendado excluir automaticamente esses valores: é melhor reforçar o aquecimento, repetir a coleta em sessões controladas e documentar os critérios antes de remover qualquer observação.
 
-O enunciado determina que a medição não inclua geração da entrada, cópias ou impressão. A metodologia definida no projeto também pretende padronizar quais etapas de preparação entram no tempo. No código registrado no contexto:
+### Implicação metodológica
 
-- **Radix Sort** cria e transforma arrays auxiliares e determina a maior chave antes de iniciar o timer; a ordenação por dígitos e a escrita dos valores de volta ao vetor ficam dentro da região cronometrada.
-- **Counting Sort** inicia o timer antes de obter mínimo/máximo e determinar o intervalo, de modo que a busca desses extremos fica dentro do tempo registrado.
-- **Bucket Sort** também inicia o timer antes da busca de mínimo/máximo e inclui essas operações.
+Os resultados usam dez repetições por configuração. Para melhorar a estabilidade, recomenda-se executar mais aquecimentos antes das repetições registradas e, se possível, realizar 30 ou mais medições como sugere o enunciado. Idealmente, manter o mesmo processo JVM durante um conjunto balanceado de algoritmos ou documentar como cada sessão é iniciada; alternar a ordem dos algoritmos também reduz o risco de confundir diferenças de aquecimento com diferenças de desempenho.
 
-Se a regra adotada para o experimento for excluir a preparação de extremos/chaves, esses limites não são equivalentes. Antes da versão definitiva, a equipe deve padronizar a decisão, ajustar os timers e **refazer as medições afetadas**. Se for decidido que a identificação de extremos faz parte do algoritmo medido, isso deve ser declarado e aplicado de maneira consistente.
+## 8. Limitações interpretativas
 
-### 8.2 Implementação de Bucket Sort
+1. **Caso teórico versus disposição:** `MELHOR`, `MEDIO` e `PIOR` são valores da coluna `caso`. Eles estão associados a crescente, aleatória e decrescente no CSV, mas não significam necessariamente melhor, médio e pior caso para todo algoritmo. A análise deve priorizar a coluna `disposicao` e discutir cada algoritmo individualmente.
+2. **Comparabilidade da medição:** o CSV registra os tempos, mas não descreve a fronteira exata do cronômetro. O contexto do projeto identificou diferenças na preparação interna medida entre Counting Sort, Bucket Sort e Radix Sort. Antes de afirmar comparação rigorosa entre esses métodos, confirme que o CSV foi coletado com as mesmas regras de cronometragem nas versões finais.
+3. **Proveniência das implementações:** o CSV não identifica hash ou versão do código que produziu cada sessão. Como houve alterações recentes nas implementações, confirme se estes tempos correspondem à versão corrigida; se não, regenere os dados afetados.
+4. **Bucket Sort:** o contexto do projeto registra o uso de `Collections.sort` dentro dos buckets na versão analisada anteriormente. Se essa for a versão que gerou estes dados, os tempos não representam uma implementação totalmente própria da ordenação interna e devem ser considerados provisórios para avaliação acadêmica.
+5. **Ambiente experimental:** não há informação suficiente no CSV sobre processador, RAM, sistema operacional, JDK e parâmetros da JVM. Esses dados devem ser documentados separadamente.
+6. **Entrada aleatória:** a semente 2026 aparece registrada, mas o CSV não contém hash dos vetores. A igualdade exata entre entradas usadas por algoritmos distintos depende do gerador e da forma como a semente é aplicada.
 
-O código de Bucket Sort utiliza `Collections.sort` para ordenar os elementos de cada bucket. O enunciado afirma que não se pode usar métodos prontos de ordenação da API Java para substituir os algoritmos solicitados. É necessário implementar manualmente a ordenação interna de cada bucket ou discutir outra solução com o docente. Até essa correção, os tempos de Bucket Sort devem ser tratados como provisórios e não devem fundamentar uma conclusão definitiva sobre a complexidade do algoritmo implementado pelo grupo.
+## 9. Conclusões
 
-### 8.3 Significado de `MELHOR`, `MEDIO` e `PIOR`
+A base reúne 1.130 medições válidas e 113 configurações completas de 120 previstas, com dez repetições em cada configuração presente. Os resultados apoiam três conclusões descritivas principais: (i) Bubble Sort, Insertion Sort e Selection Sort apresentam crescimento compatível com custo quadrático em entradas aleatórias nos tamanhos disponíveis; (ii) Heap Sort e Quick Sort crescem, em geral, na faixa esperada para n log n; e (iii) Counting Sort e Radix Sort têm menores tempos observados para a família de entradas testada, com custos que crescem aproximadamente com o tamanho e os parâmetros das chaves. Merge Sort apresenta crescimento coerente nos intervalos maiores, mas a transição entre n=1.000 e n=10.000 merece investigação devido à baixa razão observada e à grande dispersão nessa última configuração.
 
-No script experimental, os rótulos estão associados às disposições: crescente, aleatória e decrescente, respectivamente. Essa correspondência é adequada para alguns algoritmos, como Bubble Sort e Insertion Sort, mas não pode ser generalizada. Selection Sort realiza trabalho quadrático em qualquer disposição; Quick Sort depende da escolha do pivô; Counting Sort e Radix Sort dependem principalmente das chaves e parâmetros específicos.
+Os dados também mostram grande sensibilidade à disposição em Bubble Sort e Insertion Sort, e comportamento mais estável em relação à disposição em Selection Sort, Merge Sort, Counting Sort e Radix Sort. Antes da redação definitiva do relatório, devem ser confirmadas a versão dos códigos utilizada, a consistência dos cronômetros e a origem dos altos valores nas primeiras repetições de algumas sessões. As sete configurações ausentes devem continuar explicitamente identificadas, sem estimativa.
 
-No relatório, prefira nomear os cenários como **entrada crescente**, **entrada aleatória** e **entrada decrescente**. A expressão “melhor caso” ou “pior caso” deve ser usada somente quando a análise do algoritmo e da implementação justificar essa classificação.
+## 10. Arquivos derivados
 
-### 8.4 Cobertura incompleta em `n = 1.000.000`
+- `estatisticas_descritivas_tp1.csv`: estatísticas por algoritmo, tamanho e disposição, com média, mediana, mínimo, máximo, desvio-padrão e CV.
+- `analise_estatistica_csv_tp1.md`: este documento de análise.
 
-Não compare todos os algoritmos como se a matriz de um milhão estivesse completa. Para comparações abrangentes, utilize `n = 100.000`, que possui as trinta configurações esperadas (dez algoritmos × três disposições). Nas análises de um milhão, informe explicitamente quais algoritmos não foram medidos.
+### Fórmulas utilizadas
 
-### 8.5 Número de sessões e sementes
-
-As estatísticas atuais se baseiam em dez repetições por configuração e, conforme os CSVs, uma sessão e uma semente por configuração. Isso avalia a variabilidade entre repetições nessa sessão, mas não captura completamente variação entre sessões, reinicializações, condições de carga do sistema ou diferentes sementes. Uma extensão útil seria repetir o experimento em mais de uma sessão e, quando pertinente, com sementes adicionais.
-
-### 8.6 Ambiente e reprodutibilidade
-
-O CSV contém dados suficientes para agrupar as medições, mas não documenta por si só o hardware e todo o ambiente de execução. O relatório técnico precisa registrar, no mínimo:
-
-- processador e memória RAM;
-- sistema operacional e versão;
-- versão do JDK/JVM;
-- parâmetros usados ao executar a JVM;
-- commit ou versão do código avaliado;
-- comandos de execução, aquecimentos, número de repetições e semente.
-
-Esses dados devem ser obtidos do ambiente real em que o experimento foi executado; não devem ser preenchidos por suposição.
-
-## 9. Recomendações para a análise final e para o Overleaf
-
-1. **Resolver primeiro as limitações metodológicas**, especialmente a ordenação pronta em Bucket Sort e a uniformidade dos timers. Registrar qual versão do código produziu os CSVs atuais.
-2. **Regenerar a base final** a partir dos CSVs brutos preservados; depois recalcular as estatísticas e gerar os gráficos novamente, evitando misturar medições de versões diferentes.
-3. Para comparação que inclua todos os dez algoritmos, priorizar os gráficos de `n = 100.000` por disposição. Para estudar o crescimento com `n`, usar curvas separadas por disposição e deixar lacunas onde não existem resultados.
-4. Usar mediana para comparar tempos em gráficos, mas apresentar média e dispersão nas tabelas. Escala logarítmica é adequada quando os tempos diferem por várias ordens de grandeza; o eixo deve estar identificado com a unidade `ms`.
-5. Incluir pelo menos: (a) tabela de complexidades teóricas; (b) tabela de estatísticas descritivas por configuração; (c) gráfico comparativo dos dez algoritmos em `n=100.000`; (d) gráficos de crescimento de Bubble/Insertion, Selection, família `n log n` e algoritmos dependentes das chaves; (e) uma nota clara sobre as configurações ausentes.
-6. Discutir os resultados, não apenas apresentar rankings: explicar a relação entre tamanho da entrada, disposição inicial, parâmetros `k`/`d`, sequência de gaps e escolhas da implementação.
-
-## 10. Texto-base preliminar para adaptar ao relatório
-
-> Os experimentos disponíveis reúnem 1.130 medições, organizadas em 113 configurações completas, com dez repetições por configuração. Foram analisados vetores de 1.000, 10.000, 100.000 e 1.000.000 de elementos, em ordem crescente, aleatória e decrescente. A matriz de um milhão de elementos está incompleta para os algoritmos quadráticos: sete configurações não possuem medições e, portanto, foram mantidas como ausentes, sem estimativa de seus tempos.
->
-> Os resultados indicam forte sensibilidade do Bubble Sort e do Insertion Sort à disposição dos dados. Para 100.000 elementos, ambos apresentam tempos de poucos milissegundos na entrada crescente, mas passam a dezenas ou centenas de milhares de milissegundos nos casos aleatório e decrescente. Em contrapartida, Selection Sort apresenta tempos semelhantes entre as três disposições, em consonância com seu custo quadrático independente da ordem inicial. Merge Sort, Heap Sort e Quick Sort exibem crescimento mais contido nas faixas observadas, compatível com a família `n log n` nas configurações analisadas.
->
-> Counting Sort e Radix Sort registram os menores tempos entre os algoritmos com a matriz completa para entradas aleatórias grandes. Essa observação deve ser interpretada sob as condições de entrada utilizadas — permutações dos valores de `0` a `n-1` — e considerando as diferenças de implementação e de delimitação dos tempos medidos. O resultado de Bucket Sort é provisório, uma vez que a versão analisada utiliza um método de ordenação pronto dentro dos buckets. Assim, as conclusões definitivas devem ser estabelecidas após padronizar a cronometragem e validar a implementação, mantendo os tempos individuais como evidência experimental.
-
-**Nota de uso:** o texto acima é um rascunho analítico e não deve ser apresentado como conclusão definitiva até que as ressalvas da Seção 8 sejam resolvidas ou explicitamente assumidas na metodologia.
-
-## 11. Arquivos de origem usados nesta análise
-
-- Enunciado: `docs/EnunciadoTrabalho.md`.
-- Tempos individuais: `TP1/src/resultados/centralizados/tempos_consolidados.csv`.
-- Integridade das configurações: `TP1/src/resultados/centralizados/integridade_configuracoes.csv`.
-- Estatísticas resumidas: `TP1/src/resultados/estatisticas/estatisticas_por_configuracao.csv`.
-- Estatísticas por sessão: `TP1/src/resultados/estatisticas/estatisticas_por_sessao.csv`.
-- Cobertura experimental: `TP1/src/resultados/estatisticas/cobertura_configuracoes.csv`.
-- Anomalias de leitura: `TP1/src/resultados/estatisticas/anomalias_dados.csv`.
-- Implementações Java e scripts de execução do TP1, conforme o snapshot de contexto fornecido.
+- Conversão: $t_{ms}=t_{ns}/10^6$.
+- Média amostral: $ar{x}=rac{1}{n}\sum_{i=1}^{n}x_i$.
+- Desvio-padrão amostral: $s=\sqrt{rac{1}{n-1}\sum_{i=1}^{n}(x_i-ar{x})^2}$.
+- Coeficiente de variação: $CV=100\cdot s/ar{x}$.
