@@ -1,0 +1,20 @@
+RELATÓRIO DE PROCESSAMENTO — TP1 / ACD
+============================================
+Medições válidas utilizadas: 1130
+Configurações observadas (algoritmo, n, caso, disposição): 113
+Algoritmos presentes: BubbleSort, BucketSort, CountingSort, HeapSort, InsertionSort, MergeSort, QuickSort, RadixSort, SelectionSort, ShellSort
+Tamanhos presentes: 1000, 10000, 100000, 1000000
+Disposições presentes: ALEATORIO, CRESCENTE, DECRESCENTE
+Configurações previstas na matriz padrão: 120
+Configurações completas (pelo menos 10 medições): 113
+Configurações incompletas: 0
+Configurações ausentes: 7
+Linhas inválidas excluídas: 0
+Gráficos gerados: 22
+
+Definições:
+- Média e mediana calculadas sobre todas as medições disponíveis para a configuração.
+- Desvio-padrão amostral (n-1); em grupos com menos de duas medições fica vazio.
+- Os tempos originais são mantidos em nanossegundos; também são exportados em milissegundos.
+- Gráficos usam mediana e escala logarítmica; configurações ausentes ficam sem ponto/barra.
+- Se houver medições em mais de uma sessão/semente, elas são agrupadas na estatística por configuração; a tabela por sessão mantém a separação.

@@ -26,5 +26,14 @@ clean_all:
 gen_ctx:
 	gitingest . -o ctx.txt
 
+venv_create:
+	python -m venv /./.venv .
+venv_start:
+	 source .venv/bin/activate
+venv_end:
+	deactivate
+venv_purge:
+	rm -rf ./venv
+
 
 .PHONY: all test benchmark experimento run clean clean_all gen_ctx
