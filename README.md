@@ -1,4 +1,3 @@
-
 # unirepo
 
 Repositório de estudos e trabalhos das disciplinas de graduação. As anotações são material pessoal de apoio e podem estar incompletas; para trabalhos avaliativos, consulte também os enunciados oficiais e confirme os requisitos com o docente.
@@ -7,7 +6,7 @@ Repositório de estudos e trabalhos das disciplinas de graduação. As anotaçõ
 
 O projeto do TP1 está na pasta [`TP1/`](TP1/). Ele reúne as implementações em Java de dez algoritmos de ordenação, os testes de corretude e o programa CLI usado para medir desempenho.
 
-### Começar
+#### Começar
 
 ```bash
 cd TP1/src
