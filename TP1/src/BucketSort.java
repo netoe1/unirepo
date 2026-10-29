@@ -53,8 +53,8 @@ public class BucketSort extends Ordenador<Integer> {
                     this.vetor.set(index++, val);
                 }
             }
-        }
-        this.tempoFinal = System.nanoTime();
+     
+        this.tempoFinal = System.nanoTime();   }
     }
 
     public static void main(String args[]) {
