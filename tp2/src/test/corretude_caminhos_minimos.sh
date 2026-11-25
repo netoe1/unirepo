@@ -9,4 +9,5 @@ find "$TP2_DIR/src" -name '*.java' -print0 \
     | xargs -0 javac -encoding UTF-8 -d "$BUILD_DIR"
 
 java -cp "$BUILD_DIR" test.BellmanFordTest
-java -cp "$BUILD_DIR" test.DkjistraTest
+java -cp "$BUILD_DIR" test.DijkstraTest
+java -cp "$BUILD_DIR" test.FloydWarshallTest

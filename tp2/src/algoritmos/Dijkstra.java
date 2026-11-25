@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.PriorityQueue;
 
 /** Calcula caminhos mínimos de uma origem para grafos com pesos não negativos. */
-public class Dkjistra {
+public class Dijkstra{
 
-    public static class ResultadoDkjistra {
+    public static class ResultadoDijkstra {
         private final int origem;
         private final double[] distancia;
         private final int[] pai;
 
-        private ResultadoDkjistra(int origem, double[] distancia, int[] pai) {
+        private ResultadoDijkstra(int origem, double[] distancia, int[] pai) {
             this.origem = origem;
             this.distancia = distancia.clone();
             this.pai = pai.clone();
@@ -71,7 +71,7 @@ public class Dkjistra {
         }
     }
 
-    public ResultadoDkjistra executar(IGrafo grafo, int origem) {
+    public ResultadoDijkstra executar(IGrafo grafo, int origem) {
         validarEntrada(grafo, origem);
         validarPesos(grafo);
 
@@ -102,7 +102,7 @@ public class Dkjistra {
             }
         }
 
-        return new ResultadoDkjistra(origem, distancia, pai);
+        return new ResultadoDijkstra(origem, distancia, pai);
     }
 
     private void validarEntrada(IGrafo grafo, int origem) {

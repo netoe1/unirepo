@@ -61,6 +61,48 @@ public class ExportadorCSV {
         return arquivoCsv;
     }
 
+    public File registrarExperimento(
+            String arquivoOrigem,
+            String algoritmo,
+            String representacao,
+            int numVertices,
+            int numArestas,
+            double densidade,
+            int repeticao,
+            int verticeOrigem,
+            double tempoMs
+    ) throws IOException {
+        if (!pastaOutput.exists() && !pastaOutput.mkdirs()) {
+            throw new IOException("Nao foi possivel criar a pasta de saida: " + pastaOutput.getPath());
+        }
+
+        File arquivoCsv = new File(pastaOutput, "experimento_caminhos_minimos.csv");
+        boolean arquivoNovo = !arquivoCsv.exists() || arquivoCsv.length() == 0;
+
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoCsv, StandardCharsets.UTF_8, true))) {
+            if (arquivoNovo) {
+                bw.write("arquivo_grafo;algoritmo;representacao;vertices;arestas;densidade;repeticao;origem;tempo_ms");
+                bw.newLine();
+            }
+
+            String linha = String.join(";",
+                    escaparCsv(arquivoOrigem),
+                    escaparCsv(algoritmo),
+                    escaparCsv(representacao),
+                    String.valueOf(numVertices),
+                    String.valueOf(numArestas),
+                    String.format(java.util.Locale.US, "%.2f", densidade),
+                    String.valueOf(repeticao),
+                    String.valueOf(verticeOrigem),
+                    String.format(java.util.Locale.US, "%.6f", tempoMs)
+            );
+            bw.write(linha);
+            bw.newLine();
+        }
+
+        return arquivoCsv;
+    }
+
     public File salvarPercursoVertices(
             String nomeArquivo,
             String algoritmo,

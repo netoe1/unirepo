@@ -4,12 +4,12 @@ import algoritmos.BellmanFord;
 import algoritmos.BellmanFord.ResultadoBellmanFord;
 import algoritmos.DFS;
 import algoritmos.DFS.ResultadoDFS;
-import algoritmos.Dkjistra;
-import algoritmos.Dkjistra.ResultadoDkjistra;
-import io.ExportadorCSV;
-import io.EscritaGrafo;
-import io.LeituraGrafo;
-import io.LeituraGrafo.Representacao;
+import algoritmos.Dijkstra;
+import algoritmos.Dijkstra.ResultadoDijkstra;
+import algoritmos.FloydWarshall;
+import algoritmos.FloydWarshall.ResultadoFloydWarshall;
+import algoritmos.FordFulkerson;
+import algoritmos.FordFulkerson.ResultadoFordFulkerson;
 import algoritmos.Kruskal;
 import algoritmos.OrdenacaoTopologica;
 import algoritmos.OrdenacaoTopologica.ResultadoOrdenacaoTopologica;
@@ -17,6 +17,10 @@ import algoritmos.Prim;
 import algoritmos.ResultadoArvoreGeradoraMinima;
 import grafo.IGrafo;
 import grafo.TipoGrafo;
+import io.ExportadorCSV;
+import io.EscritaGrafo;
+import io.LeituraGrafo;
+import io.LeituraGrafo.Representacao;
 import java.io.File;
 import java.io.IOException;
 import java.util.Scanner;
@@ -45,7 +49,9 @@ public class Main {
                 System.out.println("5 - Rodar Prim");
                 System.out.println("6 - Rodar Bellman-Ford");
                 System.out.println("7 - Rodar Dijkstra");
-                System.out.println("8 - Trocar arquivo / vertice de origem");
+                System.out.println("8 - Rodar Floyd-Warshall");
+                System.out.println("9 - Rodar Ford-Fulkerson");
+                System.out.println("10 - Trocar arquivo / vertice de origem");
                 System.out.println("0 - Sair");
                 System.out.print("Escolha: ");
                 opcao = lerInteiroComPadrao(scanner, -1);
@@ -58,7 +64,9 @@ public class Main {
                     case 5 -> executarPrim(caminhoArquivo, origem, leitor, impressora, exportador);
                     case 6 -> executarBellmanFord(caminhoArquivo, origem, leitor, impressora, exportador);
                     case 7 -> executarDijkstra(caminhoArquivo, origem, leitor, impressora, exportador);
-                    case 8 -> {
+                    case 8 -> executarFloydWarshall(caminhoArquivo, leitor, impressora, exportador);
+                    case 9 -> executarFordFulkerson(caminhoArquivo, origem, scanner, leitor, impressora, exportador);
+                    case 10 -> {
                         System.out.print("Novo caminho do arquivo: ");
                         caminhoArquivo = scanner.nextLine().trim();
                         System.out.print("Novo vertice de origem: ");
@@ -325,7 +333,7 @@ public class Main {
             impressora.imprimirResumoGrafo(grafo);
 
             long inicio = System.nanoTime();
-            ResultadoDkjistra resultado = new Dkjistra().executar(grafo, origem);
+            ResultadoDijkstra resultado = new Dijkstra().executar(grafo, origem);
             double tempoMs = (System.nanoTime() - inicio) / 1_000_000.0;
             impressora.imprimirResultadoDijkstra(resultado, tempoMs);
 
@@ -339,6 +347,82 @@ public class Main {
                     origem,
                     tempoMs,
                     "distancias=" + java.util.Arrays.toString(resultado.getDistancia())
+            );
+        }
+        System.out.println("\nArquivos CSV salvos na pasta output/");
+    }
+
+    private static void executarFloydWarshall(
+            String caminhoArquivo,
+            LeituraGrafo leitor,
+            EscritaGrafo impressora,
+            ExportadorCSV exportador
+    ) throws IOException {
+        String nomeBaseArquivo = new File(caminhoArquivo).getName();
+        for (Representacao rep : Representacao.values()) {
+            for (TipoGrafo tipo : TipoGrafo.values()) {
+                IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, tipo);
+                System.out.println("\n--------------------------------------------------");
+                System.out.println("ALGORITMO: Floyd-Warshall | REP: " + rep + " | TIPO: " + tipo);
+                impressora.imprimirResumoGrafo(grafo);
+
+                long inicio = System.nanoTime();
+                ResultadoFloydWarshall resultado = new FloydWarshall().executar(grafo);
+                double tempoMs = (System.nanoTime() - inicio) / 1_000_000.0;
+                impressora.imprimirResultadoFloydWarshall(resultado, tempoMs);
+
+                exportador.registrarExecucao(
+                        nomeBaseArquivo,
+                        "FLOYD_WARSHALL",
+                        rep.name(),
+                        tipo.name(),
+                        grafo.numVertices(),
+                        grafo.numArestas(),
+                        -1,
+                        tempoMs,
+                        "ciclo_negativo=" + resultado.isTemCicloNegativo()
+                );
+            }
+        }
+        System.out.println("\nArquivos CSV salvos na pasta output/");
+    }
+
+    private static void executarFordFulkerson(
+            String caminhoArquivo,
+            int origem,
+            Scanner scanner,
+            LeituraGrafo leitor,
+            EscritaGrafo impressora,
+            ExportadorCSV exportador
+    ) throws IOException {
+
+        IGrafo grafoBase = leitor.lerArquivo(caminhoArquivo, Representacao.LISTA_ADJACENCIA, TipoGrafo.DIRECIONADO);
+        int sumidouroPadrao = Math.max(0, grafoBase.numVertices() - 1);
+        System.out.print("Vertice sumidouro (padrao " + sumidouroPadrao + "): ");
+        int sumidouro = lerInteiroComPadrao(scanner, sumidouroPadrao);
+
+        String nomeBaseArquivo = new File(caminhoArquivo).getName();
+        for (Representacao rep : Representacao.values()) {
+            IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.DIRECIONADO);
+            System.out.println("\n--------------------------------------------------");
+            System.out.println("ALGORITMO: Ford-Fulkerson | REP: " + rep + " | TIPO: DIRECIONADO");
+            impressora.imprimirResumoGrafo(grafo);
+
+            long inicio = System.nanoTime();
+            ResultadoFordFulkerson resultado = new FordFulkerson().executar(grafo, origem, sumidouro);
+            double tempoMs = (System.nanoTime() - inicio) / 1_000_000.0;
+            impressora.imprimirResultadoFordFulkerson(resultado, tempoMs);
+
+            exportador.registrarExecucao(
+                    nomeBaseArquivo,
+                    "FORD_FULKERSON",
+                    rep.name(),
+                    TipoGrafo.DIRECIONADO.name(),
+                    grafo.numVertices(),
+                    grafo.numArestas(),
+                    origem,
+                    tempoMs,
+                    "sumidouro=" + sumidouro + " | fluxo_maximo=" + resultado.getFluxoMaximo()
             );
         }
         System.out.println("\nArquivos CSV salvos na pasta output/");
