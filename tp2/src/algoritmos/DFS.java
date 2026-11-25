@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+// Busca em profundidade
 public class DFS {
 
     public static class ResultadoDFS {
