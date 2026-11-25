@@ -33,15 +33,12 @@ public class Main {
         ExportadorCSV exportador = new ExportadorCSV("output");
 
         try (Scanner scanner = new Scanner(System.in)) {
-            System.out.print("Caminho do arquivo do grafo (ex: sample.gr): ");
-            String caminhoArquivo = scanner.nextLine().trim();
-
-            System.out.print("Vertice de origem (padrao 0): ");
+            System.out.print("Vertice de origem (indices Java, padrao 0): ");
             int origem = lerInteiroComPadrao(scanner, 0);
 
             int opcao;
             do {
-                System.out.println("\nEXECUTAR ALGORITMO EM TODAS AS COMBINACOES");
+                System.out.println("\nEXECUTAR ALGORITMO");
                 System.out.println("1 - Rodar BFS");
                 System.out.println("2 - Rodar DFS");
                 System.out.println("3 - Rodar Ordenacao Topologica");
@@ -51,25 +48,45 @@ public class Main {
                 System.out.println("7 - Rodar Dijkstra");
                 System.out.println("8 - Rodar Floyd-Warshall");
                 System.out.println("9 - Rodar Ford-Fulkerson");
-                System.out.println("10 - Trocar arquivo / vertice de origem");
+                System.out.println("10 - Alterar vertice de origem");
                 System.out.println("0 - Sair");
                 System.out.print("Escolha: ");
                 opcao = lerInteiroComPadrao(scanner, -1);
 
                 switch (opcao) {
-                    case 1 -> executarCombinacoesBFS(caminhoArquivo, origem, leitor, impressora, exportador);
-                    case 2 -> executarCombinacoesDFS(caminhoArquivo, origem, leitor, impressora, exportador);
-                    case 3 -> executarOrdenacaoTopologica(caminhoArquivo, leitor, impressora, exportador);
-                    case 4 -> executarKruskal(caminhoArquivo, leitor, impressora, exportador);
-                    case 5 -> executarPrim(caminhoArquivo, origem, leitor, impressora, exportador);
-                    case 6 -> executarBellmanFord(caminhoArquivo, origem, leitor, impressora, exportador);
-                    case 7 -> executarDijkstra(caminhoArquivo, origem, leitor, impressora, exportador);
-                    case 8 -> executarFloydWarshall(caminhoArquivo, leitor, impressora, exportador);
-                    case 9 -> executarFordFulkerson(caminhoArquivo, origem, scanner, leitor, impressora, exportador);
+                    case 1 -> executarCombinacoesBFS(
+                            selecionarArquivo(scanner, "BFS", "bfs.gr"), origem, leitor, impressora, exportador
+                    );
+                    case 2 -> executarCombinacoesDFS(
+                            selecionarArquivo(scanner, "DFS", "dfs.gr"), origem, leitor, impressora, exportador
+                    );
+                    case 3 -> executarOrdenacaoTopologica(
+                            selecionarArquivo(scanner, "ordenacao topologica", "ordenacao-topologica.gr"),
+                            leitor, impressora, exportador
+                    );
+                    case 4 -> executarKruskal(
+                            selecionarArquivo(scanner, "Kruskal", "kruskal.gr"), leitor, impressora, exportador
+                    );
+                    case 5 -> executarPrim(
+                            selecionarArquivo(scanner, "Prim", "prim.gr"), origem, leitor, impressora, exportador
+                    );
+                    case 6 -> executarBellmanFord(
+                            selecionarArquivo(scanner, "Bellman-Ford", "bellman-ford.gr"),
+                            origem, leitor, impressora, exportador
+                    );
+                    case 7 -> executarDijkstra(
+                            selecionarArquivo(scanner, "Dijkstra", "dijkstra.gr"), origem, leitor, impressora, exportador
+                    );
+                    case 8 -> executarFloydWarshall(
+                            selecionarArquivo(scanner, "Floyd-Warshall", "floyd-warshall.gr"),
+                            leitor, impressora, exportador
+                    );
+                    case 9 -> executarFordFulkerson(
+                            selecionarArquivo(scanner, "Ford-Fulkerson", "ford-fulkerson.gr"),
+                            origem, scanner, leitor, impressora, exportador
+                    );
                     case 10 -> {
-                        System.out.print("Novo caminho do arquivo: ");
-                        caminhoArquivo = scanner.nextLine().trim();
-                        System.out.print("Novo vertice de origem: ");
+                        System.out.print("Novo vertice de origem (indices Java): ");
                         origem = lerInteiroComPadrao(scanner, 0);
                     }
                     case 0 -> System.out.println("Encerrando...");
@@ -98,7 +115,7 @@ public class Main {
 
                 System.out.println("\n--------------------------------------------------");
                 System.out.println("ALGORITMO: BFS | REP: " + rep + " | TIPO: " + tipo);
-                impressora.imprimirResumoGrafo(grafo);
+                impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
                 long inicio = System.nanoTime();
                 ResultadoBFS resultado = bfs.executar(grafo, origem);
@@ -149,7 +166,7 @@ public class Main {
 
                 System.out.println("\n--------------------------------------------------");
                 System.out.println("ALGORITMO: DFS | REP: " + rep + " | TIPO: " + tipo);
-                impressora.imprimirResumoGrafo(grafo);
+                impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
                 long inicio = System.nanoTime();
                 ResultadoDFS resultado = dfs.executarDeOrigem(grafo, origem);
@@ -195,7 +212,7 @@ public class Main {
             IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.DIRECIONADO);
             System.out.println("\n--------------------------------------------------");
             System.out.println("ALGORITMO: Ordenacao Topologica | REP: " + rep + " | TIPO: DIRECIONADO");
-            impressora.imprimirResumoGrafo(grafo);
+            impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
             long inicio = System.nanoTime();
             ResultadoOrdenacaoTopologica resultado = new OrdenacaoTopologica().executar(grafo);
@@ -228,7 +245,7 @@ public class Main {
             IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.NAO_DIRECIONADO);
             System.out.println("\n--------------------------------------------------");
             System.out.println("ALGORITMO: Kruskal | REP: " + rep + " | TIPO: NAO_DIRECIONADO");
-            impressora.imprimirResumoGrafo(grafo);
+            impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
             long inicio = System.nanoTime();
             ResultadoArvoreGeradoraMinima resultado = new Kruskal().executar(grafo);
@@ -262,7 +279,7 @@ public class Main {
             IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.NAO_DIRECIONADO);
             System.out.println("\n--------------------------------------------------");
             System.out.println("ALGORITMO: Prim | REP: " + rep + " | TIPO: NAO_DIRECIONADO");
-            impressora.imprimirResumoGrafo(grafo);
+            impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
             long inicio = System.nanoTime();
             ResultadoArvoreGeradoraMinima resultado = new Prim().executar(grafo, origem);
@@ -296,7 +313,7 @@ public class Main {
             IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.DIRECIONADO);
             System.out.println("\n--------------------------------------------------");
             System.out.println("ALGORITMO: Bellman-Ford | REP: " + rep + " | TIPO: DIRECIONADO");
-            impressora.imprimirResumoGrafo(grafo);
+            impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
             long inicio = System.nanoTime();
             ResultadoBellmanFord resultado = new BellmanFord().executar(grafo, origem);
@@ -330,7 +347,7 @@ public class Main {
             IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.DIRECIONADO);
             System.out.println("\n--------------------------------------------------");
             System.out.println("ALGORITMO: Dijkstra | REP: " + rep + " | TIPO: DIRECIONADO");
-            impressora.imprimirResumoGrafo(grafo);
+            impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
             long inicio = System.nanoTime();
             ResultadoDijkstra resultado = new Dijkstra().executar(grafo, origem);
@@ -364,7 +381,7 @@ public class Main {
                 IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, tipo);
                 System.out.println("\n--------------------------------------------------");
                 System.out.println("ALGORITMO: Floyd-Warshall | REP: " + rep + " | TIPO: " + tipo);
-                impressora.imprimirResumoGrafo(grafo);
+                impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
                 long inicio = System.nanoTime();
                 ResultadoFloydWarshall resultado = new FloydWarshall().executar(grafo);
@@ -398,7 +415,7 @@ public class Main {
 
         IGrafo grafoBase = leitor.lerArquivo(caminhoArquivo, Representacao.LISTA_ADJACENCIA, TipoGrafo.DIRECIONADO);
         int sumidouroPadrao = Math.max(0, grafoBase.numVertices() - 1);
-        System.out.print("Vertice sumidouro (padrao " + sumidouroPadrao + "): ");
+        System.out.print("Vertice sumidouro (indices Java, padrao " + sumidouroPadrao + "): ");
         int sumidouro = lerInteiroComPadrao(scanner, sumidouroPadrao);
 
         String nomeBaseArquivo = new File(caminhoArquivo).getName();
@@ -406,7 +423,7 @@ public class Main {
             IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.DIRECIONADO);
             System.out.println("\n--------------------------------------------------");
             System.out.println("ALGORITMO: Ford-Fulkerson | REP: " + rep + " | TIPO: DIRECIONADO");
-            impressora.imprimirResumoGrafo(grafo);
+            impressora.imprimirListaAdjacencia(grafo, 20, 10);
 
             long inicio = System.nanoTime();
             ResultadoFordFulkerson resultado = new FordFulkerson().executar(grafo, origem, sumidouro);
@@ -426,6 +443,18 @@ public class Main {
             );
         }
         System.out.println("\nArquivos CSV salvos na pasta output/");
+    }
+
+    private static String selecionarArquivo(Scanner scanner, String algoritmo, String arquivoExemplo) {
+        String caminhoPadrao = "tp2/src/samples/demo/" + arquivoExemplo;
+        System.out.print(
+                "Arquivo para " + algoritmo + " (Enter usa " + caminhoPadrao + "; vertices Java iniciam em 0): "
+        );
+        if (!scanner.hasNextLine()) {
+            return caminhoPadrao;
+        }
+        String caminhoInformado = scanner.nextLine().trim();
+        return caminhoInformado.isEmpty() ? caminhoPadrao : caminhoInformado;
     }
 
     private static int lerInteiroComPadrao(Scanner scanner, int padrao) {

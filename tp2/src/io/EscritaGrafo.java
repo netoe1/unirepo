@@ -29,6 +29,13 @@ public class EscritaGrafo {
     }
 
     public void imprimirListaAdjacencia(IGrafo grafo, int limiteVertices) {
+        imprimirListaAdjacencia(grafo, limiteVertices, 10);
+    }
+
+    public void imprimirListaAdjacencia(IGrafo grafo, int limiteVertices, int limiteAdjacenciasPorVertice) {
+        if (limiteVertices < 0 || limiteAdjacenciasPorVertice < 0) {
+            throw new IllegalArgumentException("Os limites de exibicao nao podem ser negativos.");
+        }
         imprimirResumoGrafo(grafo);
         int limite = Math.min(grafo.numVertices(), limiteVertices);
         for (int u = 0; u < limite; u++) {
@@ -38,12 +45,16 @@ public class EscritaGrafo {
             if (adj.isEmpty()) {
                 sb.append("[]");
             } else {
-                for (int i = 0; i < adj.size(); i++) {
+                int exibidas = Math.min(adj.size(), limiteAdjacenciasPorVertice);
+                for (int i = 0; i < exibidas; i++) {
                     Aresta a = adj.get(i);
                     sb.append("(").append(a.getV().getId()).append(", peso=").append(a.getPeso()).append(")");
-                    if (i < adj.size() - 1) {
+                    if (i < exibidas - 1) {
                         sb.append(", ");
                     }
+                }
+                if (adj.size() > exibidas) {
+                    sb.append(" ... (").append(adj.size() - exibidas).append(" adjacencias omitidas)");
                 }
             }
             System.out.println(sb);

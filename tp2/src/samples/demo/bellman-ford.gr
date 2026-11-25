@@ -1,0 +1,9 @@
+c Demonstracao Bellman-Ford; aresta negativa sem ciclo negativo
+p sp 5 7
+a 1 2 6
+a 1 3 7
+a 2 3 8
+a 2 4 5
+a 2 5 -4
+a 3 4 -3
+a 4 2 -2
