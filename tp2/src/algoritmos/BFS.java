@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-
+// Busca em Largura
 public class BFS {
 
     public static class ResultadoBFS {
