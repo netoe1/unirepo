@@ -54,6 +54,10 @@ public class GrafoListaAdjacencia implements IGrafo {
         validarVertice(u);
         validarVertice(v);
 
+        // A matriz armazena uma aresta por par ordenado. Mantemos a mesma
+        // semantica na lista: adicionar novamente o par substitui o peso.
+        removerArestaExistente(u, v);
+
         Vertice verticeU = vertices.get(u);
         Vertice verticeV = vertices.get(v);
         Aresta arestaUV = new Aresta(verticeU, verticeV, peso);
@@ -62,7 +66,7 @@ public class GrafoListaAdjacencia implements IGrafo {
         arestas.add(arestaUV);
 
         // Se nao for direcionado, adiciona tambem na lista de adjacencia de v
-        if (tipo == TipoGrafo.NAO_DIRECIONADO) {
+        if (tipo == TipoGrafo.NAO_DIRECIONADO && u != v) {
             Aresta arestaVU = new Aresta(verticeV, verticeU, peso);
             adjacencia.get(v).add(arestaVU);
         }
@@ -102,6 +106,25 @@ public class GrafoListaAdjacencia implements IGrafo {
             throw new IndexOutOfBoundsException(
                 "Indice de vertice fora dos limites: " + u + " (valido: 0.." + (numVertices() - 1) + ")"
             );
+        }
+    }
+
+    private void removerArestaExistente(int u, int v) {
+        for (int i = 0; i < arestas.size(); i++) {
+            Aresta existente = arestas.get(i);
+            int origem = existente.getU().getId();
+            int destino = existente.getV().getId();
+            boolean mesmaDirecao = origem == u && destino == v;
+            boolean direcaoInversa = tipo == TipoGrafo.NAO_DIRECIONADO && origem == v && destino == u;
+            if (mesmaDirecao || direcaoInversa) {
+                arestas.remove(i);
+                break;
+            }
+        }
+
+        adjacencia.get(u).removeIf(a -> a.getV().getId() == v);
+        if (tipo == TipoGrafo.NAO_DIRECIONADO && u != v) {
+            adjacencia.get(v).removeIf(a -> a.getV().getId() == u);
         }
     }
 }

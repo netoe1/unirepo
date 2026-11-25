@@ -53,26 +53,17 @@ public class GrafoMatrizAdjacencia implements IGrafo {
         validarVertice(u);
         validarVertice(v);
 
+        removerArestaExistente(u, v);
+
         Vertice verticeU = vertices.get(u);
         Vertice verticeV = vertices.get(v);
         Aresta arestaUV = new Aresta(verticeU, verticeV, peso);
-
-        // Remove aresta anterior da lista caso haja sobrescrita na mesma posicao da matriz
-        Aresta anterior = matriz[u][v];
-        if (anterior != null) {
-            arestas.remove(anterior);
-        }
-
         matriz[u][v] = arestaUV;
         arestas.add(arestaUV);
 
         // Se nao for direcionado, preenche tambem a posicao simetrica (v, u)
-        if (tipo == TipoGrafo.NAO_DIRECIONADO) {
+        if (tipo == TipoGrafo.NAO_DIRECIONADO && u != v) {
             Aresta arestaVU = new Aresta(verticeV, verticeU, peso);
-            Aresta anteriorReversa = matriz[v][u];
-            if (anteriorReversa != null) {
-                arestas.remove(anteriorReversa);
-            }
             matriz[v][u] = arestaVU;
         }
     }
@@ -93,7 +84,7 @@ public class GrafoMatrizAdjacencia implements IGrafo {
                 listaAdjacentes.add(matriz[u][v]);
             }
         }
-        return listaAdjacentes;
+        return Collections.unmodifiableList(listaAdjacentes);
     }
 
     @Override
@@ -111,6 +102,21 @@ public class GrafoMatrizAdjacencia implements IGrafo {
             throw new IndexOutOfBoundsException(
                 "Indice de vertice fora dos limites: " + u + " (valido: 0.." + (numVertices() - 1) + ")"
             );
+        }
+    }
+
+    private void removerArestaExistente(int u, int v) {
+        Aresta existente = matriz[u][v];
+        if (existente != null) {
+            matriz[u][v] = null;
+            arestas.remove(existente);
+        }
+        if (tipo == TipoGrafo.NAO_DIRECIONADO && u != v) {
+            Aresta inversa = matriz[v][u];
+            if (inversa != null) {
+                matriz[v][u] = null;
+                arestas.remove(inversa);
+            }
         }
     }
 }
