@@ -9,6 +9,7 @@ Na branch `acd/tp2/main`, o foco é o **TP2**, sobre representações de grafos 
 - Código do TP2: [`tp2/`](tp2/)
 - Enunciado: [`docs/TP2 - Trabalho Prático sobre  GRAFOS.md`](<docs/TP2 - Trabalho Prático sobre  GRAFOS.md>)
 - Grafos de amostra: [`tp2/src/samples/`](tp2/src/samples/)
+- Exemplos pequenos para demonstração: [`tp2/src/samples/demo/`](tp2/src/samples/demo/)
 - Documentação das estruturas: [`tp2/src/grafo/README.md`](tp2/src/grafo/README.md)
 - Documentação dos testes: [`tp2/src/test/README.md`](tp2/src/test/README.md)
 - Instruções para contribuir e revisar: [`AGENTS.md`](AGENTS.md)
@@ -24,8 +25,8 @@ O projeto implementa grafos dirigidos e não dirigidos nas representações por 
 | Prim | Implementado e testado |
 | Bellman-Ford | Implementado e testado |
 | Dijkstra | Implementado e testado |
-| Floyd-Warshall | Em desenvolvimento |
-| Ford-Fulkerson | Em desenvolvimento |
+| Floyd-Warshall | Implementado e testado |
+| Ford-Fulkerson | Implementado e testado |
 | Experimento completo com boxplots e artigo | Em desenvolvimento |
 
 ## Requisitos
@@ -48,7 +49,7 @@ Execute o programa interativo:
 java -cp out/tp2 Main
 ```
 
-O menu permite escolher o grafo de entrada e executar os algoritmos já integrados ao programa. Remova `out/` quando quiser limpar os arquivos compilados.
+O menu permite executar cada algoritmo com um exemplo pequeno recomendado. Pressione Enter no prompt de arquivo para usar o exemplo sugerido ou informe outro caminho GTgraph. Os vértices informados pelo programa usam índices Java começando em zero. A estrutura é exibida com até 20 vértices e 10 adjacências por vértice; itens omitidos são indicados. Remova `out/` quando quiser limpar os arquivos compilados.
 
 ## Testes
 
@@ -59,6 +60,8 @@ bash tp2/src/test/corretude_est_grafos.spec.sh
 bash tp2/src/test/corretude_algoritmos_grafos.sh
 bash tp2/src/test/corretude_ordenacao_topologica.sh
 bash tp2/src/test/corretude_caminhos_minimos.sh
+bash tp2/src/test/corretude_fluxo_maximo.sh
+bash tp2/src/test/corretude_exemplos_demonstracao.sh
 ```
 
 Os scripts compilam o projeto em uma pasta temporária e encerram com código diferente de zero quando uma compilação ou validação falha.
