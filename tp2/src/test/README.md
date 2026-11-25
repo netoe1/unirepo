@@ -1,6 +1,6 @@
 # Testes de regressão do TP2
 
-Esta pasta contém testes automatizados para as estruturas de grafo e para os algoritmos de busca já implementados. Os testes são Java simples, sem JUnit ou outras dependências: cada classe de teste tem um `main` e encerra com erro (`AssertionError`) quando uma condição falha.
+Esta pasta contém testes automatizados para as estruturas e os algoritmos de grafos. Os testes são Java simples, sem JUnit ou outras dependências: cada classe de teste tem um `main` e encerra com erro (`AssertionError`) quando uma condição falha.
 
 Execute os comandos a partir da raiz do repositório:
 
@@ -9,6 +9,8 @@ bash tp2/src/test/corretude_est_grafos.spec.sh
 bash tp2/src/test/corretude_algoritmos_grafos.sh
 bash tp2/src/test/corretude_ordenacao_topologica.sh
 bash tp2/src/test/corretude_caminhos_minimos.sh
+bash tp2/src/test/corretude_fluxo_maximo.sh
+bash tp2/src/test/corretude_exemplos_demonstracao.sh
 ```
 
 Cada script compila os arquivos Java de `tp2/src` em uma pasta temporária e remove essa pasta ao terminar. Se a compilação ou algum teste falhar, o script encerra com código diferente de zero.
@@ -36,4 +38,10 @@ O script `corretude_algoritmos_grafos.sh` executa:
 O script `corretude_caminhos_minimos.sh` executa:
 
 - `BellmanFordTest`: verifica caminhos mínimos com peso negativo, vértices desconectados, ciclos negativos alcançáveis e inalcançáveis, validações e as duas representações de grafo.
-- `DkjistraTest`: verifica caminhos mínimos com pesos não negativos, vértices desconectados, rejeição de pesos negativos ou infinitos, validações e as duas representações de grafo.
+- `DijkstraTest`: verifica caminhos mínimos com pesos não negativos, vértices desconectados, rejeição de pesos negativos ou infinitos, validações e as duas representações de grafo.
+- `FloydWarshallTest`: verifica caminhos mínimos entre todos os pares, caminhos reconstruídos, ciclos negativos, desconexão e pesos inválidos nas duas representações.
+
+## Testes de fluxo e demonstrações
+
+- `corretude_fluxo_maximo.sh` executa `FordFulkersonTest`, incluindo capacidade residual, conservação de fluxo, capacidades inválidas e as duas representações.
+- `corretude_exemplos_demonstracao.sh` executa cada algoritmo sobre o seu exemplo recomendado em ambas as representações relevantes, verifica os limites de impressão do grafo e percorre todas as opções do menu usando os exemplos padrão.

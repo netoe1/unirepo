@@ -84,6 +84,8 @@ bash tp2/src/test/corretude_est_grafos.spec.sh
 bash tp2/src/test/corretude_algoritmos_grafos.sh
 bash tp2/src/test/corretude_ordenacao_topologica.sh
 bash tp2/src/test/corretude_caminhos_minimos.sh
+bash tp2/src/test/corretude_fluxo_maximo.sh
+bash tp2/src/test/corretude_exemplos_demonstracao.sh
 ```
 
 Compile todo o TP2 antes de concluir uma mudança:
