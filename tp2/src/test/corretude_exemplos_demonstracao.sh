@@ -15,11 +15,39 @@ RUN_DIR="$BUILD_DIR/run"
 mkdir -p "$RUN_DIR/tp2/src/samples"
 ln -s "$TP2_DIR/src/samples/demo" "$RUN_DIR/tp2/src/samples/demo"
 
-printf '\n1\n\n2\n\n3\n\n4\n\n5\n\n6\n\n7\n\n8\n\n9\n\n\n0\n' \
-    | (cd "$RUN_DIR" && java -cp "$BUILD_DIR" Main) > "$BUILD_DIR/main-output.txt"
+cat > "$RUN_DIR/custom-e2e.gr" <<'EOF'
+c Custom E2E graph
+p sp 3 2
+a 1 2 4
+a 2 3 5
+EOF
+
+{
+    printf '\n'
+    for opcao in 1 2 3 4 5 6 7 8 9; do
+        printf '%s\n\n' "$opcao"
+        if [[ "$opcao" == 9 ]]; then
+            printf '\n'
+        fi
+    done
+    printf '1\n%s\n0\n' "$RUN_DIR/custom-e2e.gr"
+} | (cd "$RUN_DIR" && java -cp "$BUILD_DIR" Main) > "$BUILD_DIR/main-output.txt"
 
 for algoritmo in BFS DFS "Ordenacao Topologica" Kruskal Prim "Bellman-Ford" Dijkstra "Floyd-Warshall" "Ford-Fulkerson"; do
     grep -q "ALGORITMO: $algoritmo" "$BUILD_DIR/main-output.txt"
 done
-grep -q "Estrutura do Grafo" "$BUILD_DIR/main-output.txt"
-grep -q "Tempo de execucao" "$BUILD_DIR/main-output.txt"
+
+test "$(grep -c "ALGORITMO:" "$BUILD_DIR/main-output.txt")" -eq 28
+test "$(grep -c "Estrutura do Grafo" "$BUILD_DIR/main-output.txt")" -eq 28
+test "$(grep -c "Tempo de execucao" "$BUILD_DIR/main-output.txt")" -eq 28
+grep -q "0 -> (1, peso=1.0)" "$BUILD_DIR/main-output.txt"
+grep -q "Peso total: 10.0000" "$BUILD_DIR/main-output.txt"
+grep -q "Fluxo maximo             : 23.0000" "$BUILD_DIR/main-output.txt"
+grep -q "Arquivo para BFS" "$BUILD_DIR/main-output.txt"
+
+CSV="$RUN_DIR/output/resultados_algoritmos.csv"
+test -f "$CSV"
+test "$(wc -l < "$CSV")" -eq 29
+test "$(awk -F';' 'NR > 1 && $2 == "BFS" { count++ } END { print count+0 }' "$CSV")" -eq 8
+test "$(awk -F';' 'NR > 1 && $2 == "FORD_FULKERSON" { count++ } END { print count+0 }' "$CSV")" -eq 2
+grep -q 'custom-e2e.gr;BFS;' "$CSV"

@@ -66,6 +66,8 @@ bash tp2/src/test/corretude_exemplos_demonstracao.sh
 
 Os scripts compilam o projeto em uma pasta temporária e encerram com código diferente de zero quando uma compilação ou validação falha.
 
+O teste `corretude_exemplos_demonstracao.sh` funciona como E2E: percorre o menu, executa os nove algoritmos com os exemplos sugeridos, seleciona um arquivo GTgraph personalizado e verifica a saída e os CSVs gerados em diretório temporário.
+
 ## Licença
 
 Este repositório está sob a licença GNU General Public License v3.0. Consulte [`LICENSE`](LICENSE) para ver o texto completo e as condições de uso, modificação e redistribuição.

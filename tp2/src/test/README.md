@@ -44,4 +44,4 @@ O script `corretude_caminhos_minimos.sh` executa:
 ## Testes de fluxo e demonstrações
 
 - `corretude_fluxo_maximo.sh` executa `FordFulkersonTest`, incluindo capacidade residual, conservação de fluxo, capacidades inválidas e as duas representações.
-- `corretude_exemplos_demonstracao.sh` executa cada algoritmo sobre o seu exemplo recomendado em ambas as representações relevantes, verifica os limites de impressão do grafo e percorre todas as opções do menu usando os exemplos padrão.
+- `corretude_exemplos_demonstracao.sh` executa cada algoritmo sobre o seu exemplo recomendado em ambas as representações relevantes, verifica resultados e limites de impressão, percorre todas as opções do menu, usa também um arquivo personalizado e confere os registros CSV produzidos.
