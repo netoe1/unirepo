@@ -23,6 +23,12 @@ import io.LeituraGrafo;
 import io.LeituraGrafo.Representacao;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.Scanner;
 
 public class Main {
@@ -30,7 +36,7 @@ public class Main {
     public static void main(String[] args) {
         EscritaGrafo impressora = new EscritaGrafo();
         LeituraGrafo leitor = new LeituraGrafo();
-        ExportadorCSV exportador = new ExportadorCSV("output");
+        ExportadorCSV exportador = new ExportadorCSV(localizarPastaOutput());
 
         try (Scanner scanner = new Scanner(System.in)) {
             System.out.print("Vertice de origem (indices Java, padrao 0): ");
@@ -147,7 +153,7 @@ public class Main {
                 );
             }
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static void executarCombinacoesDFS(
@@ -198,7 +204,7 @@ public class Main {
                 );
             }
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static void executarOrdenacaoTopologica(
@@ -231,7 +237,7 @@ public class Main {
                     "ordem=" + resultado.getOrdem() + " | ciclo=" + resultado.isTemCiclo()
             );
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static void executarKruskal(
@@ -264,7 +270,7 @@ public class Main {
                     "peso=" + resultado.getPesoTotal() + " | componentes=" + resultado.getNumeroComponentes()
             );
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static void executarPrim(
@@ -298,7 +304,7 @@ public class Main {
                     "peso=" + resultado.getPesoTotal() + " | componentes=" + resultado.getNumeroComponentes()
             );
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static void executarBellmanFord(
@@ -332,7 +338,7 @@ public class Main {
                     "ciclo_negativo=" + resultado.isTemCicloNegativo()
             );
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static void executarDijkstra(
@@ -366,7 +372,7 @@ public class Main {
                     "distancias=" + java.util.Arrays.toString(resultado.getDistancia())
             );
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static void executarFloydWarshall(
@@ -401,7 +407,7 @@ public class Main {
                 );
             }
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static void executarFordFulkerson(
@@ -442,19 +448,74 @@ public class Main {
                     "sumidouro=" + sumidouro + " | fluxo_maximo=" + resultado.getFluxoMaximo()
             );
         }
-        System.out.println("\nArquivos CSV salvos na pasta output/");
+        System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
     }
 
     private static String selecionarArquivo(Scanner scanner, String algoritmo, String arquivoExemplo) {
-        String caminhoPadrao = "tp2/src/samples/demo/" + arquivoExemplo;
+        Path caminhoPadrao = localizarExemplo(arquivoExemplo);
         System.out.print(
                 "Arquivo para " + algoritmo + " (Enter usa " + caminhoPadrao + "; vertices Java iniciam em 0): "
         );
         if (!scanner.hasNextLine()) {
-            return caminhoPadrao;
+            return caminhoPadrao.toString();
         }
         String caminhoInformado = scanner.nextLine().trim();
-        return caminhoInformado.isEmpty() ? caminhoPadrao : caminhoInformado;
+        return caminhoInformado.isEmpty() ? caminhoPadrao.toString() : caminhoInformado;
+    }
+
+    private static Path localizarExemplo(String arquivoExemplo) {
+        Path candidato = localizarRaizRepositorio()
+                .resolve(Paths.get("tp2", "src", "samples", "demo", arquivoExemplo));
+        if (!Files.isRegularFile(candidato)) {
+            throw new IllegalArgumentException("Exemplo padrao nao encontrado: " + candidato);
+        }
+        return candidato;
+    }
+
+    private static String localizarPastaOutput() {
+        return localizarRaizRepositorio()
+                .resolve(Paths.get("tp2", "src", "output"))
+                .toAbsolutePath()
+                .normalize()
+                .toString();
+    }
+
+    private static Path localizarRaizRepositorio() {
+        Set<Path> diretoriosBase = new LinkedHashSet<>();
+        adicionarAncestrais(Paths.get("").toAbsolutePath(), diretoriosBase);
+
+        try {
+            if (Main.class.getProtectionDomain().getCodeSource() != null) {
+                Path localizacaoClasses = Paths.get(
+                        Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()
+                );
+                if (!Files.isDirectory(localizacaoClasses)) {
+                    localizacaoClasses = localizacaoClasses.getParent();
+                }
+                if (localizacaoClasses != null) {
+                    adicionarAncestrais(localizacaoClasses, diretoriosBase);
+                }
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalStateException("Nao foi possivel resolver a localizacao das classes Java.", e);
+        }
+
+        for (Path diretorio : diretoriosBase) {
+            if (Files.isDirectory(diretorio.resolve(Paths.get("tp2", "src", "samples", "demo")))) {
+                return diretorio;
+            }
+        }
+        throw new IllegalStateException(
+                "Nao foi possivel localizar a raiz do repositorio a partir de: " + diretoriosBase
+        );
+    }
+
+    private static void adicionarAncestrais(Path caminho, Set<Path> destinos) {
+        Path atual = caminho.toAbsolutePath().normalize();
+        while (atual != null) {
+            destinos.add(atual);
+            atual = atual.getParent();
+        }
     }
 
     private static int lerInteiroComPadrao(Scanner scanner, int padrao) {
