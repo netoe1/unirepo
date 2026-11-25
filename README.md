@@ -8,31 +8,60 @@ Na branch `acd/tp2/main`, o foco é o **TP2**, sobre representações de grafos 
 
 - Código do TP2: [`tp2/`](tp2/)
 - Enunciado: [`docs/TP2 - Trabalho Prático sobre  GRAFOS.md`](<docs/TP2 - Trabalho Prático sobre  GRAFOS.md>)
-- Grafos de amostra: [`samples/`](samples/)
+- Grafos de amostra: [`tp2/src/samples/`](tp2/src/samples/)
+- Documentação das estruturas: [`tp2/src/grafo/README.md`](tp2/src/grafo/README.md)
+- Documentação dos testes: [`tp2/src/test/README.md`](tp2/src/test/README.md)
 - Instruções para contribuir e revisar: [`AGENTS.md`](AGENTS.md)
 
-O conteúdo do TP2 ainda está em desenvolvimento. Consulte o enunciado e os arquivos do projeto para confirmar quais algoritmos e funcionalidades já estão implementados.
+O projeto implementa grafos dirigidos e não dirigidos nas representações por lista e matriz de adjacência. Os algoritmos disponíveis são:
+
+| Funcionalidade | Status |
+| --- | --- |
+| Busca em largura (BFS) | Implementada e testada |
+| Busca em profundidade (DFS) | Implementada e testada |
+| Ordenação topológica | Implementada e testada |
+| Kruskal | Implementado e testado |
+| Prim | Implementado e testado |
+| Bellman-Ford | Implementado e testado |
+| Dijkstra | Implementado e testado |
+| Floyd-Warshall | Em desenvolvimento |
+| Ford-Fulkerson | Em desenvolvimento |
+| Experimento completo com boxplots e artigo | Em desenvolvimento |
 
 ## Requisitos
 
 - JDK com `java` e `javac` disponíveis no `PATH`.
 - Git para obter o repositório e alternar entre branches.
 
-## Compilar e executar o esqueleto atual
+## Compilar e executar
 
-O ponto de entrada Java atual é `tp2/src/App.java`. Na raiz do repositório:
+Na raiz do repositório, compile todo o código Java do TP2:
 
 ```bash
-mkdir -p out
-javac -d out tp2/src/App.java
-java -cp out App
+mkdir -p out/tp2
+find tp2/src -name '*.java' -print0 | xargs -0 javac -encoding UTF-8 -d out/tp2
 ```
 
-Isso compila e executa o esqueleto inicial do aplicativo. Remova a pasta `out/` quando quiser limpar os arquivos compilados.
+Execute o programa interativo:
+
+```bash
+java -cp out/tp2 Main
+```
+
+O menu permite escolher o grafo de entrada e executar os algoritmos já integrados ao programa. Remova `out/` quando quiser limpar os arquivos compilados.
 
 ## Testes
 
-O repositório ainda não possui uma suíte de testes automatizada configurada. A pasta `tests/` está reservada para testes. Ao adicionar funcionalidades, inclua testes de regressão determinísticos e atualize estas instruções com o comando para executá-los.
+O TP2 usa testes Java simples, sem JUnit ou dependências externas. Execute os scripts a partir da raiz do repositório:
+
+```bash
+bash tp2/src/test/corretude_est_grafos.spec.sh
+bash tp2/src/test/corretude_algoritmos_grafos.sh
+bash tp2/src/test/corretude_ordenacao_topologica.sh
+bash tp2/src/test/corretude_caminhos_minimos.sh
+```
+
+Os scripts compilam o projeto em uma pasta temporária e encerram com código diferente de zero quando uma compilação ou validação falha.
 
 ## Licença
 
