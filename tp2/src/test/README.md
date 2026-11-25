@@ -7,6 +7,7 @@ Execute os comandos a partir da raiz do repositório:
 ```bash
 bash tp2/src/test/corretude_est_grafos.spec.sh
 bash tp2/src/test/corretude_algoritmos_grafos.sh
+bash tp2/src/test/corretude_caminhos_minimos.sh
 ```
 
 Cada script compila os arquivos Java de `tp2/src` em uma pasta temporária e remove essa pasta ao terminar. Se a compilação ou algum teste falhar, o script encerra com código diferente de zero.
@@ -27,3 +28,10 @@ O script `corretude_algoritmos_grafos.sh` executa:
 - `DFSTest`: verifica busca a partir de uma origem e busca completa, componentes desconectados, vértices isolados, pais, tempos de descoberta/finalização, detecção de ciclos e validações. Também executa os cenários em lista e matriz, dirigidos e não dirigidos.
 
 Esses testes cobrem BFS e DFS; não substituem testes para os demais algoritmos que ainda serão implementados.
+
+## Testes de caminhos mínimos
+
+O script `corretude_caminhos_minimos.sh` executa:
+
+- `BellmanFordTest`: verifica caminhos mínimos com peso negativo, vértices desconectados, ciclos negativos alcançáveis e inalcançáveis, validações e as duas representações de grafo.
+- `DkjistraTest`: verifica caminhos mínimos com pesos não negativos, vértices desconectados, rejeição de pesos negativos ou infinitos, validações e as duas representações de grafo.
