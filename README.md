@@ -57,6 +57,12 @@ Ou compile e inicie o programa com um único comando:
 
 O menu permite executar cada algoritmo com um exemplo pequeno recomendado. Pressione Enter no prompt de arquivo para usar o exemplo sugerido ou informe outro caminho GTgraph. A localização dos exemplos padrão é resolvida a partir do diretório atual e da localização das classes compiladas, portanto o programa também pode ser iniciado de outra pasta se o bytecode estiver dentro do checkout. Os vértices informados pelo programa usam índices Java começando em zero. A estrutura é exibida com até 20 vértices e 10 adjacências por vértice; itens omitidos são indicados. Os CSVs gerados pelo menu ficam em `tp2/src/output/`. Remova `out/` quando quiser limpar os arquivos compilados.
 
+Para remover arquivos compilados (`.class`) e CSVs gerados pelo menu:
+
+```bash
+./tp2/src/clean.sh
+```
+
 ## Testes
 
 O TP2 usa testes Java simples, sem JUnit ou dependências externas. Execute os scripts a partir da raiz do repositório:
