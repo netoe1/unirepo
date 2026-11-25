@@ -16,6 +16,8 @@ public final class OrdenacaoTopologicaTest {
             testaOrdemValida(usarMatriz);
             testaGrafoDesconexo(usarMatriz);
             testaCiclo(usarMatriz);
+            testaLaco(usarMatriz);
+            testaCicloDesconectadoDaArvore(usarMatriz);
             testaGrafoVazio(usarMatriz);
             testaGrafoUnitario(usarMatriz);
         }
@@ -58,6 +60,31 @@ public final class OrdenacaoTopologicaTest {
         ResultadoOrdenacaoTopologica resultado = new OrdenacaoTopologica().executar(grafo);
         verifica(resultado.isTemCiclo(), "ciclo deve ser detectado");
         verifica(resultado.getOrdem().size() < 3, "vertices do ciclo nao podem formar uma ordenacao completa");
+    }
+
+    private static void testaLaco(boolean usarMatriz) {
+        IGrafo grafo = novoGrafo(usarMatriz, 2);
+        grafo.adicionarAresta(0, 1);
+        grafo.adicionarAresta(1, 1);
+
+        ResultadoOrdenacaoTopologica resultado = new OrdenacaoTopologica().executar(grafo);
+        verifica(resultado.isTemCiclo(), "laco deve ser detectado como ciclo");
+        verifica(resultado.getOrdem().equals(List.of(0)), "vertice conectado ao laco nao deve entrar na ordenacao completa");
+    }
+
+    private static void testaCicloDesconectadoDaArvore(boolean usarMatriz) {
+        IGrafo grafo = novoGrafo(usarMatriz, 5);
+        grafo.adicionarAresta(0, 1);
+        grafo.adicionarAresta(2, 3);
+        grafo.adicionarAresta(3, 4);
+        grafo.adicionarAresta(4, 2);
+
+        ResultadoOrdenacaoTopologica resultado = new OrdenacaoTopologica().executar(grafo);
+        verifica(resultado.isTemCiclo(), "ciclo desconectado deve ser detectado");
+        verifica(resultado.getOrdem().contains(0) && resultado.getOrdem().contains(1),
+                "componentes aciclicos devem ser processados antes da deteccao do ciclo");
+        verifica(resultado.getOrdem().size() == 2,
+                "a ordem parcial deve conter apenas vertices fora do componente ciclico");
     }
 
     private static void testaGrafoVazio(boolean usarMatriz) {

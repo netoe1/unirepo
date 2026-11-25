@@ -7,6 +7,7 @@ Execute os comandos a partir da raiz do repositório:
 ```bash
 bash tp2/src/test/corretude_est_grafos.spec.sh
 bash tp2/src/test/corretude_algoritmos_grafos.sh
+bash tp2/src/test/corretude_ordenacao_topologica.sh
 bash tp2/src/test/corretude_caminhos_minimos.sh
 ```
 
