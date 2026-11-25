@@ -3,7 +3,9 @@ package io;
 import algoritmos.BFS.ResultadoBFS;
 import algoritmos.BellmanFord.ResultadoBellmanFord;
 import algoritmos.DFS.ResultadoDFS;
-import algoritmos.Dkjistra.ResultadoDkjistra;
+import algoritmos.Dijkstra.ResultadoDijkstra;
+import algoritmos.FloydWarshall.ResultadoFloydWarshall;
+import algoritmos.FordFulkerson.ResultadoFordFulkerson;
 import algoritmos.OrdenacaoTopologica.ResultadoOrdenacaoTopologica;
 import algoritmos.ResultadoArvoreGeradoraMinima;
 import grafo.Aresta;
@@ -129,7 +131,7 @@ public class EscritaGrafo {
     }
 
     public void imprimirResultadoDijkstra(
-            ResultadoDkjistra resultado,
+            ResultadoDijkstra resultado,
             double tempoMs
     ) {
         System.out.println("\n----------------------");
@@ -145,6 +147,85 @@ public class EscritaGrafo {
             );
         }
         System.out.printf("Tempo de execucao: %.4f ms%n", tempoMs);
+    }
+
+    public void imprimirResultadoFloydWarshall(
+        ResultadoFloydWarshall resultado, 
+        double tempoMs
+    ) {
+        System.out.println("\n----------------------");
+        System.out.println("Resultado Floyd-Warshall");
+        System.out.println("----------------------");
+        System.out.println("Ciclo negativo detectado : " + (resultado.isTemCicloNegativo() ? "Sim" : "Nao"));
+
+        double[][] dist = resultado.getDistancias();
+        int n = dist.length;
+        int limite = Math.min(n, 10);
+
+        System.out.println("Matriz de distancias (primeiros " + limite + "x" + limite + " vertices):");
+        for (int i = 0; i < limite; i++) {
+            StringBuilder linha = new StringBuilder("  [" + i + "] ");
+            for (int j = 0; j < limite; j++) {
+                if (Double.isInfinite(dist[i][j])) {
+                    linha.append("INF\t");
+                } else {
+                    linha.append(String.format(java.util.Locale.US, "%.1f\t", dist[i][j]));
+                }
+            }
+            System.out.println(linha);
+        }
+
+        if (n > limite) {
+            System.out.println("  ... (" + n + "x" + n + " total; exibindo apenas os primeiros " + limite + " vertices)");
+        }
+
+        if (n >= 2) {
+            List<Integer> caminho = resultado.reconstruirCaminho(0, n - 1);
+            if (caminho.isEmpty()) {
+                System.out.println("Caminho minimo (0 -> " + (n - 1) + ") : indisponivel / sem caminho");
+            } else {
+                System.out.println("Caminho minimo (0 -> " + (n - 1) + ") : " + caminho);
+            }
+        }
+
+        System.out.printf("Tempo de execucao: %.4f ms%n", tempoMs);
+    }
+
+    public void imprimirResultadoFordFulkerson(
+        ResultadoFordFulkerson resultado, 
+        double tempoMs
+    ) {
+        System.out.println("\n----------------------");
+        System.out.println("Resultado Ford-Fulkerson");
+        System.out.println("----------------------");
+        System.out.println("Origem (s)               : " + resultado.getOrigem());
+        System.out.println("Sumidouro (t)            : " + resultado.getSumidouro());
+        System.out.printf(java.util.Locale.US, "Fluxo maximo             : %.4f%n", resultado.getFluxoMaximo());
+
+        double[][] fluxo = resultado.getFluxoPorAresta();
+        int n = fluxo.length;
+        int exibidas = 0;
+        int maxLinhas = 25;
+
+        System.out.println("Fluxo enviado por aresta (fluxo > 0):");
+        for (int u = 0; u < n; u++) {
+            for (int v = 0; v < n; v++) {
+                if (fluxo[u][v] > 1e-12) {
+                    if (exibidas < maxLinhas) {
+                        System.out.printf(java.util.Locale.US, "  %d -> %d : %.4f%n", u, v, fluxo[u][v]);
+                    }
+                    exibidas++;
+                }
+            }
+        }
+
+        if (exibidas == 0) {
+            System.out.println("  (nenhuma aresta com fluxo positivo)");
+        } else if (exibidas > maxLinhas) {
+            System.out.println("  ... (" + (exibidas - maxLinhas) + " arestas adicionais omitidas)");
+        }
+
+        System.out.printf("Tempo de execucao        : %.4f ms%n", tempoMs);
     }
 
     public void salvarTexto(String caminhoArquivo, String conteudo) throws IOException {

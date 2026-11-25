@@ -1,14 +1,14 @@
 package test;
 
-import algoritmos.Dkjistra;
-import algoritmos.Dkjistra.ResultadoDkjistra;
+import algoritmos.Dijkstra;
+import algoritmos.Dijkstra.ResultadoDijkstra;
 import grafo.GrafoListaAdjacencia;
 import grafo.GrafoMatrizAdjacencia;
 import grafo.IGrafo;
 import grafo.TipoGrafo;
 import java.util.Arrays;
 
-public final class DkjistraTest {
+public final class DijkstraTest {
 
     public static void main(String[] args) {
         for (boolean usarMatriz : new boolean[] {false, true}) {
@@ -17,7 +17,7 @@ public final class DkjistraTest {
             testaPesoNegativo(usarMatriz);
         }
         testaValidacoes();
-        System.out.println("DkjistraTest: todos os testes passaram.");
+        System.out.println("DijkstraTest: todos os testes passaram.");
     }
 
     private static void testaCaminhosMinimos(boolean usarMatriz, TipoGrafo tipo) {
@@ -28,7 +28,7 @@ public final class DkjistraTest {
         grafo.adicionarAresta(1, 3, 1.0);
         grafo.adicionarAresta(2, 3, 5.0);
 
-        ResultadoDkjistra resultado = new Dkjistra().executar(grafo, 0);
+        ResultadoDijkstra resultado = new Dijkstra().executar(grafo, 0);
 
         verifica(resultado.getOrigem() == 0, "a origem deve ser preservada");
         verificaDistancias(resultado.getDistancia(), new double[] {0.0, 3.0, 1.0, 4.0, Double.POSITIVE_INFINITY});
@@ -45,11 +45,11 @@ public final class DkjistraTest {
     private static void testaPesoNegativo(boolean usarMatriz) {
         IGrafo grafo = novoGrafo(usarMatriz, 2, TipoGrafo.DIRECIONADO);
         grafo.adicionarAresta(0, 1, -1.0);
-        esperaExcecao(IllegalArgumentException.class, () -> new Dkjistra().executar(grafo, 0));
+        esperaExcecao(IllegalArgumentException.class, () -> new Dijkstra().executar(grafo, 0));
     }
 
     private static void testaValidacoes() {
-        Dkjistra algoritmo = new Dkjistra();
+        Dijkstra algoritmo = new Dijkstra();
         esperaExcecao(IllegalArgumentException.class, () -> algoritmo.executar(null, 0));
         esperaExcecao(IndexOutOfBoundsException.class,
                 () -> algoritmo.executar(new GrafoListaAdjacencia(1, TipoGrafo.DIRECIONADO), 1));
