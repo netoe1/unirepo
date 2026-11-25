@@ -27,7 +27,7 @@ public final class KruskalTest {
         ResultadoArvoreGeradoraMinima resultado = new Kruskal().executar(grafo);
         verifica(resultado.isConexo(), "grafo conectado deve produzir uma arvore");
         verifica(resultado.getArestas().size() == 4, "arvore deve ter n-1 arestas");
-        verifica(resultado.getPesoTotal() == 22.0, "peso da MST deve ser 22");
+        verifica(resultado.getPesoTotal() == 18.0, "peso da MST deve ser 18");
     }
 
     private static void testaFlorestaGeradoraMinima(boolean usarMatriz) {

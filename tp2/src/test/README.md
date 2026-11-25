@@ -30,8 +30,6 @@ O script `corretude_algoritmos_grafos.sh` executa:
 - `KruskalTest`: verifica MST, floresta geradora mínima, laços, grafos vazios/unitários e pesos inválidos nas duas representações.
 - `PrimTest`: verifica MST, origem alternativa, floresta geradora mínima, laços, grafos vazios/unitários e validações nas duas representações.
 
-Esses testes cobrem BFS e DFS; não substituem testes para os demais algoritmos que ainda serão implementados.
-
 ## Testes de caminhos mínimos
 
 O script `corretude_caminhos_minimos.sh` executa:

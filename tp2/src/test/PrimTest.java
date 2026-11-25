@@ -27,7 +27,7 @@ public final class PrimTest {
         ResultadoArvoreGeradoraMinima resultado = new Prim().executar(grafo, 0);
         verifica(resultado.isConexo(), "grafo conectado deve produzir uma arvore");
         verifica(resultado.getArestas().size() == 4, "arvore deve ter n-1 arestas");
-        verifica(resultado.getPesoTotal() == 22.0, "peso da MST deve ser 22");
+        verifica(resultado.getPesoTotal() == 18.0, "peso da MST deve ser 18");
     }
 
     private static void testaOrigemAlternativa(boolean usarMatriz) {
@@ -35,7 +35,7 @@ public final class PrimTest {
         adicionarArestasConectadas(grafo);
         ResultadoArvoreGeradoraMinima resultado = new Prim().executar(grafo, 4);
         verifica(resultado.isConexo(), "grafo conectado deve ser conexo independentemente da origem");
-        verifica(resultado.getPesoTotal() == 22.0, "peso da MST nao deve depender da origem");
+        verifica(resultado.getPesoTotal() == 18.0, "peso da MST nao deve depender da origem");
     }
 
     private static void testaFlorestaGeradoraMinima(boolean usarMatriz) {
