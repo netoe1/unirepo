@@ -10,3 +10,6 @@ find "$TP2_DIR/src" -name '*.java' -print0 \
 
 java -cp "$BUILD_DIR" test.BFSTest
 java -cp "$BUILD_DIR" test.DFSTest
+java -cp "$BUILD_DIR" test.OrdenacaoTopologicaTest
+java -cp "$BUILD_DIR" test.KruskalTest
+java -cp "$BUILD_DIR" test.PrimTest

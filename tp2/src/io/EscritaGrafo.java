@@ -2,6 +2,8 @@ package io;
 
 import algoritmos.BFS.ResultadoBFS;
 import algoritmos.DFS.ResultadoDFS;
+import algoritmos.OrdenacaoTopologica.ResultadoOrdenacaoTopologica;
+import algoritmos.ResultadoArvoreGeradoraMinima;
 import grafo.Aresta;
 import grafo.IGrafo;
 import java.io.BufferedWriter;
@@ -75,6 +77,33 @@ public class EscritaGrafo {
             );
         }
         System.out.printf("Tempo de execucao  : %.4f ms%n", tempoMs);
+    }
+
+    public void imprimirResultadoOrdenacaoTopologica(
+            ResultadoOrdenacaoTopologica resultado,
+            double tempoMs
+    ) {
+        System.out.println("\n----------------------");
+        System.out.println("Resultado da ordenacao topologica");
+        System.out.println("----------------------");
+        System.out.println("Ordem: " + (resultado.isTemCiclo() ? "indefinida (ciclo detectado)" : resultado.getOrdem()));
+        System.out.println("Ciclo detectado: " + (resultado.isTemCiclo() ? "Sim" : "Nao"));
+        System.out.printf("Tempo de execucao: %.4f ms%n", tempoMs);
+    }
+
+    public void imprimirResultadoArvoreGeradoraMinima(
+            ResultadoArvoreGeradoraMinima resultado,
+            String algoritmo,
+            double tempoMs
+    ) {
+        System.out.println("\n----------------------");
+        System.out.println("Resultado " + algoritmo);
+        System.out.println("----------------------");
+        System.out.println("Arestas selecionadas: " + resultado.getArestas());
+        System.out.printf("Peso total: %.4f%n", resultado.getPesoTotal());
+        System.out.println("Componentes: " + resultado.getNumeroComponentes());
+        System.out.println("Grafo conexo: " + (resultado.isConexo() ? "Sim" : "Nao"));
+        System.out.printf("Tempo de execucao: %.4f ms%n", tempoMs);
     }
 
     public void salvarTexto(String caminhoArquivo, String conteudo) throws IOException {

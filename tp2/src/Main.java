@@ -6,6 +6,11 @@ import io.ExportadorCSV;
 import io.EscritaGrafo;
 import io.LeituraGrafo;
 import io.LeituraGrafo.Representacao;
+import algoritmos.Kruskal;
+import algoritmos.OrdenacaoTopologica;
+import algoritmos.OrdenacaoTopologica.ResultadoOrdenacaoTopologica;
+import algoritmos.Prim;
+import algoritmos.ResultadoArvoreGeradoraMinima;
 import grafo.IGrafo;
 import grafo.TipoGrafo;
 import java.io.File;
@@ -31,7 +36,10 @@ public class Main {
                 System.out.println("\nEXECUTAR ALGORITMO EM TODAS AS COMBINACOES");
                 System.out.println("1 - Rodar BFS");
                 System.out.println("2 - Rodar DFS");
-                System.out.println("3 - Trocar arquivo / vertice de origem");
+                System.out.println("3 - Rodar Ordenacao Topologica");
+                System.out.println("4 - Rodar Kruskal");
+                System.out.println("5 - Rodar Prim");
+                System.out.println("6 - Trocar arquivo / vertice de origem");
                 System.out.println("0 - Sair");
                 System.out.print("Escolha: ");
                 opcao = lerInteiroComPadrao(scanner, -1);
@@ -39,7 +47,10 @@ public class Main {
                 switch (opcao) {
                     case 1 -> executarCombinacoesBFS(caminhoArquivo, origem, leitor, impressora, exportador);
                     case 2 -> executarCombinacoesDFS(caminhoArquivo, origem, leitor, impressora, exportador);
-                    case 3 -> {
+                    case 3 -> executarOrdenacaoTopologica(caminhoArquivo, leitor, impressora, exportador);
+                    case 4 -> executarKruskal(caminhoArquivo, leitor, impressora, exportador);
+                    case 5 -> executarPrim(caminhoArquivo, origem, leitor, impressora, exportador);
+                    case 6 -> {
                         System.out.print("Novo caminho do arquivo: ");
                         caminhoArquivo = scanner.nextLine().trim();
                         System.out.print("Novo vertice de origem: ");
@@ -153,6 +164,106 @@ public class Main {
                         resultado.getFinalizacao()
                 );
             }
+        }
+        System.out.println("\nArquivos CSV salvos na pasta output/");
+    }
+
+    private static void executarOrdenacaoTopologica(
+            String caminhoArquivo,
+            LeituraGrafo leitor,
+            EscritaGrafo impressora,
+            ExportadorCSV exportador
+    ) throws IOException {
+        String nomeBaseArquivo = new File(caminhoArquivo).getName();
+        for (Representacao rep : Representacao.values()) {
+            IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.DIRECIONADO);
+            System.out.println("\n--------------------------------------------------");
+            System.out.println("ALGORITMO: Ordenacao Topologica | REP: " + rep + " | TIPO: DIRECIONADO");
+            impressora.imprimirResumoGrafo(grafo);
+
+            long inicio = System.nanoTime();
+            ResultadoOrdenacaoTopologica resultado = new OrdenacaoTopologica().executar(grafo);
+            double tempoMs = (System.nanoTime() - inicio) / 1_000_000.0;
+            impressora.imprimirResultadoOrdenacaoTopologica(resultado, tempoMs);
+
+            exportador.registrarExecucao(
+                    nomeBaseArquivo,
+                    "ORDENACAO_TOPOLOGICA",
+                    rep.name(),
+                    TipoGrafo.DIRECIONADO.name(),
+                    grafo.numVertices(),
+                    grafo.numArestas(),
+                    -1,
+                    tempoMs,
+                    "ordem=" + resultado.getOrdem() + " | ciclo=" + resultado.isTemCiclo()
+            );
+        }
+        System.out.println("\nArquivos CSV salvos na pasta output/");
+    }
+
+    private static void executarKruskal(
+            String caminhoArquivo,
+            LeituraGrafo leitor,
+            EscritaGrafo impressora,
+            ExportadorCSV exportador
+    ) throws IOException {
+        String nomeBaseArquivo = new File(caminhoArquivo).getName();
+        for (Representacao rep : Representacao.values()) {
+            IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.NAO_DIRECIONADO);
+            System.out.println("\n--------------------------------------------------");
+            System.out.println("ALGORITMO: Kruskal | REP: " + rep + " | TIPO: NAO_DIRECIONADO");
+            impressora.imprimirResumoGrafo(grafo);
+
+            long inicio = System.nanoTime();
+            ResultadoArvoreGeradoraMinima resultado = new Kruskal().executar(grafo);
+            double tempoMs = (System.nanoTime() - inicio) / 1_000_000.0;
+            impressora.imprimirResultadoArvoreGeradoraMinima(resultado, "Kruskal", tempoMs);
+
+            exportador.registrarExecucao(
+                    nomeBaseArquivo,
+                    "KRUSKAL",
+                    rep.name(),
+                    TipoGrafo.NAO_DIRECIONADO.name(),
+                    grafo.numVertices(),
+                    grafo.numArestas(),
+                    -1,
+                    tempoMs,
+                    "peso=" + resultado.getPesoTotal() + " | componentes=" + resultado.getNumeroComponentes()
+            );
+        }
+        System.out.println("\nArquivos CSV salvos na pasta output/");
+    }
+
+    private static void executarPrim(
+            String caminhoArquivo,
+            int origem,
+            LeituraGrafo leitor,
+            EscritaGrafo impressora,
+            ExportadorCSV exportador
+    ) throws IOException {
+        String nomeBaseArquivo = new File(caminhoArquivo).getName();
+        for (Representacao rep : Representacao.values()) {
+            IGrafo grafo = leitor.lerArquivo(caminhoArquivo, rep, TipoGrafo.NAO_DIRECIONADO);
+            System.out.println("\n--------------------------------------------------");
+            System.out.println("ALGORITMO: Prim | REP: " + rep + " | TIPO: NAO_DIRECIONADO");
+            impressora.imprimirResumoGrafo(grafo);
+
+            long inicio = System.nanoTime();
+            ResultadoArvoreGeradoraMinima resultado = new Prim().executar(grafo, origem);
+            double tempoMs = (System.nanoTime() - inicio) / 1_000_000.0;
+            impressora.imprimirResultadoArvoreGeradoraMinima(resultado, "Prim", tempoMs);
+
+            exportador.registrarExecucao(
+                    nomeBaseArquivo,
+                    "PRIM",
+                    rep.name(),
+                    TipoGrafo.NAO_DIRECIONADO.name(),
+                    grafo.numVertices(),
+                    grafo.numArestas(),
+                    origem,
+                    tempoMs,
+                    "peso=" + resultado.getPesoTotal() + " | componentes=" + resultado.getNumeroComponentes()
+            );
         }
         System.out.println("\nArquivos CSV salvos na pasta output/");
     }

@@ -26,6 +26,9 @@ O script `corretude_algoritmos_grafos.sh` executa:
 
 - `BFSTest`: verifica distâncias em número de arestas, vértices visitados e desconectados, reconstrução de caminho, grafo unitário, validação da origem e uso com ambas as representações e tipos de grafo.
 - `DFSTest`: verifica busca a partir de uma origem e busca completa, componentes desconectados, vértices isolados, pais, tempos de descoberta/finalização, detecção de ciclos e validações. Também executa os cenários em lista e matriz, dirigidos e não dirigidos.
+- `OrdenacaoTopologicaTest`: verifica DAG, ciclo, desconexão, grafo vazio/unitário e validações nas duas representações.
+- `KruskalTest`: verifica MST, floresta geradora mínima, laços, grafos vazios/unitários e pesos inválidos nas duas representações.
+- `PrimTest`: verifica MST, origem alternativa, floresta geradora mínima, laços, grafos vazios/unitários e validações nas duas representações.
 
 Esses testes cobrem BFS e DFS; não substituem testes para os demais algoritmos que ainda serão implementados.
 
