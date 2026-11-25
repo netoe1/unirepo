@@ -84,6 +84,8 @@ bash tp2/src/test/corretude_est_grafos.spec.sh
 bash tp2/src/test/corretude_algoritmos_grafos.sh
 bash tp2/src/test/corretude_ordenacao_topologica.sh
 bash tp2/src/test/corretude_caminhos_minimos.sh
+bash tp2/src/test/corretude_fluxo_maximo.sh
+bash tp2/src/test/corretude_exemplos_demonstracao.sh
 ```
 
 Compile todo o TP2 antes de concluir uma mudança:
@@ -94,6 +96,7 @@ find tp2/src -name '*.java' -print0 | xargs -0 javac -encoding UTF-8 -d out/tp2
 ```
 
 Cada script cria uma pasta temporária, compila o projeto e remove a pasta ao terminar. Medições de desempenho não são testes de corretude. Ao adicionar uma nova suíte, atualize `tp2/src/test/README.md` e o README principal.
+`corretude_exemplos_demonstracao.sh` também cobre o fluxo ponta a ponta do menu com exemplos padrão e uma entrada GTgraph personalizada.
 
 ## Experimentos
 
