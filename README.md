@@ -48,7 +48,7 @@ Execute o programa interativo:
 java -cp out/tp2 Main
 ```
 
-O menu permite escolher o grafo de entrada e executar BFS, DFS, ordenação topológica, Kruskal e Prim. Remova `out/` quando quiser limpar os arquivos compilados.
+O menu permite escolher o grafo de entrada e executar os algoritmos já integrados ao programa. Remova `out/` quando quiser limpar os arquivos compilados.
 
 ## Testes
 

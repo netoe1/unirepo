@@ -1,7 +1,9 @@
 package io;
 
 import algoritmos.BFS.ResultadoBFS;
+import algoritmos.BellmanFord.ResultadoBellmanFord;
 import algoritmos.DFS.ResultadoDFS;
+import algoritmos.Dkjistra.ResultadoDkjistra;
 import algoritmos.OrdenacaoTopologica.ResultadoOrdenacaoTopologica;
 import algoritmos.ResultadoArvoreGeradoraMinima;
 import grafo.Aresta;
@@ -103,6 +105,45 @@ public class EscritaGrafo {
         System.out.printf("Peso total: %.4f%n", resultado.getPesoTotal());
         System.out.println("Componentes: " + resultado.getNumeroComponentes());
         System.out.println("Grafo conexo: " + (resultado.isConexo() ? "Sim" : "Nao"));
+        System.out.printf("Tempo de execucao: %.4f ms%n", tempoMs);
+    }
+
+    public void imprimirResultadoBellmanFord(
+            ResultadoBellmanFord resultado,
+            double tempoMs
+    ) {
+        System.out.println("\n----------------------");
+        System.out.println("Resultado Bellman-Ford (Origem: " + resultado.getOrigem() + ")");
+        System.out.println("----------------------");
+        System.out.println("Ciclo negativo alcançavel: " + (resultado.isTemCicloNegativo() ? "Sim" : "Nao"));
+        for (int v = 0; v < resultado.getDistancia().length; v++) {
+            double distancia = resultado.getDistancia()[v];
+            String textoDistancia = Double.isInfinite(distancia) ? "INF" : String.format("%.4f", distancia);
+            System.out.println(
+                "  Vertice " + v +
+                " | Distancia: " + textoDistancia +
+                " | Pai: " + resultado.getPai()[v]
+            );
+        }
+        System.out.printf("Tempo de execucao: %.4f ms%n", tempoMs);
+    }
+
+    public void imprimirResultadoDijkstra(
+            ResultadoDkjistra resultado,
+            double tempoMs
+    ) {
+        System.out.println("\n----------------------");
+        System.out.println("Resultado Dijkstra (Origem: " + resultado.getOrigem() + ")");
+        System.out.println("----------------------");
+        for (int v = 0; v < resultado.getDistancia().length; v++) {
+            double distancia = resultado.getDistancia()[v];
+            String textoDistancia = Double.isInfinite(distancia) ? "INF" : String.format("%.4f", distancia);
+            System.out.println(
+                "  Vertice " + v +
+                " | Distancia: " + textoDistancia +
+                " | Pai: " + resultado.getPai()[v]
+            );
+        }
         System.out.printf("Tempo de execucao: %.4f ms%n", tempoMs);
     }
 

@@ -11,7 +11,7 @@ O contexto atual é o TP2, desenvolvido na branch `acd/tp2/main`. Consulte o est
 - Estruturas de grafo: `tp2/src/grafo/`
 - Algoritmos: `tp2/src/algoritmos/`
 - Entrada e saída: `tp2/src/io/`
-- Pontos de execução: `tp2/src/Main.java` e `tp2/src/App.java`
+- Ponto interativo principal: `tp2/src/Main.java`; `tp2/src/App.java` encaminha para `Main`
 - Testes Java simples: `tp2/src/test/`
 - Grafos de amostra: `tp2/src/samples/`
 - Visão geral: `README.md`
