@@ -141,16 +141,6 @@ public class Main {
                         "ordem=" + resultado.getOrdemVisitacao()
                 );
 
-                String nomeDetalhe = String.format("bfs_%s_%s.csv", rep.name().toLowerCase(), tipo.name().toLowerCase());
-                exportador.salvarPercursoVertices(
-                        nomeDetalhe,
-                        "BFS",
-                        rep.name(),
-                        tipo.name(),
-                        resultado.getOrdemVisitacao(),
-                        resultado.getDistancia(),
-                        resultado.getPai()
-                );
             }
         }
         System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
@@ -192,16 +182,6 @@ public class Main {
                         "ordem=" + resultado.getOrdemPreOrdem() + " | ciclo=" + resultado.isTemCiclo()
                 );
 
-                String nomeDetalhe = String.format("dfs_%s_%s.csv", rep.name().toLowerCase(), tipo.name().toLowerCase());
-                exportador.salvarPercursoVertices(
-                        nomeDetalhe,
-                        "DFS",
-                        rep.name(),
-                        tipo.name(),
-                        resultado.getOrdemPreOrdem(),
-                        resultado.getDescoberta(),
-                        resultado.getFinalizacao()
-                );
             }
         }
         System.out.println("\nArquivos CSV salvos em " + localizarPastaOutput() + "/");
@@ -454,18 +434,40 @@ public class Main {
     private static String selecionarArquivo(Scanner scanner, String algoritmo, String arquivoExemplo) {
         Path caminhoPadrao = localizarExemplo(arquivoExemplo);
         System.out.print(
-                "Arquivo para " + algoritmo + " (Enter usa " + caminhoPadrao + "; vertices Java iniciam em 0): "
+            "Arquivo para " + algoritmo + " (.gr; nome em tp2/samples; Enter usa "
+                + arquivoExemplo + "; indices Java iniciam em 0): "
         );
         if (!scanner.hasNextLine()) {
-            return caminhoPadrao.toString();
+            throw new IllegalArgumentException(
+                "Entrada encerrada antes de informar o arquivo para " + algoritmo + "."
+            );
         }
         String caminhoInformado = scanner.nextLine().trim();
-        return caminhoInformado.isEmpty() ? caminhoPadrao.toString() : caminhoInformado;
+        if (caminhoInformado.isEmpty()) {
+            return caminhoPadrao.toString();
+        }
+
+        Path entrada = Paths.get(caminhoInformado);
+        if (entrada.isAbsolute() || entrada.getNameCount() > 1) {
+            return caminhoInformado;
+        }
+
+        Path pastaSamples = localizarRaizRepositorio().resolve(Paths.get("tp2", "samples"));
+        Path caminhoSamples = pastaSamples.resolve(entrada);
+        if (Files.isRegularFile(caminhoSamples)) {
+            return caminhoSamples.toString();
+        }
+
+        Path caminhoDemo = pastaSamples.resolve(Paths.get("demo", caminhoInformado));
+        if (Files.isRegularFile(caminhoDemo)) {
+            return caminhoDemo.toString();
+        }
+        return caminhoSamples.toString();
     }
 
     private static Path localizarExemplo(String arquivoExemplo) {
         Path candidato = localizarRaizRepositorio()
-                .resolve(Paths.get("tp2", "src", "samples", "demo", arquivoExemplo));
+                .resolve(Paths.get("tp2", "samples", "demo", arquivoExemplo));
         if (!Files.isRegularFile(candidato)) {
             throw new IllegalArgumentException("Exemplo padrao nao encontrado: " + candidato);
         }
@@ -474,7 +476,7 @@ public class Main {
 
     private static String localizarPastaOutput() {
         return localizarRaizRepositorio()
-                .resolve(Paths.get("tp2", "src", "output"))
+                .resolve(Paths.get("tp2", "output"))
                 .toAbsolutePath()
                 .normalize()
                 .toString();
@@ -501,7 +503,7 @@ public class Main {
         }
 
         for (Path diretorio : diretoriosBase) {
-            if (Files.isDirectory(diretorio.resolve(Paths.get("tp2", "src", "samples", "demo")))) {
+            if (Files.isDirectory(diretorio.resolve(Paths.get("tp2", "samples", "demo")))) {
                 return diretorio;
             }
         }

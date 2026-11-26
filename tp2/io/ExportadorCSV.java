@@ -72,6 +72,36 @@ public class ExportadorCSV {
             int verticeOrigem,
             double tempoMs
     ) throws IOException {
+            return registrarExperimento(
+                arquivoOrigem,
+                algoritmo,
+                representacao,
+                "DIRECIONADO",
+                numVertices,
+                numArestas,
+                numArestas,
+                densidade,
+                densidade,
+                repeticao,
+                verticeOrigem,
+                tempoMs
+            );
+            }
+
+            public File registrarExperimento(
+                String arquivoOrigem,
+                String algoritmo,
+                String representacao,
+                String tipoGrafo,
+                int numVertices,
+                int numArestasArquivo,
+                int numArestasGrafo,
+                double densidadeArquivo,
+                double densidadeGrafo,
+                int repeticao,
+                int verticeOrigem,
+                double tempoMs
+            ) throws IOException {
         if (!pastaOutput.exists() && !pastaOutput.mkdirs()) {
             throw new IOException("Nao foi possivel criar a pasta de saida: " + pastaOutput.getPath());
         }
@@ -81,7 +111,9 @@ public class ExportadorCSV {
 
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(arquivoCsv, StandardCharsets.UTF_8, true))) {
             if (arquivoNovo) {
-                bw.write("arquivo_grafo;algoritmo;representacao;vertices;arestas;densidade;repeticao;origem;tempo_ms");
+                bw.write("arquivo_grafo;algoritmo;representacao;tipo_grafo;vertices;"
+                        + "arestas_arquivo;arestas_grafo;densidade_arquivo;densidade_grafo;"
+                        + "repeticao;origem;tempo_ms");
                 bw.newLine();
             }
 
@@ -89,9 +121,12 @@ public class ExportadorCSV {
                     escaparCsv(arquivoOrigem),
                     escaparCsv(algoritmo),
                     escaparCsv(representacao),
+                    escaparCsv(tipoGrafo),
                     String.valueOf(numVertices),
-                    String.valueOf(numArestas),
-                    String.format(java.util.Locale.US, "%.2f", densidade),
+                    String.valueOf(numArestasArquivo),
+                    String.valueOf(numArestasGrafo),
+                    String.format(java.util.Locale.US, "%.6f", densidadeArquivo),
+                    String.format(java.util.Locale.US, "%.6f", densidadeGrafo),
                     String.valueOf(repeticao),
                     String.valueOf(verticeOrigem),
                     String.format(java.util.Locale.US, "%.6f", tempoMs)

@@ -86,7 +86,7 @@ Os arquivos de amostra do enunciado usam identificadores iniciando em `1`. A cla
 
 ```java
 IGrafo grafo = new io.LeituraGrafo().lerArquivo(
-    "tp2/src/samples/sample100-1980.gr",
+    "tp2/samples/sample100-1980.gr",
     io.LeituraGrafo.Representacao.LISTA_ADJACENCIA,
     TipoGrafo.DIRECIONADO
 );

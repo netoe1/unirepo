@@ -5,15 +5,15 @@ Esta pasta contém testes automatizados para as estruturas e os algoritmos de gr
 Execute os comandos a partir da raiz do repositório:
 
 ```bash
-bash tp2/src/test/corretude_est_grafos.spec.sh
-bash tp2/src/test/corretude_algoritmos_grafos.sh
-bash tp2/src/test/corretude_ordenacao_topologica.sh
-bash tp2/src/test/corretude_caminhos_minimos.sh
-bash tp2/src/test/corretude_fluxo_maximo.sh
-bash tp2/src/test/corretude_exemplos_demonstracao.sh
+bash tp2/test/corretude_est_grafos.spec.sh
+bash tp2/test/corretude_algoritmos_grafos.sh
+bash tp2/test/corretude_ordenacao_topologica.sh
+bash tp2/test/corretude_caminhos_minimos.sh
+bash tp2/test/corretude_fluxo_maximo.sh
+bash tp2/test/corretude_exemplos_demonstracao.sh
 ```
 
-Cada script compila os arquivos Java de `tp2/src` em uma pasta temporária e remove essa pasta ao terminar. Se a compilação ou algum teste falhar, o script encerra com código diferente de zero.
+Cada script compila os arquivos Java de `tp2/` em uma pasta temporária e remove essa pasta ao terminar. Se a compilação ou algum teste falhar, o script encerra com código diferente de zero.
 
 ## Testes das estruturas de grafo
 
