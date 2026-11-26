@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TP2_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+TP2_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="$(mktemp -d "${TMPDIR:-/tmp}/tp2-exemplos-demonstracao.XXXXXX")"
 RUN_DIR="$(mktemp -d "${TMPDIR:-/tmp}/tp2-exemplos-execucao.XXXXXX")"
 trap 'rm -rf "$BUILD_DIR" "$RUN_DIR"' EXIT
 
-find "$TP2_DIR/src" -name '*.java' -print0 \
+find "$TP2_DIR" -name '*.java' -print0 \
     | xargs -0 javac -encoding UTF-8 -d "$BUILD_DIR"
 
 cd "$TP2_DIR/.."
 java -cp "$BUILD_DIR" test.ExemplosDemonstracaoTest
 
-mkdir -p "$BUILD_DIR/tp2/src/samples"
-ln -s "$TP2_DIR/src/samples/demo" "$BUILD_DIR/tp2/src/samples/demo"
+mkdir -p "$BUILD_DIR/tp2"
+ln -s "$TP2_DIR/samples" "$BUILD_DIR/tp2/samples"
 
 cat > "$RUN_DIR/custom-e2e.gr" <<'EOF'
 c Custom E2E graph
@@ -45,11 +45,19 @@ grep -q "Peso total: 10.0000" "$BUILD_DIR/main-output.txt"
 grep -q "Fluxo maximo             : 23.0000" "$BUILD_DIR/main-output.txt"
 grep -q "Arquivo para BFS" "$BUILD_DIR/main-output.txt"
 
-CSV="$BUILD_DIR/tp2/src/output/resultados_algoritmos.csv"
+CSV="$BUILD_DIR/tp2/output/resultados_algoritmos.csv"
 test -f "$CSV"
 test ! -e "$RUN_DIR/output"
-grep -q "Arquivos CSV salvos em $BUILD_DIR/tp2/src/output/" "$BUILD_DIR/main-output.txt"
+grep -q "Arquivos CSV salvos em $BUILD_DIR/tp2/output/" "$BUILD_DIR/main-output.txt"
 test "$(wc -l < "$CSV")" -eq 29
 test "$(awk -F';' 'NR > 1 && $2 == "BFS" { count++ } END { print count+0 }' "$CSV")" -eq 8
 test "$(awk -F';' 'NR > 1 && $2 == "FORD_FULKERSON" { count++ } END { print count+0 }' "$CSV")" -eq 2
 grep -q 'custom-e2e.gr;BFS;' "$CSV"
+
+for algoritmo in bfs dfs; do
+    for representacao in lista_adjacencia matriz_adjacencia; do
+        for tipo in direcionado nao_direcionado; do
+            test ! -e "$BUILD_DIR/tp2/output/${algoritmo}_${representacao}_${tipo}.csv"
+        done
+    done
+done

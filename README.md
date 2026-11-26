@@ -1,85 +1,101 @@
-# Repositório de trabalhos — Algoritmos e Classificação de Dados
+# TP2 — Algoritmos e Classificação de Dados
 
-Este repositório é um monorepo para os trabalhos da disciplina **Algoritmos e Classificação de Dados (ACD)**. Cada trabalho é desenvolvido em uma branch própria. Consulte a branch ativa para identificar o conteúdo em desenvolvimento; não presuma que todos os trabalhos estarão presentes ao mesmo tempo na mesma branch.
+Implementação em Java de representações de grafos por lista e matriz de adjacência, nove algoritmos e um experimento de desempenho de caminhos mínimos. O enunciado está em [`docs/TP2 - Trabalho Prático sobre  GRAFOS.md`](<docs/TP2 - Trabalho Prático sobre  GRAFOS.md>).
 
-## Trabalho atual
+## Estrutura
 
-Na branch `acd/tp2/main`, o foco é o **TP2**, sobre representações de grafos e algoritmos de grafos em Java, com experimentos para comparar desempenho.
+```text
+tp2/
+	Main.java                       menu interativo
+	App.java                        encaminha para Main
+	algoritmos/                     implementações dos nove algoritmos
+	grafo/                          interface, vértices, arestas e representações
+	io/                             leitura .gr, impressão e exportação CSV
+	samples/demo/                   exemplos pequenos do menu
+	samples/                        15 grafos GTgraph do experimento
+	test/                           testes Java e scripts de validação
+	output/                         CSVs, gráficos e estatísticas
+```
 
-- Código do TP2: [`tp2/`](tp2/)
-- Enunciado: [`docs/TP2 - Trabalho Prático sobre  GRAFOS.md`](<docs/TP2 - Trabalho Prático sobre  GRAFOS.md>)
-- Grafos de amostra: [`tp2/src/samples/`](tp2/src/samples/)
-- Exemplos pequenos para demonstração: [`tp2/src/samples/demo/`](tp2/src/samples/demo/)
-- Documentação das estruturas: [`tp2/src/grafo/README.md`](tp2/src/grafo/README.md)
-- Documentação dos testes: [`tp2/src/test/README.md`](tp2/src/test/README.md)
-- Instruções para contribuir e revisar: [`AGENTS.md`](AGENTS.md)
-
-O projeto implementa grafos dirigidos e não dirigidos nas representações por lista e matriz de adjacência. Os algoritmos disponíveis são:
-
-| Funcionalidade | Status |
-| --- | --- |
-| Busca em largura (BFS) | Implementada e testada |
-| Busca em profundidade (DFS) | Implementada e testada |
-| Ordenação topológica | Implementada e testada |
-| Kruskal | Implementado e testado |
-| Prim | Implementado e testado |
-| Bellman-Ford | Implementado e testado |
-| Dijkstra | Implementado e testado |
-| Floyd-Warshall | Implementado e testado |
-| Ford-Fulkerson | Implementado e testado |
-| Experimento completo com boxplots e artigo | Em desenvolvimento |
+Os algoritmos disponíveis são BFS, DFS, ordenação topológica, Kruskal, Prim, Bellman-Ford, Dijkstra, Floyd-Warshall e Ford-Fulkerson. A interface de grafo permite que os algoritmos usem lista ou matriz de adjacência.
 
 ## Requisitos
 
-- JDK com `java` e `javac` disponíveis no `PATH`.
-- Git para obter o repositório e alternar entre branches.
+- JDK compatível com switch expressions, com `java` e `javac` no `PATH` (Java 17 ou superior recomendado).
+- Para gerar gráficos: Python 3 e `pandas`, `matplotlib` e `numpy`.
 
 ## Compilar e executar
 
-Na raiz do repositório, compile todo o código Java do TP2:
+Execute os comandos na raiz do repositório:
 
 ```bash
 mkdir -p out/tp2
-find tp2/src -name '*.java' -print0 | xargs -0 javac -encoding UTF-8 -d out/tp2
-```
-
-Execute o programa interativo:
-
-```bash
+find tp2 -name '*.java' -print0 | xargs -0 javac -encoding UTF-8 -d out/tp2
 java -cp out/tp2 Main
 ```
 
-Ou compile e inicie o programa com um único comando:
+O menu pede um vértice de origem (padrão `0`) e apresenta as opções 1 a 9 para os algoritmos; a opção 10 altera a origem e 0 encerra. Em cada algoritmo, pressione Enter para usar o exemplo de `tp2/samples/demo/`, digite somente o nome de um `.gr` em `tp2/samples/` ou informe um caminho explícito. Os índices digitados no menu começam em zero.
+
+Os arquivos GTgraph usam linhas `p sp V E` para declarar vértices e arestas e `a u v peso` para cada arco. Os identificadores de vértice no arquivo começam em 1; `LeituraGrafo` converte-os para índices Java começando em 0. O menu imprime uma visão resumida do grafo (até 20 vértices e 10 adjacências por vértice), o resultado e o tempo.
+
+O menu acrescenta os resultados em `tp2/output/resultados_algoritmos.csv`. BFS e DFS não geram mais CSVs de percurso separados.
+
+## Experimento de caminhos mínimos
+
+O experimento principal compara Bellman-Ford e Dijkstra nas 15 amostras, nas representações por lista e matriz, com 10 repetições por configuração:
 
 ```bash
-./tp2/src/rodar.sh
+bash tp2/experimento_caminhos_minimos.sh
 ```
 
-O menu permite executar cada algoritmo com um exemplo pequeno recomendado. Pressione Enter no prompt de arquivo para usar o exemplo sugerido ou informe outro caminho GTgraph. A localização dos exemplos padrão é resolvida a partir do diretório atual e da localização das classes compiladas, portanto o programa também pode ser iniciado de outra pasta se o bytecode estiver dentro do checkout. Os vértices informados pelo programa usam índices Java começando em zero. A estrutura é exibida com até 20 vértices e 10 adjacências por vértice; itens omitidos são indicados. Os CSVs gerados pelo menu ficam em `tp2/src/output/`. Remova `out/` quando quiser limpar os arquivos compilados.
+São 300 medições por algoritmo, 600 no total. O executor também faz um aquecimento não registrado por algoritmo e configuração. Cada chamada cronometrada mede somente o algoritmo; leitura e preparação ficam fora do intervalo. Os resultados vão para `tp2/output/<timestamp>/experimento_caminhos_minimos.csv`, sem substituir coletas anteriores.
 
-Para remover arquivos compilados (`.class`) e CSVs gerados pelo menu:
+A entrada do experimento é tratada como dígrafo e usa origem 0. Arestas paralelas entre o mesmo par dirigido são normalizadas pelo menor peso, preservando os caminhos mínimos. O CSV registra tanto as arestas/densidades declaradas no arquivo quanto as efetivamente carregadas.
+
+Para validar rapidamente com um grafo e uma repetição:
 
 ```bash
-./tp2/src/clean.sh
+TP2_LIMITE_GRAFOS=1 TP2_REPETICOES=1 bash tp2/experimento_caminhos_minimos.sh
 ```
+
+## Boxplots
+
+No Ubuntu, instale os pacotes Python necessários:
+
+```bash
+sudo apt update
+sudo apt install python3-pandas python3-matplotlib python3-numpy
+```
+
+Depois gere os gráficos e a tabela estatística:
+
+```bash
+python3 tp2/output/boxplot.py
+```
+
+O script seleciona o CSV experimental mais recente, verifica as 600 medições e produz um boxplot separado para cada algoritmo, comparando lista e matriz por tamanho e densidade. O eixo mostra a densidade nominal e, entre parênteses, a densidade efetiva do grafo carregado. Os arquivos são salvos em `tp2/output/boxplots/`: PNG, PDF e `estatisticas_resumo_tp2.csv`.
+
+As dependências também estão listadas em [`tp2/output/requirements.txt`](tp2/output/requirements.txt), para ambientes Python que usam `pip`.
 
 ## Testes
 
-O TP2 usa testes Java simples, sem JUnit ou dependências externas. Execute os scripts a partir da raiz do repositório:
+Os testes são classes Java sem JUnit. Cada script compila em uma pasta temporária e retorna erro se uma compilação ou verificação falhar. Para executar todas as suítes a partir da raiz:
 
 ```bash
-bash tp2/src/test/corretude_est_grafos.spec.sh
-bash tp2/src/test/corretude_algoritmos_grafos.sh
-bash tp2/src/test/corretude_ordenacao_topologica.sh
-bash tp2/src/test/corretude_caminhos_minimos.sh
-bash tp2/src/test/corretude_fluxo_maximo.sh
-bash tp2/src/test/corretude_exemplos_demonstracao.sh
+set -e
+for teste in tp2/test/corretude_*.sh; do bash "$teste"; done
 ```
 
-Os scripts compilam o projeto em uma pasta temporária e encerram com código diferente de zero quando uma compilação ou validação falha.
+As suítes cobrem as estruturas, os algoritmos, caminhos mínimos, fluxo máximo e a demonstração ponta a ponta do menu. Para executar apenas uma suíte, por exemplo:
 
-O teste `corretude_exemplos_demonstracao.sh` funciona como E2E: percorre o menu, executa os nove algoritmos com os exemplos sugeridos, seleciona um arquivo GTgraph personalizado e verifica a saída e os CSVs gerados em diretório temporário.
+```bash
+bash tp2/test/corretude_caminhos_minimos.sh
+```
 
-## Licença
+## Referências
 
-Este repositório está sob a licença GNU General Public License v3.0. Consulte [`LICENSE`](LICENSE) para ver o texto completo e as condições de uso, modificação e redistribuição.
+- [Enunciado do TP2](<docs/TP2 - Trabalho Prático sobre  GRAFOS.md>)
+- [Documentação das estruturas de grafo](tp2/grafo/README.md)
+- [Documentação dos testes](tp2/test/README.md)
+
+Este repositório está sob a licença GNU General Public License v3.0. Consulte [`LICENSE`](LICENSE) para os termos completos.

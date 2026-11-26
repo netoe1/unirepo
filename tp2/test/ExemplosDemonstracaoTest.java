@@ -22,7 +22,7 @@ import java.util.function.Predicate;
 
 public final class ExemplosDemonstracaoTest {
 
-    private static final String PASTA_EXEMPLOS = "tp2/src/samples/demo/";
+    private static final String PASTA_EXEMPLOS = "tp2/samples/demo/";
 
     public static void main(String[] args) throws Exception {
         testaExemplosDosAlgoritmos();

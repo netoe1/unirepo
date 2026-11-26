@@ -7,13 +7,13 @@ Este repositório é um monorepo de trabalhos da disciplina **Algoritmos e Class
 O contexto atual é o TP2, desenvolvido na branch `acd/tp2/main`. Consulte o estado da branch ativa antes de implementar qualquer mudança.
 
 - Enunciado completo: `docs/TP2 - Trabalho Prático sobre  GRAFOS.md`
-- Código Java: `tp2/src/`
-- Estruturas de grafo: `tp2/src/grafo/`
-- Algoritmos: `tp2/src/algoritmos/`
-- Entrada e saída: `tp2/src/io/`
-- Ponto interativo principal: `tp2/src/Main.java`; `tp2/src/App.java` encaminha para `Main`
-- Testes Java simples: `tp2/src/test/`
-- Grafos de amostra: `tp2/src/samples/`
+- Código Java: `tp2/`
+- Estruturas de grafo: `tp2/grafo/`
+- Algoritmos: `tp2/algoritmos/`
+- Entrada e saída: `tp2/io/`
+- Ponto interativo principal: `tp2/Main.java`; `tp2/App.java` encaminha para `Main`
+- Testes Java simples: `tp2/test/`
+- Grafos de amostra: `tp2/samples/`
 - Visão geral: `README.md`
 
 O TP2 implementa grafos não dirigidos e dirigidos, ponderados ou não ponderados, nas representações por lista e matriz de adjacência. As implementações disponíveis devem respeitar as restrições do enunciado:
@@ -46,7 +46,7 @@ Antes de uma decisão que altere o escopo ou a metodologia do trabalho, consulte
 
 ## Política de testes automatizados de regressão
 
-O repositório não usa JUnit nem outra dependência de testes. Cada teste é uma classe Java com `main` em `tp2/src/test/` e lança `AssertionError` em caso de falha. Os testes são compilados e executados pelos scripts `corretude_*.sh`.
+O repositório não usa JUnit nem outra dependência de testes. Cada teste é uma classe Java com `main` em `tp2/test/` e lança `AssertionError` em caso de falha. Os testes são compilados e executados pelos scripts `corretude_*.sh`.
 
 ### Quando corrigir um defeito
 
@@ -80,22 +80,22 @@ Para cada resultado, confira não apenas um número agregado. Valide distâncias
 Execute a partir da raiz do repositório:
 
 ```bash
-bash tp2/src/test/corretude_est_grafos.spec.sh
-bash tp2/src/test/corretude_algoritmos_grafos.sh
-bash tp2/src/test/corretude_ordenacao_topologica.sh
-bash tp2/src/test/corretude_caminhos_minimos.sh
-bash tp2/src/test/corretude_fluxo_maximo.sh
-bash tp2/src/test/corretude_exemplos_demonstracao.sh
+bash tp2/test/corretude_est_grafos.spec.sh
+bash tp2/test/corretude_algoritmos_grafos.sh
+bash tp2/test/corretude_ordenacao_topologica.sh
+bash tp2/test/corretude_caminhos_minimos.sh
+bash tp2/test/corretude_fluxo_maximo.sh
+bash tp2/test/corretude_exemplos_demonstracao.sh
 ```
 
 Compile todo o TP2 antes de concluir uma mudança:
 
 ```bash
 mkdir -p out/tp2
-find tp2/src -name '*.java' -print0 | xargs -0 javac -encoding UTF-8 -d out/tp2
+find tp2 -name '*.java' -print0 | xargs -0 javac -encoding UTF-8 -d out/tp2
 ```
 
-Cada script cria uma pasta temporária, compila o projeto e remove a pasta ao terminar. Medições de desempenho não são testes de corretude. Ao adicionar uma nova suíte, atualize `tp2/src/test/README.md` e o README principal.
+Cada script cria uma pasta temporária, compila o projeto e remove a pasta ao terminar. Medições de desempenho não são testes de corretude. Ao adicionar uma nova suíte, atualize `tp2/test/README.md` e o README principal.
 `corretude_exemplos_demonstracao.sh` também cobre o fluxo ponta a ponta do menu com exemplos padrão e uma entrada GTgraph personalizada.
 
 ## Experimentos
@@ -108,7 +108,7 @@ O experimento principal exige análise de:
 
 Mantenha comparações rastreáveis por representação, algoritmo, grafo, número de vértices, número de arestas e repetição. Use pelo menos 10 execuções por configuração, segundo o enunciado. Não cronometre leitura, geração ou preparação da entrada dentro da parte destinada ao tempo do algoritmo.
 
-Os arquivos de `tp2/src/samples/` são entradas reais do projeto e não devem ser substituídos ou alterados por testes. Resultados temporários não devem ser adicionados ao repositório, exceto quando forem artefatos documentados de um experimento.
+Os arquivos de `tp2/samples/` são entradas reais do projeto e não devem ser substituídos ou alterados por testes. Resultados temporários não devem ser adicionados ao repositório, exceto quando forem artefatos documentados de um experimento.
 
 ## Uso do Copilot
 
